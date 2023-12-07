@@ -12,6 +12,29 @@
 
 #### 2.1.1. Design
 
+First of all, we will have two types of machines: the client and the server. 
+
+The server will have in his database the informations for each client. These informations are : the client's signature, the symmectric key of the client-server, the last nonce used with the client and the public key of his family (each client is in a family that has a public key known by the server and a private key owned by all family members, if the client doesn't have a family, he will be registered to a family of one).
+
+The client will have the symmetric key of the client-server and the private key of his family.
+
+**Client -> Server** 
+
+**Protect:** In this part, we will protect the communication between the client and the server. For this task, we need to fulfill authenticity of the client, integrity of the request and the freshness to ensure that the message won't be repeated by an outsider attacker. The message sent by the client is composed of two parts :
+
+
+* M1: First one will encrypt with the public key of the server the client's signature (in order to identify in our data which client we're communicating with) plus the hash of the request (to compute the integrity of the meassage) plus a nonce (for freshness).
+
+
+* M2: We have the request encrypted by the symmetric key of the client-server.
+
+**Unprotect:** To unprotect this message, the server has to use his private key to get the signature of the client, the hash of the request and the nonce. With this, he will verify the client in his database that will contain: the previous nonce, the symmetric key of the client-server and the public key of the client's family. So, the server will be able to decrypt the message and will finish by checking the integrity of the message (will hash the request and will check if it's equal to the hashed request received).
+
+**Check:** To confirm the identity of the client. The server just have to decrypt the first part of the message M1 with his private key and verify the signature of the client.
+
+
+**Server -> Client** 
+
 (_Outline the design of your custom cryptographic library and the rationale behind your design choices, focusing on how it addresses the specific needs of your chosen business scenario._)
 
 (_Include a complete example of your data format, with the designed protections._)
