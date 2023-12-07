@@ -18,19 +18,22 @@ The server will have in his database the informations for each client. These inf
 
 The client will have the symmetric key of the client-server and the private key of his family.
 
-**Client -> Server** 
+**Client -> Server**: 
 
-**Protect:** In this part, we will protect the communication between the client and the server. For this task, we need to fulfill authenticity of the client, integrity of the request and the freshness to ensure that the message won't be repeated by an outsider attacker. The message sent by the client is composed of two parts :
+**Protect:** $(Pb_s(Sig_c, H(REQ), nonce), K_c(REQ))$
+
+In this part, we will protect the communication between the client and the server. For this task, we need to fulfill authenticity of the client, integrity of the request and the freshness to ensure that the message won't be repeated by an outsider attacker. The message sent by the client is composed of two parts : 
 
 
-* M1: First one will encrypt with the public key of the server the client's signature (in order to identify in our data which client we're communicating with) plus the hash of the request (to compute the integrity of the meassage) plus a nonce (for freshness).
+* M1 $(Pb_s(Sig_c, H(REQ), nonce))$ : First one will encrypt with the public key of the server the client's signature (in order to identify in our data which client we're communicating with) plus the hash of the request (to compute the integrity of the meassage) plus a nonce (for freshness).
 
 
-* M2: We have the request encrypted by the symmetric key of the client-server.
+* M2 $(K_c(REQ))$: We have the request encrypted by the symmetric key of the client-server.
 
-**Unprotect:** To unprotect this message, the server has to use his private key to get the signature of the client, the hash of the request and the nonce. With this, he will verify the client in his database that will contain: the previous nonce, the symmetric key of the client-server and the public key of the client's family. So, the server will be able to decrypt the message and will finish by checking the integrity of the message (will hash the request and will check if it's equal to the hashed request received).
+**Unprotect:** 
+To unprotect this message, the server has to use his private key to get the signature of the client $(Pr_s(Pb_s(Sig_c, H(REQ), nonce)))$, the hash of the request and the nonce. With this, he will verify the client in his database that will contain: the previous nonce, the symmetric key of the client-server and the public key of the client's family. So, the server will be able to decrypt the message $K_c(K_c(REQ))$ and will finish by checking the integrity of the message (will hash the request and will check if it's equal to the hashed request received).
 
-**Check:** To confirm the identity of the client. The server just have to decrypt the first part of the message M1 with his private key and verify the signature of the client.
+**Check:** To confirm the identity of the client. The server just have to decrypt the first part of the message M1 with his private key and verify the signature of the client. $(Pr_s(Pb_s(Sig_c, H(REQ), nonce)))$
 
 
 **Server -> Client** 
