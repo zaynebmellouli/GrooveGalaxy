@@ -36,7 +36,15 @@ To unprotect this message, the server has to use his private key to get the sign
 **Check:** To confirm the identity of the client. The server just have to decrypt the first part of the message M1 with his private key and verify the signature of the client. $(Pr_s(Pb_s(Sig_c, H(REQ), nonce)))$
 
 
-**Server -> Client** 
+**Server -> Client**
+
+**Protect:** In this part, we will protect the communication in the other way. For this task, we need to fulfill authenticity of the server, the integrity of the message, the confidentiality and the freshness to ensure that the message won't be repeated by an outsider attacker. The message sent by the server is composed of:
+
+First, it will encrypt at first the file with the public key of the family(so this file could be accessed by only the family members). After the result plus the nonce (for freshness) will be enrypted by the symmetric key of the client-server . And after two encryptions, we will perform the last encryption on the result plus the signature of the server using the private key of the server (this last one is to ensure authenticity).
+
+**Unprotect:** To unprotect this message, the client has to use the public key of the server to get the whole message and the server's signature. After, he will use the symmetric key of the client-server to get the nonce and the file encrypted by the public key of the family that the client can decrypt or send it to another member of his family (this file will be stored encrypted so no one can see it or use it maliciously outside of the client's interface).
+
+**Check:** To confirm the identity of the server. The client has to use the public key of the server to get the server's signature.
 
 (_Outline the design of your custom cryptographic library and the rationale behind your design choices, focusing on how it addresses the specific needs of your chosen business scenario._)
 
