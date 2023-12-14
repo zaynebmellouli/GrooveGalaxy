@@ -37,11 +37,15 @@ Encrypting the message with the sym Key ($K_c$) and a MAC to check for integrity
 From server to client: ${K_f(hash(P_n), nonce + 3), K_f(P_n)}$
 The server will stream each byte of the music from the pourcentage asked from the client, encrypted by the the family key. We add to this stream message a MAC for the entegrity and freshness.
 
+![](img/Structure.jpg)
+
 #### Protect Method
 
 For this method we will make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
 The standard method used by the client takes as input the message to be encrypted, the next nonce and the symmetric key of the client. The overloaded version will expect an additional parameter for the symmetric key of the client's family.
 Both methods will return the encoded MAC and the encoded message. The overloaded method will additionally return the family key encrypted with the clients key Kc(Kf)
+
+![](img/ProtectMethod.jpeg)
 
 #### Unprotect Method
 For the unprotect section, for both client and server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This will ensure the integrity and the freshness of the communication.
@@ -51,6 +55,7 @@ Secondly, we will make use of the Java feature “method overloading” such tha
 For the server, he will have to decrypt only the request sent by the client using the symmetric shared key. 
 Both functions(overloaded and standard) will return the decoded MAC and the decoded message. 
 
+![](img/UnprotectMethod.jpeg)
 
 #### Check Method
 
@@ -59,6 +64,7 @@ Freshness: The method calculates the next nonce and checks that it corresponds t
 Integrity: The method calculates the hash of the decoded message and checks that it corresponds to the one of the MAC too.
 If both of these tests pass the method returns true, in any other case it returns false as the freshness or the integrity of the message is not given. 
 
+![](img/CheckMethod.jpeg)
 
 #### 2.1.2. Implementation
 
