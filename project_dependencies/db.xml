@@ -1,0 +1,10 @@
+<dependencies>
+    <!-- Other dependencies may be here -->
+
+    <!-- PostgreSQL JDBC Driver -->
+    <dependency>
+        <groupId>org.postgresql</groupId>
+        <artifactId>postgresql</artifactId>
+        <version>42.2.5</version> <!-- Replace with the latest version -->
+    </dependency>
+</dependencies>
