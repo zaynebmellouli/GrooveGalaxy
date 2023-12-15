@@ -253,29 +253,30 @@ class CLTest extends CL {
         // Simulate streaming by decrypting from the 4th byte
         int offset = 1; // Assuming the first byte is at index 0
         byte[] encryptedMessage = Base64.getDecoder().decode(r.get("Crypt_M").getAsString());
-        byte[] partialEncryptedMessage = new byte[encryptedMessage.length - offset];
-        System.arraycopy(encryptedMessage, offset, partialEncryptedMessage, 0, partialEncryptedMessage.length);
+        byte[] partialEncryptedMessage = new byte[encryptedMessage.length - offset * 16];
+        System.arraycopy(encryptedMessage, offset * 16, partialEncryptedMessage, 0, partialEncryptedMessage.length);
 
         // You need to adjust the nonce to account for the offset in CTR mode
         byte[] adjustedNonce = incrementCounterInNonce(nonce, offset ); // Assuming each byte is 2 hex characters
 
         System.out.println("Nonce: " + Base64.getEncoder().encodeToString(nonce));
         System.out.println("Adjusted nonce: " + Base64.getEncoder().encodeToString(adjustedNonce));
+        String expectedPartialMessage = message.substring(offset * 16);
 
         r.addProperty("Crypt_M", Base64.getEncoder().encodeToString(partialEncryptedMessage));
+        r.addProperty("MAC", CL.calculateMAC(expectedPartialMessage, adjustedNonce, key));
 
         // Unprotect with the adjusted nonce and partial message
         JsonObject t = CL.unprotect("CTR", r, key, adjustedNonce);
         String M = t.get("M").getAsString();
 
         // Since we're starting from the 4th byte, we need to compare with the corresponding substring of the message
-        String expectedPartialMessage = message.substring(offset);
 
         System.out.println("Partial message: " + M);
         System.out.println("Expected partial message: " + expectedPartialMessage);
 
         Assertions.assertEquals(expectedPartialMessage, M);
-        Assertions.assertTrue(check(M, adjustedNonce, key, r.get("MAC").getAsString()));
+        Assertions.assertTrue(check(M, adjustedNonce, key, t.get("MAC").getAsString()));
     }
 //    @Test
 //    void testProtectUnprotectFourthStreamPart() throws IOException, GeneralSecurityException {
