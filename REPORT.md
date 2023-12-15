@@ -48,7 +48,7 @@ Both methods will return the encoded MAC and the encoded message. The overloaded
 ![](img/ProtectMethod.jpeg)
 
 #### Unprotect Method
-For the unprotect section, for both client and server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This will ensure the integrity and the freshness of the communication.
+For the unprotect section, for both client and server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This will ensure the integrity, authenticity and the freshness of the communication.
 Secondly, we will make use of the Java feature “method overloading” such that it can be used by both the server and the client. The client will have to decrypt two messages:
 -M1: the encrypted family key sent by the server 
 -M2: once the client has the symmetric family key, he will be able to decrypt the second message with it (song).
