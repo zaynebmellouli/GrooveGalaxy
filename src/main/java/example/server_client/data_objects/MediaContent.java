@@ -1,4 +1,4 @@
-package server_client.data_objects;
+package example.server_client.data_objects;
 
 import java.io.Serializable;
 
@@ -33,4 +33,15 @@ public class MediaContent implements Serializable {
         return audioBase64;
     }
 
+    public void setMediaId(int mediaId) {
+        this.mediaId = mediaId;
+    }
+
+    public void setLyrics(String lyrics) {
+        this.lyrics = lyrics;
+    }
+
+    public void setAudioBase64(String audioBase64) {
+        this.audioBase64 = audioBase64;
+    }
 }

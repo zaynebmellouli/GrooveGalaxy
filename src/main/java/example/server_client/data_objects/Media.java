@@ -1,4 +1,4 @@
-package server_client.data_objects;
+package example.server_client.data_objects;
 
 import java.io.Serializable;
 
@@ -51,4 +51,23 @@ public class Media implements Serializable{
         return genre;
     }
 
+    public void setOwnerId(String ownerId) {
+        this.ownerId=ownerId;
+    }
+
+    public void setFormat(String format) {
+        this.format=format;
+    }
+
+    public void setArtist(String artist) {
+        this.artist=artist;
+    }
+
+    public void setTitle(String title) {
+        this.title=title;
+    }
+
+    public void setGenre(String genre) {
+        this.genre=genre;
+    }
 }
