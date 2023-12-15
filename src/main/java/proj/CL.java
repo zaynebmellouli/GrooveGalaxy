@@ -1,4 +1,4 @@
-package example;
+package proj;
 
 import java.io.*;
 import java.util.*;
@@ -198,13 +198,13 @@ public class CL {
      * Unprotect the first message of the client in CBC mode where he gives the nonce in the json
      * @param json the json object with (MAC(M, ID, N), Crypt(M), nonce, ID)
      * @param symKey the symmetric key of the client that he shares with the server
-     * @return the json object with (M, ID)
+     * @return the json object with M
      * @throws GeneralSecurityException
      */
     public static JsonObject unprotect(JsonObject json, Key symKey) throws GeneralSecurityException {
         // Extract the necessary properties from the JSON object
         byte[] encryptedM = Base64.getDecoder().decode(json.get("Crypt_M").getAsString());
-        byte[] nonce = Base64.getDecoder().decode(json.get("Crypt_nonce").getAsString());
+        byte[] nonce = Base64.getDecoder().decode(json.get("Nonce").getAsString());
 
         // Initialize the cipher for decryption
         Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
@@ -238,7 +238,7 @@ public class CL {
             if (encryptedKey_f != null){
                 // Decrypt the data
                 Key key_f = new SecretKeySpec(cipher.doFinal(encryptedKey_f), "AES");
-                json.addProperty("Key_f", key_f.toString());
+                json.addProperty("Key_f", Base64.getEncoder().encodeToString(key_f.getEncoded()));
 
                 cipher.init(Cipher.DECRYPT_MODE, key_f, ivSpec);
                 json.addProperty("M", new String(cipher.doFinal(encryptedM)));
