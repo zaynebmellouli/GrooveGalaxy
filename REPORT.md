@@ -97,6 +97,28 @@ For hashing, we will implement the SHA-2 algorithm. Given that SHA-2 offers a hi
 
 (_Justify the choice of technologies for each server._)
 
+1. **Client Machine**: 
+   - **Description**: This is the user's interface for interacting with GrooveGalaxy. It includes the application or web interface through which users browse, preview, purchase, and play songs.
+   - **Technology Justification**:
+     
+2. **Server Machine**:
+   - **Description**: This server handles requests from clients, including song browsing, purchase transactions, and delivery of encrypted audio files. It also manages user accounts and personalization algorithms.
+   - **Technology Justification**: 
+
+3. **Database Machine**:
+   - **Description**: This machine is dedicated to storing and managing data such as user information, song metadata, purchase history, and encrypted audio files.
+   - **Technology Justification**: 
+
+4. **Gateway/Router Machine (e.g., VM2)**:
+   - **Description**: This machine acts as a gateway or router, managing the traffic between the internet and the internal network. It also enforces firewall rules and monitors for unauthorized access.
+   - **Technology Justification**: The gateway/router is equipped with advanced firewall capabilities and possibly intrusion detection systems (IDS) like Snort. It's crucial for this machine to have robust security configurations to protect against external threats. SSL/TLS termination can also be configured here for added security.
+
+**Security Considerations**:
+- **SSL/TLS**: Secure Socket Layer (SSL) and Transport Layer Security (TLS) protocols are essential for encrypting data in transit between the client, server, and database machines, protecting against eavesdropping and man-in-the-middle attacks.
+- **Firewall Rules**: The gateway/router should have strict firewall rules to control incoming and outgoing network traffic, only allowing authorized communications and protecting against network-based attacks.
+- **Data Encryption**: Encryption of the data ensures the integrity, authenticity and the freshness of the communication.
+
+
 #### 2.2.2. Server Communication Security
 
 (_Discuss how server communications were secured, including the secure channel solutions implemented and any challenges encountered._)
