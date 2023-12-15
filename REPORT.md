@@ -37,7 +37,7 @@ Encrypting the message with the sym Key ($K_c$) and a MAC to check for integrity
 From server to client: ${K_f(hash(P_n), nonce + 3), K_f(P_n)}$
 The server will stream each byte of the music from the pourcentage asked from the client, encrypted by the the family key. We add to this stream message a MAC for the entegrity and freshness.
 
-![](img/Structure.jpg)
+![](img/Structure.jpeg)
 
 #### Protect Method
 
