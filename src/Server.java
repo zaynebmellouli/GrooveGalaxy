@@ -1,63 +1,55 @@
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.net.Socket;
+import com.sun.net.httpserver.HttpsServer;
+import com.sun.net.httpserver.HttpsConfigurator;
+import com.sun.net.httpserver.HttpsParameters;
+import javax.net.ssl.SSLContext;
+import javax.net.ssl.KeyManagerFactory;
+import javax.net.ssl.TrustManagerFactory;
+import java.io.FileInputStream;
+import java.security.KeyStore;
+import java.net.InetSocketAddress;
 
-import javax.net.ServerSocketFactory;
-import javax.net.ssl.SSLServerSocket;
-import javax.net.ssl.SSLServerSocketFactory;
+public class SecureHttpServer {
 
-public class Server {
+    public static void main(String[] args) throws Exception {
+        // Load the keystore
+        String keystoreFilename = "server.p12";
+        char[] storepass = "changeme".toCharArray();
+        char[] keypass = "changeme".toCharArray();
+        KeyStore ks = KeyStore.getInstance("PKCS12");
+        ks.load(new FileInputStream(keystoreFilename), storepass);
 
-    public static void startServer(int port) throws IOException {
+        // Set up the key manager factory
+        KeyManagerFactory kmf = KeyManagerFactory.getInstance("SunX509");
+        kmf.init(ks, keypass);
 
-        ServerSocketFactory factory = SSLServerSocketFactory.getDefault();
-        try (SSLServerSocket listener = (SSLServerSocket) factory.createServerSocket(port)) {
-            listener.setNeedClientAuth(true);
-            listener.setEnabledCipherSuites(new String[] { "TLS_AES_128_GCM_SHA256" });
-            listener.setEnabledProtocols(new String[] { "TLSv1.3" });
-            System.out.println("listening for messages...");
-            String message = "";
-            InputStream is = null;
-            OutputStream os = null;
-            try (Socket socket = listener.accept()) {
+        // Set up the trust manager factory
+        TrustManagerFactory tmf = TrustManagerFactory.getInstance("SunX509");
+        tmf.init(ks);
 
-                while (!message.equals("Exit")) {
-                    try {
-                        is = new BufferedInputStream(socket.getInputStream());
-                        byte[] data = new byte[2048];
-                        int len = is.read(data);
+        // Set up the HTTPS context and parameters
+        SSLContext sslContext = SSLContext.getInstance("TLS");
+        sslContext.init(kmf.getKeyManagers(), tmf.getTrustManagers(), null);
 
-                        message = new String(data, 0, len);
-                        os = new BufferedOutputStream(socket.getOutputStream());
-                        System.out.printf("server received %d bytes: %s%n", len, message);
-                        String response = message + " processed by server";
-                        os.write(response.getBytes(), 0, response.getBytes().length);
-                        os.flush();
-                    } catch (IOException i) {
-                        System.out.println(i);
-                        return;
-                    }
-                }
-                try {
-                    is.close();
-                    os.close();
-                    socket.close();
-                } catch (IOException i) {
-                    System.out.println(i);
-                    return;
-                }
+        HttpsServer server = HttpsServer.create(new InetSocketAddress(5000), 0);
+        server.setHttpsConfigurator(new HttpsConfigurator(sslContext) {
+            public void configure(HttpsParameters params) {
+                // Initialize the SSL context
+                SSLContext c = getSSLContext();
+                SSLParameters sslparams = c.getDefaultSSLParameters();
+                params.setSSLParameters(sslparams);
             }
-        }
-    }
+        });
 
-    public static void main(String args[]) throws IOException {
-        System.setProperty("javax.net.ssl.keyStore", "server.p12");
-        System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
-        System.setProperty("javax.net.ssl.trustStore", "servertruststore.jks");
-        System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
-        startServer(5000);
+        // Set up a simple handler to process requests
+        server.createContext("/test", (exchange -> {
+            String response = "This is the response";
+            exchange.sendResponseHeaders(200, response.getBytes().length);
+            OutputStream os = exchange.getResponseBody();
+            os.write(response.getBytes());
+            os.close();
+        }));
+
+        server.start();
+        System.out.println("Server is listening on port 5000");
     }
 }
