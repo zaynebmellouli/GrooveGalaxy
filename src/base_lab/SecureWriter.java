@@ -19,7 +19,7 @@ public class SecureWriter {
         // Check arguments
         if (args.length < 1) {
             System.err.println("Argument(s) missing!");
-            System.err.printf("Usage: java %s file%n", JsonWriter.class.getName());
+//            System.err.printf("Usage: java %s file%n", JsonWriter.class.getName());
             return;
         }
         final String filename = args[0];
