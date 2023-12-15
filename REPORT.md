@@ -60,9 +60,8 @@ Both functions(overloaded and standard) will return the decoded MAC and the deco
 #### Check Method
 
 This method will also be used by the server and the client. It takes as input the decoded MAC address, the decoded message and the previous nonce known by the machine.
-Freshness: The method calculates the next nonce and checks that it corresponds to the one of the MAC 
-Integrity: The method calculates the hash of the decoded message and checks that it corresponds to the one of the MAC too.
-If both of these tests pass the method returns true, in any other case it returns false as the freshness, the authenticity or the integrity of the message is not given. 
+The method calculates the next nonce and and the hash of the message and the next nonce. It then checks that this corresponds to the decoded MAC given as input. 
+If this test passes the method returns true, in any other case it returns false as the freshness, the authenticity or the integrity of the message is not given. 
 
 ![](img/CheckMethod.jpeg)
 
