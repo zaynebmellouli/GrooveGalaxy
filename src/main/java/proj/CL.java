@@ -1,6 +1,8 @@
 package proj;
 
 import java.io.*;
+import java.nio.ByteBuffer;
+import java.nio.ByteOrder;
 import java.util.*;
 import java.security.*;
 import javax.crypto.*;
@@ -104,13 +106,6 @@ public class CL {
         return sb.toString();
     }
 
-    public static byte[] concatenateByteArrays(byte[] a, byte[] b) {
-        byte[] result = new byte[a.length + b.length]; // Create a new array with combined length
-        System.arraycopy(a, 0, result, 0, a.length);  // Copy first array into result array
-        System.arraycopy(b, 0, result, a.length, b.length);  // Copy second array into result array starting at the end of the first array
-        return result;
-    }
-
     /**
      * Protect for first req of client in CBC mode
      * @param message the requested music
@@ -158,6 +153,7 @@ public class CL {
                                                         : Cipher.getInstance("AES/CBC/PKCS5Padding");
 
         IvParameterSpec ivSpec = new IvParameterSpec(nonce);
+
         cipher.init(Cipher.ENCRYPT_MODE, symKey_c, ivSpec);
         JsonObject result = new JsonObject();
         result.addProperty("MAC", calculateMAC(message, nonce, symKey_c));
@@ -253,6 +249,7 @@ public class CL {
             // Initialize the cipher for decryption
             Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
             IvParameterSpec ivSpec = new IvParameterSpec(nonce);
+
             cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
 
             // Decrypt the data
@@ -263,5 +260,57 @@ public class CL {
             throw new IllegalArgumentException("Mode must be CBC or CTR");
         }
     }
+
+
+    // Function to check if a given MAC is valid for the message, nonce, and key
+    public static boolean checkMAC(String message, byte[] nonce, Key key, String macToCheck)
+            throws NoSuchAlgorithmException, InvalidKeyException {
+        // Calculate the MAC based on the message, nonce, and key
+        String calculatedMac = calculateMAC(message, nonce, key);
+
+        // Compare the calculated MAC with the given MAC
+        return calculatedMac.equalsIgnoreCase(macToCheck);
+    }
+
+    public static boolean check(String message, byte[] nonce, Key key, String macToCheck) throws NoSuchAlgorithmException, InvalidKeyException  {
+        // Calculate the MAC based on the message, nonce, and key
+        String calculatedMac = calculateMAC(message, nonce, key);
+
+        // Compare the calculated MAC with the given MAC
+        return calculatedMac.equalsIgnoreCase(macToCheck);
+    }
+
+    public static boolean check(String message, int id, byte[] nonce, Key key, String macToCheck) throws NoSuchAlgorithmException, InvalidKeyException  {
+        // Calculate the MAC based on the message, nonce, and key
+        String calculatedMac = calculateMAC(message,id, nonce, key);
+
+        // Compare the calculated MAC with the given MAC
+        return calculatedMac.equalsIgnoreCase(macToCheck);
+    }
+
+    public byte[] incrementCounterInNonce(byte[] nonce, int offset) {
+        // Copy the original nonce to avoid mutating it
+        byte[] adjustedNonce = Arrays.copyOf(nonce, nonce.length);
+
+        // Convert the last 4 bytes of the nonce to an integer
+        ByteBuffer byteBuffer = ByteBuffer.wrap(adjustedNonce, nonce.length - 4, 4);
+        byteBuffer.order(ByteOrder.BIG_ENDIAN); // use BIG_ENDIAN if the nonce is in network byte order
+        int counterValue = byteBuffer.getInt();
+
+        // Increment the counter by the number of blocks offset
+        counterValue += offset / 16; // AES block size is 16 bytes
+
+        // If the offset is not a multiple of the block size, we need to account for the partial block
+        if (offset % 16 != 0) {
+            counterValue++;
+        }
+
+        // Put the incremented counter back into the nonce
+        byteBuffer.position(nonce.length - 4);
+        byteBuffer.putInt(counterValue);
+
+        return adjustedNonce;
+    }
+
 }
 
