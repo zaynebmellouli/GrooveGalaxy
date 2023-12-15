@@ -26,7 +26,7 @@ From client to server: ${K_c(hash(Message, ID, nonce)), K_c(Message, ID), ID}$
 The client will send a Message that will contain which song he wants with an ID and MAC of the request ${K_c(hash(Message, ID, nonce))}$
 By adding the ID to the hash we protect the ID from being tampered with. The ID is not cyphered as the server will need it to look up the key of the client sending the request. 
 The server will search in his database with the ID of the client for the symetric key $K_c$ that he shares with the client, and will be able to read the message and know it’s integrity.
-The protect method run by the client will return ${K_c(hash(Message, ID, nonce))$ and $K_c(Message, ID)$. To this he will add the ID and transform all three elements to a JSON file.
+The protect method run by the client will return $K_c(hash(Message, ID, nonce))$ and $K_c(Message, ID)$. To this he will add the ID and transform all three elements to a JSON file.
 
 From the server to the client: ${K_c(hash(Data, nonce + 1)), K_c(K_f), K_f(Data)}$. 
 The server will send first the info of the music in data and will wait to know from when the client want his music to be streamed.
