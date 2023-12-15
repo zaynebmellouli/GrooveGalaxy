@@ -69,7 +69,7 @@ Both functions(overloaded and standard) will return the decoded MAC and the deco
 #### Check Method
 
 This method will also be used by the server and the client. It takes as input the decoded MAC address, the decoded message and the previous nonce known by the machine.
-The method calculates the next nonce and and the hash of the message and the next nonce. It then checks that this corresponds to the decoded MAC given as input. 
+The method calculates the hash of the message and the next nonce. It then checks that this corresponds to the decoded MAC given as input. 
 If this test passes the method returns true, in any other case it returns false as the freshness, the authenticity or the integrity of the message is not given. 
 
 ![](img/CheckMethod.jpeg)
@@ -108,6 +108,10 @@ For hashing, we will implement the SHA-2 algorithm. Given that SHA-2 offers a hi
 #### 2.3.1. Challenge Overview
 
 (_Describe the new requirements introduced in the security challenge and how they impacted your original design._)
+
+The new requirements introduced in the security challenge significantly impact our original cryptographic design, necessitating both functional and architectural modifications. Firstly, the demand for quick playback initiation in the middle of an audio stream requires the implementation of a more flexible encryption scheme, such as symmetric key encryption with a mode that supports random access, like Counter (CTR) mode. This adaptation ensures that users can start playback from any point in the audio without needing to decrypt the entire file first. 
+The CipherStream library in Java provides a convenient way to implement streaming encryption and decryption. The choice of symmetric encryption (e.g., AES) in a mode that supports random access, like CTR (Counter Mode), is essential here. This mode allows for decrypting any part of the stream independently, facilitating the quick start of playback.
+Secondly, the concept of family sharing introduces a complex layer of key management where each family member must access the same encrypted content using their unique key. In this scenario, each family unit shares a common symmetric key that is used to encrypt the JSON files. However, since each user still has their own unique key,  a secure method to distribute the family key to each user is necessary. We do this by  using the individual client's keys to encrypt the family key before distributing it.
 
 #### 2.3.2. Attacker Model
 
