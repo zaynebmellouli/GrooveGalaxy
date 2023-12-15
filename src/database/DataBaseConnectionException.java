@@ -1,17 +1,17 @@
 package database;
 
 
-public class DatabaseConnectionException extends Exception {
+public class DataBaseConnectionException extends Exception {
     private static final long serialVersionUID = 1L;
 
-    public DatabaseConnectionException() {
+    public DataBaseConnectionException() {
     }
 
-    public DatabaseConnectionException(String message) {
+    public DataBaseConnectionException(String message) {
         super(message);
     }
 
-    public DatabaseConnectionException(String message, Throwable cause) {
+    public DataBaseConnectionException(String message, Throwable cause) {
         super(message, cause);
     }
 }

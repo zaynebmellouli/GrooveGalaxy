@@ -1,19 +1,13 @@
 package database;
 
-import database.DatabaseConnector;
-import database.DatabaseUtils;
-import database.DatabaseConnectionException;
-
 import java.sql.Connection;
 import java.sql.SQLException;
-import java.time.LocalDate;
-import java.util.ArrayList;
 
 public class Populate {
 
     private Populate() {}
 
-    public static void populate() throws DatabaseConnectionException, SQLException {
+    public static void populate() throws DataBaseConnectionException, SQLException {
         Connection connection = (new DatabaseConnector()).getConnection();
 
         User user1 = new User("1", "Bob", "supersecret", "sharedKey123", "familyKey456");
