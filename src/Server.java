@@ -8,7 +8,7 @@ import java.io.FileInputStream;
 import java.security.KeyStore;
 import java.net.InetSocketAddress;
 
-public class SecureHttpServer {
+public class Server {
 
     public static void main(String[] args) throws Exception {
         // Load the keystore
