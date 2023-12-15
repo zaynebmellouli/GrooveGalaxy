@@ -14,45 +14,54 @@
 
 We will have secured communication between the client and the server. 
 
-The server will have in his database the informations for each client. These informations are : the client's ID, the symmectric key of the client-server, the last nonce used nonce with the client and the symmetric Key of his family (each client is in a family that has a symmetric Key known by the server only and will be stored in his data base for each client the symmetric Key of his family, if the client doesn't have a family, he will be registered to a family of one).
+The server will have in his database the informations for each client. These informations are : the client's ID, the symmectric key of the client-server, the last used nonce with the client and the symmetric key of his family (each client is in a family that has a symmetric key known by the server only and will be stored in his data base for each client the symmetric key of his family, if the client doesn't have a family, he will be registered to a family of one).
 
 The client will have the symmetric key of the client-server and his ID for the server.
 #### Message architecture
 
 There will be two set of (request, response) from the client to the server.
-The first:
-From client to server: ${K_c(hash(Req), nonce), K_c(Req), ID}$
 
-The client will send a Req that will contain which song he wants with an ID and MAC of the request ${K_c(hash(Req), nonce)}$
-The server will search in his database with the ID of the client for the sym Key $K_c$ that he shares with the client, and will be able to read the message and know it’s integrity.
-From the server to the client: ${K_c(hash(Data), nonce + 1), K_c(K_f), K_f(Data)}$. 
+The first:
+From client to server: ${K_c(hash(Message, ID, nonce)), K_c(Message, ID), ID}$
+The client will send a Message that will contain which song he wants with an ID and MAC of the request ${K_c(hash(Message, ID, nonce))}$
+By adding the ID to the hash we protect the ID from being tampered with. The ID is not cyphered as the server will need it to look up the key of the client sending the request. 
+The server will search in his database with the ID of the client for the symetric key $K_c$ that he shares with the client, and will be able to read the message and know it’s integrity.
+The protect method run by the client will return ${K_c(hash(Message, ID, nonce))$ and $K_c(Message, ID)$. To this he will add the ID and transform all three elements to a JSON file.
+
+From the server to the client: ${K_c(hash(Data, nonce + 1)), K_c(K_f), K_f(Data)}$. 
 The server will send first the info of the music in data and will wait to know from when the client want his music to be streamed.
-The data will be encoded with the family key that the client belongs to ($K_f$) this key will be sent to the client by encoding it with their symmetric key ($K_c(K_f)$) and finally a MAC 
-with the message to check for entegrity and freshness.
-The client after decrypting the message will have access to his family sym Key ($K_f$).
+The data will be encoded with the family key that the client belongs to ($K_f$). This key will be sent to the client by encoding it with their symmetric key ($K_c(K_f)$) and finally a MAC 
+with the message to check for integrity, authenticity and freshness.
+After the client decrypted the message, he will have access to his family's symetric key ($K_f$).
+
 The Second:
-From client to server: ${K_c(hash(Req), nonce + 2), K_c(Req)}$
-The client will indicate in request from which percentage he wants the music.
-Encrypting the message with the sym Key ($K_c$) and a MAC to check for integrity and freshness. 
+From client to server: ${K_c(hash(Message, nonce + 2)), K_c(Message)}$
+The client will indicate in the request from which percentage he wants the music.
+Encrypting the message with the symetrc key ($K_c$) and a MAC to check for integrity, authenticity and freshness. 
+
 From server to client: ${K_f(hash(P_n), nonce + 3), K_f(P_n)}$
-The server will stream each byte of the music from the pourcentage asked from the client, encrypted by the the family key. We add to this stream message a MAC for the entegrity and freshness.
+The server will stream a block of bytes of the music from the percentage requested by the client, encrypted by the the family key. We add to this stream message a MAC for integrity, authenticity and freshness. 
 
 ![](img/Structure.jpeg)
 
 #### Protect Method
 
 For this method we will make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
-The standard method used by the client takes as input the message to be encrypted, the next nonce and the symmetric key of the client. The overloaded version will expect an additional parameter for the symmetric key of the client's family.
+The standard method used by the client takes as input the message to be encrypted, the next nonce and the symmetric key of the client. 
+(When identifying himself in the first message the client concatinates the request and the ID to form a single message, encrypting that with the protect method and then adding the uncyphered ID to the output before sending the message) 
+The overloaded version will expect an additional parameter for the symmetric key of the client's family.
 Both methods will return the encoded MAC and the encoded message. The overloaded method will additionally return the family key encrypted with the clients key Kc(Kf)
 
 ![](img/ProtectMethod.jpeg)
 
 #### Unprotect Method
-For the unprotect section, for both client and server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This will ensure the integrity, authenticity and the freshness of the communication.
-Secondly, we will make use of the Java feature “method overloading” such that it can be used by both the server and the client. The client will have to decrypt two messages:
+For the unprotect method, used by both the client and the server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This will ensure the integrity, authenticity and the freshness of the communication.
+We will make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
+The client will have to decrypt two messages:
 -M1: the encrypted family key sent by the server 
 -M2: once the client has the symmetric family key, he will be able to decrypt the second message with it (song).
-For the server, he will have to decrypt only the request sent by the client using the symmetric shared key. 
+
+The server, he will have to decrypt only the request sent by the client using the symmetric shared key. When decoding the first request of the client he will first seperate the unciphered ID from the MAC and the ciphered Message. Then he will run the unprotect message on the encoded MAC address, the encoded Message and the ID. In this specific case of the identification the $Message_d$ and $Message_e$ corresponds to the concatination of the inital request and the client's ID. The ID is also hash into the MAC to ensure it's protection.
 Both functions(overloaded and standard) will return the decoded MAC and the decoded message. 
 
 ![](img/UnprotectMethod.jpeg)
