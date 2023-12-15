@@ -1,3 +1,5 @@
+package example;
+
 import java.io.*;
 import java.util.*;
 import java.security.*;
@@ -102,13 +104,20 @@ public class CL {
         return sb.toString();
     }
 
+    public static byte[] concatenateByteArrays(byte[] a, byte[] b) {
+        byte[] result = new byte[a.length + b.length]; // Create a new array with combined length
+        System.arraycopy(a, 0, result, 0, a.length);  // Copy first array into result array
+        System.arraycopy(b, 0, result, a.length, b.length);  // Copy second array into result array starting at the end of the first array
+        return result;
+    }
+
     /**
      * Protect for first req of client in CBC mode
      * @param message the requested music
      * @param nonce the first nonce to use
      * @param ID the ID of the client
      * @param symKey_c  the symmetric key of the client that he shares with the server
-     * @return a json object with (MAC(M, ID, N), Crypt(M, ID), ID)
+     * @return a json object with (MAC(M, ID, N), Crypt(M), nonce, ID)
      * @throws GeneralSecurityException if the cipher is not initialized correctly
      */
     public static JsonObject protect(String message, byte[] nonce, int ID, Key symKey_c) throws GeneralSecurityException {
@@ -124,7 +133,9 @@ public class CL {
 
         JsonObject result = new JsonObject();
         result.addProperty("MAC", calculateMAC(message, ID, nonce, symKey_c));
-        result.addProperty("Crypt", Base64.getEncoder().encodeToString(cipher.doFinal((message + "/" +ID).getBytes())));
+        result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes())));
+        result.addProperty("Nonce", Base64.getEncoder().encodeToString(nonce));
+        result.addProperty("ID", ID);
 
         return result;
     }
@@ -143,14 +154,14 @@ public class CL {
         if (nonce.length != 16) {
             throw new IllegalArgumentException("Nonce must be 16 bytes long");
         }
-        Cipher cipher = Objects.equals(mode, "CTR") ? Cipher.getInstance("AES/CBC/PKCS5Padding")
-                                                        : Cipher.getInstance("AES/CTR/PKCS5Padding");
+        Cipher cipher = Objects.equals(mode, "CTR") ? Cipher.getInstance("AES/CTR/NoPadding")
+                                                        : Cipher.getInstance("AES/CBC/PKCS5Padding");
 
         IvParameterSpec ivSpec = new IvParameterSpec(nonce);
         cipher.init(Cipher.ENCRYPT_MODE, symKey_c, ivSpec);
         JsonObject result = new JsonObject();
         result.addProperty("MAC", calculateMAC(message, nonce, symKey_c));
-        result.addProperty("Crypt", Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes())));
+        result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes())));
         return result;
     }
 
@@ -176,14 +187,81 @@ public class CL {
 
         JsonObject result = new JsonObject();
         result.addProperty("MAC", calculateMAC(message, nonce, symKey_c));
-        result.addProperty("Crypt_Key_f", Base64.getEncoder().encodeToString(cipher.doFinal(symKey_f.toString().getBytes())));
+        result.addProperty("Crypt_Key_f", Base64.getEncoder().encodeToString(cipher.doFinal(symKey_f.getEncoded())));
         cipher.init(Cipher.ENCRYPT_MODE, symKey_f, ivSpec);
-        result.addProperty("Crypt_message", Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes())));
+        result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes())));
 
         return result;
     }
 
+    /**
+     * Unprotect the first message of the client in CBC mode where he gives the nonce in the json
+     * @param json the json object with (MAC(M, ID, N), Crypt(M), nonce, ID)
+     * @param symKey the symmetric key of the client that he shares with the server
+     * @return the json object with (M, ID)
+     * @throws GeneralSecurityException
+     */
+    public static JsonObject unprotect(JsonObject json, Key symKey) throws GeneralSecurityException {
+        // Extract the necessary properties from the JSON object
+        byte[] encryptedM = Base64.getDecoder().decode(json.get("Crypt_M").getAsString());
+        byte[] nonce = Base64.getDecoder().decode(json.get("Crypt_nonce").getAsString());
 
+        // Initialize the cipher for decryption
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        IvParameterSpec ivSpec = new IvParameterSpec(nonce);
+        cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
 
+        // Decrypt the data
+        json.addProperty("M", new String(cipher.doFinal(encryptedM)));
+        return json;
+    }
+
+    /**
+     * Unprotect the message different modes depending on the json received
+     * @param mode the mode of the cipher ("CBC" or "CTR")
+     * @param json the json object with different kind of information depending on the mode
+     * @param symKey the symmetric key of the client that he shares with the server
+     * @param nonce the nonce to use
+     * @return the json object with encrypted message in M or in Key_f
+     * @throws GeneralSecurityException
+     */
+    public static JsonObject unprotect(String mode, JsonObject json, Key symKey, byte[] nonce) throws GeneralSecurityException {
+        // Extract the necessary properties from the JSON object
+        byte[] encryptedM = Base64.getDecoder().decode(json.get("Crypt_M").getAsString());
+        if (mode.equals("CBC")) {
+            byte[] encryptedKey_f = json.has("Crypt_Key_f") ? Base64.getDecoder().decode(json.get("Crypt_Key_f").getAsString()): null;
+
+            // Initialize the cipher for decryption
+            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+            IvParameterSpec ivSpec = new IvParameterSpec(nonce);
+            cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
+            if (encryptedKey_f != null){
+                // Decrypt the data
+                Key key_f = new SecretKeySpec(cipher.doFinal(encryptedKey_f), "AES");
+                json.addProperty("Key_f", key_f.toString());
+
+                cipher.init(Cipher.DECRYPT_MODE, key_f, ivSpec);
+                json.addProperty("M", new String(cipher.doFinal(encryptedM)));
+                return json;
+
+            } else {
+                    // Decrypt the data
+                    json.addProperty("M", new String(cipher.doFinal(encryptedM)));
+                    return json;
+            }
+        } else if (mode.equals("CTR")) {
+            // Initialize the cipher for decryption
+            Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+            IvParameterSpec ivSpec = new IvParameterSpec(nonce);
+            cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
+
+            // Decrypt the data
+            json.addProperty("M", new String(cipher.doFinal(encryptedM)));
+            return json;
+
+        } else {
+            throw new IllegalArgumentException("Mode must be CBC or CTR");
+        }
+    }
 }
 

@@ -1,6 +1,6 @@
-package pt.ulisboa.tecnico.meic.sirs;
+package base_lab;
 
-import static javax.xml.bind.DatatypeConverter.printHexBinary;
+//import static javax.xml.bind.DatatypeConverter.printHexBinary;
 
 import java.io.FileInputStream;
 import java.io.FileOutputStream;
@@ -44,7 +44,7 @@ public class AESKeyGenerator {
         System.out.println("Finish generating AES key");
         byte[] encoded = key.getEncoded();
         System.out.println("Key:");
-        System.out.println(printHexBinary(encoded));
+//        System.out.println(printHexBinary(encoded));
 
         System.out.println("Writing key to '" + keyPath + "' ...");
 
