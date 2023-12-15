@@ -12,51 +12,73 @@
 
 #### 2.1.1. Design
 
-First of all, we will have two types of machines: the client and the server. 
+We will have secured communication between the client and the server. 
 
-The server will have in his database the informations for each client. These informations are : the client's signature, the symmectric key of the client-server, the last nonce used with the client and the public key of his family (each client is in a family that has a public key known by the server and a private key owned by all family members, if the client doesn't have a family, he will be registered to a family of one).
+The server will have in his database the informations for each client. These informations are : the client's ID, the symmectric key of the client-server, the last nonce used nonce with the client and the symmetric Key of his family (each client is in a family that has a symmetric Key known by the server only and will be stored in his data base for each client the symmetric Key of his family, if the client doesn't have a family, he will be registered to a family of one).
 
-The client will have the symmetric key of the client-server and the private key of his family.
+The client will have the symmetric key of the client-server and his ID for the server.
+#### Message architecture
 
-**Client -> Server**: 
+There will be two set of (request, response) from the client to the server.
+The first:
+From client to server: ${K_c(hash(Req), nonce), K_c(Req), ID}$
 
-**Protect:** $(Pb_s(Sig_c, H(REQ), nonce), K_c(REQ))$
+The client will send a Req that will contain which song he wants with an ID and MAC of the request ${K_c(hash(Req), nonce)}$
+The server will search in his database with the ID of the client for the sym Key $K_c$ that he shares with the client, and will be able to read the message and know it’s integrity.
+From the server to the client: ${K_c(hash(Data), nonce + 1), K_c(K_f), K_f(Data)}$. 
+The server will send first the info of the music in data and will wait to know from when the client want his music to be streamed.
+The data will be encoded with the family key that the client belongs to ($K_f$) this key will be sent to the client by encoding it with their symmetric key ($K_c(K_f)$) and finally a MAC 
+with the message to check for entegrity and freshness.
+The client after decrypting the message will have access to his family sym Key ($K_f$).
+The Second:
+From client to server: ${K_c(hash(Req), nonce + 2), K_c(Req)}$
+The client will indicate in request from which percentage he wants the music.
+Encrypting the message with the sym Key ($K_c$) and a MAC to check for integrity and freshness. 
+From server to client: ${K_f(hash(P_n), nonce + 3), K_f(P_n)}$
+The server will stream each byte of the music from the pourcentage asked from the client, encrypted by the the family key. We add to this stream message a MAC for the entegrity and freshness.
 
-In this part, we will protect the communication between the client and the server. For this task, we need to fulfill authenticity of the client, integrity of the request and the freshness to ensure that the message won't be repeated by an outsider attacker. The message sent by the client is composed of two parts : 
+![](img/Structure.jpeg)
 
+#### Protect Method
 
-* M1 $(Pb_s(Sig_c, H(REQ), nonce))$ : First one will encrypt with the public key of the server the client's signature (in order to identify in our data which client we're communicating with) plus the hash of the request (to compute the integrity of the meassage) plus a nonce (for freshness).
+For this method we will make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
+The standard method used by the client takes as input the message to be encrypted, the next nonce and the symmetric key of the client. The overloaded version will expect an additional parameter for the symmetric key of the client's family.
+Both methods will return the encoded MAC and the encoded message. The overloaded method will additionally return the family key encrypted with the clients key Kc(Kf)
 
+![](img/ProtectMethod.jpeg)
 
-* M2 $(K_c(REQ))$: We have the request encrypted by the symmetric key of the client-server.
+#### Unprotect Method
+For the unprotect section, for both client and server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This will ensure the integrity, authenticity and the freshness of the communication.
+Secondly, we will make use of the Java feature “method overloading” such that it can be used by both the server and the client. The client will have to decrypt two messages:
+-M1: the encrypted family key sent by the server 
+-M2: once the client has the symmetric family key, he will be able to decrypt the second message with it (song).
+For the server, he will have to decrypt only the request sent by the client using the symmetric shared key. 
+Both functions(overloaded and standard) will return the decoded MAC and the decoded message. 
 
-**Unprotect:** 
-To unprotect this message, the server has to use his private key to get the signature of the client $(Pr_s(Pb_s(Sig_c, H(REQ), nonce)))$, the hash of the request and the nonce. With this, he will verify the client in his database that will contain: the previous nonce, the symmetric key of the client-server and the public key of the client's family. So, the server will be able to decrypt the message $K_c(K_c(REQ))$ and will finish by checking the integrity of the message (will hash the request and will check if it's equal to the hashed request received).
+![](img/UnprotectMethod.jpeg)
 
-**Check:** To confirm the identity of the client. The server just have to decrypt the first part of the message M1 with his private key and verify the signature of the client. $(Pr_s(Pb_s(Sig_c, H(REQ), nonce)))$
+#### Check Method
 
+This method will also be used by the server and the client. It takes as input the decoded MAC address, the decoded message and the previous nonce known by the machine.
+The method calculates the next nonce and and the hash of the message and the next nonce. It then checks that this corresponds to the decoded MAC given as input. 
+If this test passes the method returns true, in any other case it returns false as the freshness, the authenticity or the integrity of the message is not given. 
 
-**Server -> Client**
-
-**Protect:** $(Pr_s(K_c(Pb_f(FILE), nonce), Sig_s))&
-
-In this part, we will protect the communication in the other way. For this task, we need to fulfill authenticity of the server, the integrity of the message, the confidentiality and the freshness to ensure that the message won't be repeated by an outsider attacker. The message sent by the server is composed of:
-
-First, it will encrypt at first the file with the public key of the family(so this file could be accessed by only the family members). After the result plus the nonce (for freshness) will be enrypted by the symmetric key of the client-server . And after two encryptions, we will perform the last encryption on the result plus the signature of the server using the private key of the server (this last one is to ensure authenticity).
-
-**Unprotect:** To unprotect this message, the client has to use the public key of the server to get the whole message and the server's signature. After, he will use the symmetric key of the client-server to get the nonce and the file encrypted by the public key of the family that the client can decrypt or send it to another member of his family (this file will be stored encrypted so no one can see it or use it maliciously outside of the client's interface).
-
-**Check:** To confirm the identity of the server. The client has to use the public key of the server to get the server's signature.
-
-(_Outline the design of your custom cryptographic library and the rationale behind your design choices, focusing on how it addresses the specific needs of your chosen business scenario._)
-
-(_Include a complete example of your data format, with the designed protections._)
+![](img/CheckMethod.jpeg)
 
 #### 2.1.2. Implementation
 
 (_Detail the implementation process, including the programming language and cryptographic libraries used._)
 
 (_Include challenges faced and how they were overcome._)
+
+For our project, we have selected Java as the programming language due to its robust security features and extensive libraries for cryptographic functions. The encryption scheme between the server and the client will utilize AES in CBC (Cipher Block Chaining) mode. This mode ensures that each block of plaintext is XORed with the previous ciphertext block before being encrypted, providing strong data encryption.
+
+On the other hand, for encryption within family members, we will employ AES in CTR (Counter) mode. This choice is particularly well-suited for streaming data, as it allows for the encryption of data bytes individually, facilitating efficient processing of streaming content.
+
+The nonce, a number used once, will be randomly generated at the start of the communication session. It will then be incremented by one for each subsequent message to ensure that each message is unique, mitigating the risk of replay attacks.
+
+For hashing, we will implement the SHA-2 algorithm. Given that SHA-2 offers a high level of collision resistance, and our application will not reach the threshold where collisions become a practical concern, it is an appropriate choice for ensuring the integrity and authenticity of our messages
+
 
 ### 2.2. Infrastructure
 
