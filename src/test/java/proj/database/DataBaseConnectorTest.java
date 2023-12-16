@@ -57,8 +57,8 @@ public class DataBaseConnectorTest {
                 "\n" +
                 "-- Table to store users\n" +
                 "CREATE TABLE users (\n" +
-                "    user_id VARCHAR(255) ,\n" +
-                "    username VARCHAR(255) NOT NULL UNIQUE,\n" +
+                "    user_id INTEGER,\n" +
+                "    username VARCHAR(255) NOT NULL ,\n" +
                 "    password VARCHAR(255) NOT NULL,\n" +
                 "    shared_symmetric_key VARCHAR(255) NOT NULL,\n" +
                 "    family_symmetric_key VARCHAR(255) NOT NULL,\n" +
@@ -69,8 +69,8 @@ public class DataBaseConnectorTest {
                 "\n" +
                 "-- Table to store media information\n" +
                 "CREATE TABLE media (\n" +
-                "    media_id SERIAL PRIMARY KEY,\n" +
-                "    owner_id VARCHAR(255) REFERENCES users(user_id) ON DELETE CASCADE,\n" +
+                "    media_id INTEGER PRIMARY KEY,\n" +
+                "    owner_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,\n" +
                 "    format VARCHAR(50) NOT NULL,\n" +
                 "    artist VARCHAR(255) NOT NULL,\n" +
                 "    title VARCHAR(255) NOT NULL,\n" +
@@ -79,10 +79,10 @@ public class DataBaseConnectorTest {
                 "\n" +
                 "-- Table to store media content\n" +
                 "CREATE TABLE media_content (\n" +
-                "    media_id SERIAL REFERENCES media(media_id) ON DELETE CASCADE,\n" +
+                "    media_id INTEGER PRIMARY KEY,\n" +
+                "    FOREIGN KEY (media_id) REFERENCES media(media_id) ON DELETE CASCADE,\n" +
                 "    lyrics TEXT NOT NULL,\n" +
-                "    audio_base64 TEXT NOT NULL,\n" +
-                "    PRIMARY KEY (media_id)\n" +
+                "    audio_base64 TEXT NOT NULL\n" +
                 ");\n";
         InputStream mockInputStream = new ByteArrayInputStream(setupContent.getBytes(StandardCharsets.UTF_8));
 

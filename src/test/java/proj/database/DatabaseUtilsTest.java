@@ -1,105 +1,103 @@
 package proj.database;
 
-import org.junit.jupiter.api.*;
+import org.junit.jupiter.api.AfterAll;
+import org.junit.jupiter.api.BeforeAll;
+import org.junit.jupiter.api.BeforeEach;
+import org.junit.jupiter.api.Test;
 import proj.server_client.data_objects.Media;
 import proj.server_client.data_objects.MediaContent;
 import proj.server_client.data_objects.User;
 
 import java.sql.Connection;
-import java.sql.DriverManager;
 import java.sql.SQLException;
-import java.util.List;
 
 import static org.junit.jupiter.api.Assertions.*;
 
-@TestInstance(TestInstance.Lifecycle.PER_CLASS)
-    class DatabaseUtilsTest {
+public class DatabaseUtilsTest {
 
-        private static final String TEST_URL = "jdbc:your_test_database_url";
-        private static final String TEST_USERNAME = "your_test_database_username";
-        private static final String TEST_PASSWORD = "your_test_database_password";
+    private static DataBaseConnector connector;
+    private static Connection connection;
 
-        private Connection testConnection;
-
-        @BeforeAll
-        void setUp() {
-            // Establish a connection to the test database
-            try {
-                Class.forName("org.postgresql.Driver").newInstance();
-                testConnection = DriverManager.getConnection(TEST_URL, TEST_USERNAME, TEST_PASSWORD);
-            } catch (Exception e) {
-                e.printStackTrace();
-                fail("Failed to connect to the test database.");
-            }
-        }
-
-        @AfterAll
-        void tearDown() {
-            // Close the test database connection
-            if (testConnection != null) {
-                try {
-                    testConnection.close();
-                } catch (SQLException e) {
-                    e.printStackTrace();
-                }
-            }
-        }
-
-        @Test
-        void testGetAllUsers() {
-            assertDoesNotThrow(() -> {
-                List<User> userList = DatabaseUtils.getAllUsers(testConnection);
-                assertNotNull(userList);
-                assertFalse(userList.isEmpty());
-            });
-        }
-
-        @Test
-        void testGetUserById() {
-            assertDoesNotThrow(() -> {
-                String userId = "your_test_user_id";
-                User user = DatabaseUtils.getUserById(testConnection, userId);
-                assertNotNull(user);
-                assertEquals(userId, user.getUserId());
-            });
-        }
-
-        @Test
-        void testGetAllMedia() {
-            assertDoesNotThrow(() -> {
-                List<Media> mediaList = DatabaseUtils.getAllMedia(testConnection);
-                assertNotNull(mediaList);
-                assertFalse(mediaList.isEmpty());
-            });
-        }
-
-        @Test
-        void testGetMediaById() {
-            assertDoesNotThrow(() -> {
-                int mediaId = 1;  // Replace with your test media ID
-                Media media = DatabaseUtils.getMediaById(testConnection, mediaId);
-                assertNotNull(media);
-                assertEquals(mediaId, media.getMediaId());
-            });
-        }
-
-        @Test
-        void testGetAllMediaContent() {
-            assertDoesNotThrow(() -> {
-                List<MediaContent> mediaContentList = DatabaseUtils.getAllMediaContent(testConnection);
-                assertNotNull(mediaContentList);
-                assertFalse(mediaContentList.isEmpty());
-            });
-        }
-
-        @Test
-        void testGetMediaContentById() {
-            assertDoesNotThrow(() -> {
-                int mediaId = 1;  // Replace with your test media ID
-                MediaContent mediaContent = DatabaseUtils.getMediaContentById(testConnection, mediaId);
-                assertNotNull(mediaContent);
-                assertEquals(mediaId, mediaContent.getMediaId());
-            });
-        }
-
+    @BeforeAll
+    static void setUpAll() throws DataBaseConnectionException, SQLException, ClassNotFoundException, InstantiationException, IllegalAccessException {
+        connector = new DataBaseConnector();
+        connector.createConnection();
+        connection = connector.getConnection();
     }
+
+    @AfterAll
+    static void tearDownAll() throws SQLException {
+        if (connector != null) {
+            connector.closeConnection();
+        }
+    }
+
+    @BeforeEach
+    void setUp() throws SQLException {
+        // Clear tables or perform any setup needed before each test
+        clearTables();
+    }
+
+    @Test
+    void testAddUserAndGetUserById() throws SQLException {
+        User user = new User();
+        user.setUserId(12);
+        user.setUsername("testUser");
+        user.setPassword("password");
+        user.setSharedSymmetricKey("sharedKey");
+        user.setFamilySymmetricKey("familyKey");
+
+        DatabaseUtils.addUser(connection, user);
+
+        User retrievedUser = DatabaseUtils.getUserById(connection, user.getUserId());
+
+        assertNotNull(retrievedUser);
+        assertEquals(user.getUsername(), retrievedUser.getUsername());
+        assertEquals(user.getPassword(), retrievedUser.getPassword());
+        assertEquals(user.getSharedSymmetricKey(), retrievedUser.getSharedSymmetricKey());
+        assertEquals(user.getFamilySymmetricKey(), retrievedUser.getFamilySymmetricKey());
+    }
+
+    @Test
+    void testAddMediaAndGetMediaById() throws SQLException {
+        Media media = new Media();
+        media.setOwnerId(2);
+        media.setFormat("mp3");
+        media.setArtist("testArtist");
+        media.setTitle("testTitle");
+        media.setGenre("testGenre");
+
+        DatabaseUtils.addMedia(connection, media);
+
+        Media retrievedMedia = DatabaseUtils.getMediaById(connection, media.getMediaId());
+
+        assertNotNull(retrievedMedia);
+        assertEquals(media.getOwnerId(), retrievedMedia.getOwnerId());
+        assertEquals(media.getFormat(), retrievedMedia.getFormat());
+        assertEquals(media.getArtist(), retrievedMedia.getArtist());
+        assertEquals(media.getTitle(), retrievedMedia.getTitle());
+        assertEquals(media.getGenre(), retrievedMedia.getGenre());
+    }
+
+    @Test
+    void testAddMediaContentAndGetMediaContentById() throws SQLException {
+        MediaContent mediaContent = new MediaContent();
+        mediaContent.setMediaId(1);
+        mediaContent.setLyrics("testLyrics");
+        mediaContent.setAudioBase64("testAudioBase64");
+
+        DatabaseUtils.addMediaContent(connection, mediaContent);
+
+        MediaContent retrievedMediaContent = DatabaseUtils.getMediaContentById(connection, mediaContent.getMediaId());
+
+        assertNotNull(retrievedMediaContent);
+        assertEquals(mediaContent.getMediaId(), retrievedMediaContent.getMediaId());
+        assertEquals(mediaContent.getLyrics(), retrievedMediaContent.getLyrics());
+        assertEquals(mediaContent.getAudioBase64(), retrievedMediaContent.getAudioBase64());
+    }
+
+    private void clearTables() throws SQLException {
+        // Implement logic to clear tables or perform any setup needed before each test
+        // You may use DELETE statements to remove data from tables
+    }
+}

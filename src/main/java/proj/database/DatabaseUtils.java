@@ -19,12 +19,12 @@ public class DatabaseUtils {
     /**
      * Get users from the database based on a specific query
      */
-    private static List<User> getUsers(Connection conn, String query, String parameter) throws SQLException {
+    private static List<User> getUsers(Connection conn, String query, int parameter) throws SQLException {
         List<User> userList = new ArrayList<>();
         try (PreparedStatement statement = conn.prepareStatement(query)) {
             // If a parameter is provided, set it in the prepared statement
-            if (parameter != null) {
-                statement.setString(1, parameter);
+            if (parameter != 0) {
+                statement.setInt(1, parameter);
             }
 
             try (ResultSet resultSet = statement.executeQuery()) {
@@ -42,7 +42,7 @@ public class DatabaseUtils {
      */
     private static User extractUserFromResultSet(ResultSet resultSet) throws SQLException {
         User user = new User();
-        user.setUserId(resultSet.getString("user_id"));
+        user.setUserId(resultSet.getInt("user_id"));
         user.setUsername(resultSet.getString("username"));
         user.setPassword(resultSet.getString("password"));
         user.setSharedSymmetricKey(resultSet.getString("shared_symmetric_key"));
@@ -50,17 +50,11 @@ public class DatabaseUtils {
         return user;
     }
 
-    /**
-     * Get all users from the database
-     */
-    public static List<User> getAllUsers(Connection conn) throws SQLException {
-        return getUsers(conn, Queries.GET_ALL_USERS_QUERY, null);
-    }
 
     /**
      * Get a user by ID from the database
      */
-    public static User getUserById(Connection conn, String userId) throws SQLException {
+    public static User getUserById(Connection conn, int userId) throws SQLException {
         List<User> users = getUsers(conn, Queries.GET_USER_BY_ID_QUERY, userId);
         return users.isEmpty() ? null : users.get(0);
     }
@@ -68,13 +62,10 @@ public class DatabaseUtils {
     /**
      * Get media from the database based on a specific query
      */
-    private static List<Media> getMedia(Connection conn, String query, String parameter) throws SQLException {
+    private static List<Media> getMedia(Connection conn, String query, int parameter) throws SQLException {
         List<Media> mediaList = new ArrayList<>();
         try (PreparedStatement statement = conn.prepareStatement(query)) {
-            // If a parameter is provided, set it in the prepared statement
-            if (parameter != null) {
-                statement.setString(1, parameter);
-            }
+                statement.setInt(1, parameter);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -91,7 +82,8 @@ public class DatabaseUtils {
      */
     private static Media extractMediaFromResultSet(ResultSet resultSet) throws SQLException {
         Media media = new Media();
-        media.setOwnerId(resultSet.getString("owner_id"));
+        media.setMediaId(resultSet.getInt("media_id"));
+        media.setOwnerId(resultSet.getInt("owner_id"));
         media.setFormat(resultSet.getString("format"));
         media.setArtist(resultSet.getString("artist"));
         media.setTitle(resultSet.getString("title"));
@@ -100,29 +92,19 @@ public class DatabaseUtils {
     }
 
     /**
-     * Get all media from the database
-     */
-    public static List<Media> getAllMedia(Connection conn) throws SQLException {
-        return getMedia(conn, Queries.GET_ALL_MEDIA_QUERY, null);
-    }
-
-    /**
      * Get media by ID from the database
      */
     public static Media getMediaById(Connection conn, int mediaId) throws SQLException {
-        List<Media> mediaList = getMedia(conn, Queries.GET_MEDIA_BY_ID_QUERY, String.valueOf(mediaId));
+        List<Media> mediaList = getMedia(conn, Queries.GET_MEDIA_BY_ID_QUERY, mediaId);
         return mediaList.isEmpty() ? null : mediaList.get(0);
     }
     /**
      * Get media content from the database based on a specific query
      */
-    private static List<MediaContent> getMediaContent(Connection conn, String query, String parameter) throws SQLException {
+    private static List<MediaContent> getMediaContent(Connection conn, String query, int parameter) throws SQLException {
         List<MediaContent> mediaContentList = new ArrayList<>();
         try (PreparedStatement statement = conn.prepareStatement(query)) {
-            // If a parameter is provided, set it in the prepared statement
-            if (parameter != null) {
-                statement.setString(1, parameter);
-            }
+            statement.setInt(1, parameter);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -144,51 +126,52 @@ public class DatabaseUtils {
         mediaContent.setAudioBase64(resultSet.getString("audio_base64"));
         return mediaContent;
     }
-    /**
-     * Get all media content from the database
-     */
-    public static List<MediaContent> getAllMediaContent(Connection conn) throws SQLException {
-        return getMediaContent(conn, Queries.GET_ALL_MEDIA_CONTENT_QUERY, null);
-    }
 
     /**
      * Get media content by ID from the database
      */
     public static MediaContent getMediaContentById(Connection conn, int mediaId) throws SQLException {
-        List<MediaContent> mediaContentList = getMediaContent(conn, Queries.GET_MEDIA_CONTENT_BY_ID_QUERY, String.valueOf(mediaId));
+        List<MediaContent> mediaContentList = getMediaContent(conn, Queries.GET_MEDIA_CONTENT_BY_ID_QUERY, mediaId);
         return mediaContentList.isEmpty() ? null : mediaContentList.get(0);
     }
 
 
     public static void addUser(Connection conn, User user) throws SQLException {
-        try (PreparedStatement statement = conn.prepareStatement(Queries.ADD_USER_QUERY)) {
-            statement.setString(1, user.getUsername());
-            statement.setString(2, user.getPassword());
-            statement.setString(3, user.getSharedSymmetricKey());
-            statement.setString(4, user.getFamilySymmetricKey());
+        try (PreparedStatement statement = conn.prepareStatement(Queries.ADD_USER_QUERY, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            // Instead of relying on SERIAL, provide a value for user_id explicitly
+            statement.setInt(1, user.getUserId()); // Assuming user.getUserId() returns a String
+            statement.setString(2, user.getUsername());
+            statement.setString(3, user.getPassword());
+            statement.setString(4, user.getSharedSymmetricKey());
+            statement.setString(5, user.getFamilySymmetricKey());
 
-            statement.executeUpdate();
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Adding user failed, no rows affected.");
+            }
         }
     }
 
-    /**
-     * Add media to the database
-     */
     public static void addMedia(Connection conn, Media media) throws SQLException {
-        try (PreparedStatement statement = conn.prepareStatement(Queries.ADD_MEDIA_QUERY)) {
-            statement.setString(1, media.getOwnerId());
-            statement.setString(2, media.getFormat());
-            statement.setString(3, media.getArtist());
-            statement.setString(4, media.getTitle());
-            statement.setString(5, media.getGenre());
+        try (PreparedStatement statement = conn.prepareStatement(Queries.ADD_MEDIA_QUERY, PreparedStatement.RETURN_GENERATED_KEYS)) {
+            // Instead of relying on SERIAL, provide a value for media_id explicitly
+            statement.setInt(1, media.getMediaId());
 
-            statement.executeUpdate();
+            statement.setInt(2, media.getOwnerId());
+            statement.setString(3, media.getFormat());
+            statement.setString(4, media.getArtist());
+            statement.setString(5, media.getTitle());
+            statement.setString(6, media.getGenre());
+
+            int affectedRows = statement.executeUpdate();
+
+            if (affectedRows == 0) {
+                throw new SQLException("Adding media failed, no rows affected.");
+            }
         }
     }
 
-    /**
-     * Add media content to the database
-     */
     public static void addMediaContent(Connection conn, MediaContent mediaContent) throws SQLException {
         try (PreparedStatement statement = conn.prepareStatement(Queries.ADD_MEDIA_CONTENT_QUERY)) {
             statement.setInt(1, mediaContent.getMediaId());

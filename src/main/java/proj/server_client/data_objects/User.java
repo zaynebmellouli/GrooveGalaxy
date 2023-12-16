@@ -4,18 +4,18 @@ import java.io.Serializable;
 
 public class User implements Serializable{
 
+    private int userId;
     private String username;
     private String password;
     private String sharedSymmetricKey;
     private String familySymmetricKey;
-    private String userId;
 
     // Constructors
 
     public User() {
     }
 
-    public User(String userId,String username, String password, String sharedSymmetricKey, String familySymmetricKey) {
+    public User(int userId,String username, String password, String sharedSymmetricKey, String familySymmetricKey) {
         this.userId= userId;
         this.username = username;
         this.password = password;
@@ -23,10 +23,9 @@ public class User implements Serializable{
         this.familySymmetricKey = familySymmetricKey;
     }
     // Getters
-    public String getUserId() {
-        return username;
+    public int getUserId() {
+        return userId;
     }
-
     public String getUsername() {
         return username;
     }
@@ -43,7 +42,7 @@ public class User implements Serializable{
         return familySymmetricKey;
     }
 
-    public void setUserId(String userId) {
+    public void setUserId(int userId) {
         this.userId = userId;
     }
 
