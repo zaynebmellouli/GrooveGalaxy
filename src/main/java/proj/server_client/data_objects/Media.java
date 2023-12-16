@@ -5,7 +5,7 @@ import java.io.Serializable;
 public class Media implements Serializable{
 
     private int mediaId;
-    private String ownerId;
+    private int ownerId;
     private String format;
     private String artist;
     private String title;
@@ -16,7 +16,7 @@ public class Media implements Serializable{
     public Media() {
     }
 
-    public Media(int mediaId, String ownerId, String format, String artist, String title, String genre) {
+    public Media(int mediaId, int ownerId, String format, String artist, String title, String genre) {
         this.mediaId = mediaId;
         this.ownerId = ownerId;
         this.format = format;
@@ -31,7 +31,7 @@ public class Media implements Serializable{
         return mediaId;
     }
 
-    public String getOwnerId() {
+    public int getOwnerId() {
         return ownerId;
     }
 
@@ -51,7 +51,11 @@ public class Media implements Serializable{
         return genre;
     }
 
-    public void setOwnerId(String ownerId) {
+    public void setMediaId(int mediaId) {
+        this.mediaId=mediaId;
+    }
+
+    public void setOwnerId(int ownerId) {
         this.ownerId=ownerId;
     }
 

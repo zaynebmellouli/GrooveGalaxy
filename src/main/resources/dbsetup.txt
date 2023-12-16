@@ -3,8 +3,8 @@ DROP TABLE IF EXISTS media_content, media, users;
 
 -- Table to store users
 CREATE TABLE users (
-    user_id VARCHAR(255) ,
-    username VARCHAR(255) NOT NULL UNIQUE,
+    user_id INTEGER,
+    username VARCHAR(255) NOT NULL ,
     password VARCHAR(255) NOT NULL,
     shared_symmetric_key VARCHAR(255) NOT NULL,
     family_symmetric_key VARCHAR(255) NOT NULL,
@@ -15,8 +15,8 @@ CREATE TABLE users (
 
 -- Table to store media information
 CREATE TABLE media (
-    media_id SERIAL PRIMARY KEY,
-    owner_id VARCHAR(255) REFERENCES users(user_id) ON DELETE CASCADE,
+    media_id INTEGER PRIMARY KEY,
+    owner_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     format VARCHAR(50) NOT NULL,
     artist VARCHAR(255) NOT NULL,
     title VARCHAR(255) NOT NULL,
@@ -25,8 +25,8 @@ CREATE TABLE media (
 
 -- Table to store media content
 CREATE TABLE media_content (
-    media_id SERIAL REFERENCES media(media_id) ON DELETE CASCADE,
+    media_id INTEGER PRIMARY KEY,
+    FOREIGN KEY (media_id) REFERENCES media(media_id) ON DELETE CASCADE,
     lyrics TEXT NOT NULL,
-    audio_base64 TEXT NOT NULL,
-    PRIMARY KEY (media_id)
+    audio_base64 TEXT NOT NULL
 );

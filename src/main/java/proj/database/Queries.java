@@ -14,10 +14,9 @@ public class Queries {
     public static final String GET_USER_BY_ID_QUERY = "SELECT * FROM users WHERE user_id=?";
 
     public static final String UPDATE_USER_QUERY = "UPDATE users SET username=?, password=?, shared_symmetric_key=?, "
-            + "family_symmetric_key=?, profile_pic=? WHERE user_id=?";
+            + "family_symmetric_key=? WHERE user_id=?";
 
-    public static final String ADD_USER_QUERY = "INSERT INTO users(username, password, shared_symmetric_key, "
-            + "family_symmetric_key, profile_pic) VALUES (?,?,?,?,?)";
+    public static final String ADD_USER_QUERY = "INSERT INTO users (user_id, username, password, shared_symmetric_key, family_symmetric_key) VALUES (?, ?, ?, ?, ?);";
 
     public static final String REMOVE_USER_QUERY = "DELETE FROM users WHERE user_id=?";
 
@@ -25,8 +24,8 @@ public class Queries {
 
     public static final String GET_MEDIA_BY_ID_QUERY = "SELECT * FROM media WHERE media_id=?";
 
-    public static final String ADD_MEDIA_QUERY = "INSERT INTO media(owner_id, format, artist, title, genre) "
-            + "VALUES (?,?,?,?,?)";
+    public static final String ADD_MEDIA_QUERY = "INSERT INTO media(media_id, owner_id, format, artist, title, genre) "
+            + "VALUES (?,?,?,?,?,?)";
 
     public static final String REMOVE_MEDIA_QUERY = "DELETE FROM media WHERE media_id=?";
 
