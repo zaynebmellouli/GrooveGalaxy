@@ -1,18 +1,12 @@
 package proj;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.util.Scanner;
-
 import javax.net.SocketFactory;
 import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
+import java.io.*;
+import java.util.Scanner;
 
-public class Client {
-
+public class Database {
     public static void startClient(String host, int port) throws IOException {
 
         SocketFactory factory = SSLSocketFactory.getDefault();
@@ -27,8 +21,8 @@ public class Client {
             os.write(message.getBytes());
             os.flush();
 
-            InputStream is = new BufferedInputStream(socket.getInputStream());
-            byte[] data = new byte[2048];
+            InputStream is   = new BufferedInputStream(socket.getInputStream());
+            byte[]      data = new byte[2048];
             int len = is.read(data);
             System.out.printf("client received %d bytes: %s%n", len, new String(data, 0, len));
 
@@ -78,8 +72,9 @@ public class Client {
             int port = Integer.parseInt(args[1]);
             startClient(host, port);
         } else {
-            System.out.println("Usage: java Client <host> <port>");
+            System.out.println("Usage: java Database <host> <port>");
             return;
         }
+
     }
 }

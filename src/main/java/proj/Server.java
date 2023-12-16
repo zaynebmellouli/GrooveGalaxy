@@ -1,3 +1,5 @@
+package proj;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -54,10 +56,17 @@ public class Server {
     }
 
     public static void main(String args[]) throws IOException {
-        System.setProperty("javax.net.ssl.keyStore", "server.p12");
+        System.setProperty("javax.net.ssl.keyStore", "proj/https_cert/database.p12");
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
-        System.setProperty("javax.net.ssl.trustStore", "servertruststore.jks");
+        System.setProperty("javax.net.ssl.trustStore", "proj/https_cert/databasetruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
-        startServer(5000);
+        if (args.length == 1) {
+            int port = Integer.parseInt(args[0]);
+            startServer(port);
+        }
+        else {
+            System.out.println("Usage: java Server <port>");
+            return;
+        }
     }
 }
