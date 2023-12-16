@@ -1,9 +1,9 @@
-package example.database;
+package proj.database;
 
-import example.server_client.data_objects.Media;
-import example.server_client.data_objects.MediaContent;
-import example.server_client.data_objects.User;
 
+import proj.server_client.data_objects.User;
+import proj.server_client.data_objects.Media;
+import proj.server_client.data_objects.MediaContent;
 import java.sql.Connection;
 import java.sql.PreparedStatement;
 import java.sql.ResultSet;

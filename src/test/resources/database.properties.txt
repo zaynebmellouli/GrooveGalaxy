@@ -1,0 +1,10 @@
+# database.properties
+
+# JDBC URL for PostgreSQL
+db.url=jdbc:postgresql://localhost:5432/groovedb
+
+# Database username
+db.username=postgres
+
+# Database password
+db.password=postgres

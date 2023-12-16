@@ -1,4 +1,4 @@
-package example.database;
+package proj.database;
 
 
 public class DataBaseConnectionException extends Exception {

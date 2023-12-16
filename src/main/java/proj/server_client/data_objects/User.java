@@ -1,4 +1,4 @@
-package example.server_client.data_objects;
+package proj.server_client.data_objects;
 
 import java.io.Serializable;
 
@@ -23,6 +23,9 @@ public class User implements Serializable{
         this.familySymmetricKey = familySymmetricKey;
     }
     // Getters
+    public String getUserId() {
+        return username;
+    }
 
     public String getUsername() {
         return username;
