@@ -68,18 +68,14 @@ public class Client {
         }
     }
 
-    public static void main(String args[]) throws IOException {
+    public static void main() throws IOException {
         System.setProperty("javax.net.ssl.keyStore", "proj/https_cert/user.p12");
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
         System.setProperty("javax.net.ssl.trustStore", "proj/https_cert/usertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
-        if (args.length == 2) {
-            String host = args[0];
-            int port = Integer.parseInt(args[1]);
-            startClient(host, port);
-        } else {
-            System.out.println("Usage: java Client <host> <port>");
-            return;
-        }
+        String host = "192.168.0.100";
+        int port = 5000;
+        startClient(host, port);
+
     }
 }

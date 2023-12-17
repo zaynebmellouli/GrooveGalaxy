@@ -60,13 +60,7 @@ public class Server {
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
         System.setProperty("javax.net.ssl.trustStore", "proj/https_cert/databasetruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
-        if (args.length == 1) {
-            int port = Integer.parseInt(args[0]);
-            startServer(port);
-        }
-        else {
-            System.out.println("Usage: java Server <port>");
-            return;
-        }
+        int port = 5000;
+        startServer(port);
     }
 }
