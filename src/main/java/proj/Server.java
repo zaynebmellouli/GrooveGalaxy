@@ -10,6 +10,8 @@ import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
 import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.Key;
 
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
@@ -28,6 +30,7 @@ public class Server {
             String message = null;
             InputStream is = null;
             OutputStream os = null;
+
             try (Socket socket = listener.accept()) {
 
                 while (!message.equals("Exit")) {
@@ -38,7 +41,19 @@ public class Server {
                         int len = is.read(data);
 
                         message = new String(data, 0, len);
-                        JsonObject json = JsonParser.parseString(message).getAsJsonObject();
+                        JsonObject jsonEncrypted = JsonParser.parseString(message).getAsJsonObject();
+
+                        //get the key of the client from the id form the json
+                         int id = jsonEncrypted.get("id").getAsInt();
+                         //to change the key to the key in the database
+                         Key keyServClient = CL.readAESKey("Keys/KeyServClient.key");
+
+                        //decrypt the message
+                        JsonObject jsonDecrypt = CL.unprotect(jsonEncrypted, keyServClient);
+
+
+
+
 
                         os = new BufferedOutputStream(socket.getOutputStream());
                         System.out.printf("server received %d bytes: %s%n", len, message);
@@ -48,6 +63,14 @@ public class Server {
                     } catch (IOException i) {
                         System.out.println(i);
                         return;
+                    } catch (GeneralSecurityException e) {
+                        e.printStackTrace();
+                        System.out.println("Error decrypting message, maybe hacked");
+                        os = new BufferedOutputStream(socket.getOutputStream());
+                        System.out.printf("Sending error message");
+                        String response = "Error";
+                        os.write(response.getBytes(), 0, response.getBytes().length);
+                        os.flush();
                     }
                 }
                 try {
