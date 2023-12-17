@@ -87,7 +87,7 @@ public class Client {
                                 // Send error message to server
                                 String errorMessage = "Error";
                                 nonce = incrementByteNonce(nonce);
-                                r = CL.protect(message, nonce, key, key_f);
+                                r = CL.protect("CBC", errorMessage, nonce, key);
                                 messageBytes = r.toString().getBytes();
                                 os.write(messageBytes);
                                 os.flush();
