@@ -1,5 +1,9 @@
 package proj;
 
+import com.google.gson.Gson;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import java.io.IOException;
@@ -21,7 +25,7 @@ public class Server {
             listener.setEnabledCipherSuites(new String[] { "TLS_AES_128_GCM_SHA256" });
             listener.setEnabledProtocols(new String[] { "TLSv1.3" });
             System.out.println("listening for messages...");
-            String message = "";
+            String message = null;
             InputStream is = null;
             OutputStream os = null;
             try (Socket socket = listener.accept()) {
@@ -30,9 +34,12 @@ public class Server {
                     try {
                         is = new BufferedInputStream(socket.getInputStream());
                         byte[] data = new byte[2048];
+                        //first message
                         int len = is.read(data);
 
                         message = new String(data, 0, len);
+                        JsonObject json = JsonParser.parseString(message).getAsJsonObject();
+
                         os = new BufferedOutputStream(socket.getOutputStream());
                         System.out.printf("server received %d bytes: %s%n", len, message);
                         String response = message + " processed by server";
