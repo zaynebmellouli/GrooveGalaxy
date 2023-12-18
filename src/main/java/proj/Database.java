@@ -63,9 +63,9 @@ public class Database {
     }
 
     public static void main(String args[]) throws IOException {
-        System.setProperty("javax.net.ssl.keyStore", "proj/https_cert/user.p12");
+        System.setProperty("javax.net.ssl.keyStore", "https_cert/user.p12");
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
-        System.setProperty("javax.net.ssl.trustStore", "proj/https_cert/usertruststore.jks");
+        System.setProperty("javax.net.ssl.trustStore", "https_cert/usertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
         if (args.length == 2) {
             String host = args[0];

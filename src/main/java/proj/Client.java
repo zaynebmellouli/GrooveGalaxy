@@ -8,11 +8,9 @@ import java.io.BufferedOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
 import java.io.OutputStream;
-import java.nio.charset.StandardCharsets;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.SecureRandom;
-import java.util.Base64;
 import java.util.Scanner;
 
 import javax.net.SocketFactory;
@@ -160,17 +158,12 @@ public class Client {
 
 
     public static void main(String args[]) throws IOException {
-        System.setProperty("javax.net.ssl.keyStore", "proj/https_cert/user.p12");
+        System.setProperty("javax.net.ssl.keyStore", "https_cert/user.p12");
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
-        System.setProperty("javax.net.ssl.trustStore", "proj/https_cert/usertruststore.jks");
+        System.setProperty("javax.net.ssl.trustStore", "https_cert/usertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
-        if (args.length == 2) {
-            String host = args[0];
-            int port = Integer.parseInt(args[1]);
-            startClient(host, port);
-        } else {
-            System.out.println("Usage: java Client <host> <port>");
-            return;
-        }
+        String host = "192.168.0.100";
+        int port = 5000;
+        startClient(host, port);
     }
 }

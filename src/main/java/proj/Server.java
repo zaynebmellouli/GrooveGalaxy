@@ -6,9 +6,13 @@ import com.google.gson.JsonParser;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
+import com.google.gson.JsonObject;
+import com.google.gson.JsonParser;
+
+import java.io.*;
+import java.net.Socket;
+import java.security.GeneralSecurityException;
+import java.security.Key;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.security.Key;
@@ -52,7 +56,7 @@ public class Server {
                          nonce = new byte[]{receivedJson1.get("nonce").getAsByte()};
                          //to change the key to the key in the database
                          Key keyServClient = CL.readAESKey("Keys/KeyServClient.key");
-                         Key keyFamily = CL.readAESKey("Keys/KeyFamily.key");
+                         Key keyFamily     = CL.readAESKey("Keys/KeyFamily.key");
                         //decrypt the message
                         JsonObject decryptedJson1 = CL.unprotect(receivedJson1, keyServClient);
                         String Song = decryptedJson1.get("M").getAsString();
@@ -163,11 +167,11 @@ public class Server {
     }
 
     public static void main(String args[]) throws IOException {
-        System.setProperty("javax.net.ssl.keyStore", "proj/https_cert/server.p12");
+        System.setProperty("javax.net.ssl.keyStore", "https_cert/server.p12");
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
-        System.setProperty("javax.net.ssl.trustStore", "proj/https_cert/servertruststore.jks");
+        System.setProperty("javax.net.ssl.trustStore", "https_cert/servertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
-        int port = 8000;
+        int port = 5000;
         startServer(port);
     }
 }
