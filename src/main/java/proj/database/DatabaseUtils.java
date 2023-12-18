@@ -141,7 +141,6 @@ public class DatabaseUtils {
 
     public static void addUser(Connection conn, User user) throws SQLException {
         try (PreparedStatement statement = conn.prepareStatement(Queries.ADD_USER_QUERY, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            // Instead of relying on SERIAL, provide a value for user_id explicitly
             statement.setInt(1, user.getUserId()); // Assuming user.getUserId() returns a String
             statement.setString(2, user.getUsername());
             statement.setString(3, user.getPassword());

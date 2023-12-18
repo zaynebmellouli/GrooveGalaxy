@@ -1,5 +1,5 @@
 package proj.server_client.data_objects;
-
+import org.json.JSONObject;
 import java.io.Serializable;
 
 public class Media implements Serializable{
@@ -73,5 +73,16 @@ public class Media implements Serializable{
 
     public void setGenre(String genre) {
         this.genre=genre;
+    }
+
+    public JSONObject toJson() {
+        JSONObject json = new JSONObject();
+        json.put("media_id", this.getMediaId());
+        json.put("owner_id", this.getOwnerId());
+        json.put("format", this.getFormat());
+        json.put("artist", this.getArtist());
+        json.put("title", this.getTitle());
+        json.put("genre", this.getGenre());
+        return json;
     }
 }
