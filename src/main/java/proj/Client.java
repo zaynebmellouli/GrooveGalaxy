@@ -49,8 +49,8 @@ public class Client {
                         byte[] nonce = new byte[16];
                         random.nextBytes(nonce);
                         int id = 1;
-                        Key key = CL.readAESKey("Keys/AESKeyClient.key");
-                        Key key_f = CL.readAESKey("Keys/AESFamilyKeyClient.key");
+                        Key key = CL.readAESKey("Keys/KeyServClient.key");
+                        Key key_f = CL.readAESKey("Keys/KeyFamily.key");
 
                         //First Message
                         message = "This Song";
@@ -77,7 +77,7 @@ public class Client {
                                     socket.close();
                                     return;
                                 } else {
-                                    System.out.printf("Client received %d bytes: %s%n", len, message);
+                                    System.out.printf("Client received %d bytes: %s%n", len, m);
                                     // Continue to send the second message
                                 }
                             }else {
@@ -102,6 +102,7 @@ public class Client {
                         os.write(messageBytes);
                         os.flush();
 
+                        System.out.println("finished");
                         //Listen for Response
                         len = is.read(data);
                         if (len != -1) {
@@ -162,7 +163,9 @@ public class Client {
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
         System.setProperty("javax.net.ssl.trustStore", "https_cert/usertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
-        String host = "192.168.0.100";
+        String host =
+//                "localhost";
+                "192.168.0.100";
         int port = 5000;
         startClient(host, port);
     }

@@ -16,6 +16,7 @@ import java.security.Key;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.util.Base64;
 
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
@@ -34,41 +35,52 @@ public class Server {
             listener.setEnabledCipherSuites(new String[] { "TLS_AES_128_GCM_SHA256" });
             listener.setEnabledProtocols(new String[] { "TLSv1.3" });
             System.out.println("listening for messages...");
-            String message = null;
+            String message = "";
             InputStream is = null;
             OutputStream os = null;
             int id = 0;
             byte[] nonce = new byte[16];
+
             try (Socket socket = listener.accept()) {
+
 
                 while (!message.equals("Exit")) {
                     try {
                         is = new BufferedInputStream(socket.getInputStream());
                         byte[] data = new byte[2048];
-                        //first message
                         int len = is.read(data);
                         if (len == -1) {return;}
 
                         message = new String(data, 0, len);
+                        os = new BufferedOutputStream(socket.getOutputStream());
+                        System.out.printf("server received %d bytes: %s%n", len, message);
+                        String response = message + " processed by server";
+                        os.write(response.getBytes(), 0, response.getBytes().length);
+                        os.flush();
+
+                        //first message
+                        len = is.read(data);
+                        if (len == -1) {return;}
+                        message = new String(data, 0, len);
                         JsonObject receivedJson1 = JsonParser.parseString(message).getAsJsonObject();
                         //get the key of the client from the id form the json
-                         id = receivedJson1.get("id").getAsInt();
-                         nonce = new byte[]{receivedJson1.get("nonce").getAsByte()};
+                         id = receivedJson1.get("ID").getAsInt();
+                         nonce = Base64.getDecoder().decode(receivedJson1.get("Nonce").getAsString());
                          //to change the key to the key in the database
                          Key keyServClient = CL.readAESKey("Keys/KeyServClient.key");
                          Key keyFamily     = CL.readAESKey("Keys/KeyFamily.key");
                         //decrypt the message
                         JsonObject decryptedJson1 = CL.unprotect(receivedJson1, keyServClient);
-                        String Song = decryptedJson1.get("M").getAsString();
-                        if(check(Song,id,nonce, keyServClient,receivedJson1.get("MAC").getAsString())){
+                        String song = decryptedJson1.get("M").getAsString();
+                        if(check(song,id,nonce, keyServClient,receivedJson1.get("MAC").getAsString())){
                                 // Check if the message is an error message
-                                if (Song.equalsIgnoreCase("error")) {
+                                if (song.equalsIgnoreCase("error")) {
                                     System.out.println("Error message received. Aborting communication.");
                                     // Close the connection
                                     socket.close();
                                     return;
                                 } else {
-                                    System.out.printf("Client received %d bytes: %s%n", len, message);
+                                    System.out.printf("Server received %d bytes: %s%n", len, song);
                                     // Continue to send the second message
                                 }
                             }else {
@@ -106,9 +118,9 @@ public class Server {
                         JsonObject receivedJson2 = JsonParser.parseString(message).getAsJsonObject();
                         nonce = incrementByteNonce(nonce);
                         //decrypt the message
-                        JsonObject decryptedJson2 = CL.unprotect(receivedJson2, keyServClient);
+                        JsonObject decryptedJson2 = CL.unprotect("CBC", receivedJson2, keyServClient, nonce);
                         String byteReq = decryptedJson2.get("M").getAsString();
-                        if(check(byteReq,id,nonce, keyServClient,receivedJson2.get("MAC").getAsString())){
+                        if(check(byteReq,nonce, keyServClient,receivedJson2.get("MAC").getAsString())){
                             // Check if the message is an error message
                             if (byteReq.equalsIgnoreCase("error")) {
                                 System.out.println("Error message received. Aborting communication.");
@@ -116,7 +128,7 @@ public class Server {
                                 socket.close();
                                 return;
                             } else {
-                                System.out.printf("Client received %d bytes: %s%n", len, message);
+                                System.out.printf("Server received %d bytes: %s%n", len, byteReq);
                                 // Continue to send the second message
                             }
                         }else {
@@ -134,11 +146,11 @@ public class Server {
                             return;
                         }
 
-
+                        System.out.println("finish");
 
                         os = new BufferedOutputStream(socket.getOutputStream());
                         System.out.printf("server received %d bytes: %s%n", len, message);
-                        String response = message + " processed by server";
+                        response = message + " processed by server";
                         os.write(response.getBytes(), 0, response.getBytes().length);
                         os.flush();
                     } catch (IOException i) {
