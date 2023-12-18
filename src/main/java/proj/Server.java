@@ -8,16 +8,25 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import proj.database.DataBaseConnectionException;
+import proj.database.DataBaseConnector;
+import proj.database.DatabaseUtils;
+import proj.database.UserAccessException;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.file.Files;
+import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.net.Socket;
 import java.security.GeneralSecurityException;
 import java.security.Key;
+import java.sql.Connection;
+import java.sql.SQLException;
 import java.util.Base64;
 
+import javax.crypto.spec.SecretKeySpec;
 import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
@@ -28,8 +37,7 @@ import static proj.CL.incrementByteNonce;
 public class Server {
 
     public static void startServer(int port) throws IOException {
-
-        ServerSocketFactory factory = SSLServerSocketFactory.getDefault();
+        ServerSocketFactory factory    = SSLServerSocketFactory.getDefault();
         try (SSLServerSocket listener = (SSLServerSocket) factory.createServerSocket(port)) {
             listener.setNeedClientAuth(true);
             listener.setEnabledCipherSuites(new String[] { "TLS_AES_128_GCM_SHA256" });
@@ -41,7 +49,11 @@ public class Server {
             int id = 0;
             byte[] nonce = new byte[16];
 
-            try (Socket socket = listener.accept()) {
+            try (Socket socket = listener.accept();
+                 Connection connection = (new DataBaseConnector()).getConnection();) {
+                Key keyServClient = new SecretKeySpec(Base64.getDecoder().decode(DatabaseUtils.getUserKeyById(connection, id)),"AES");
+                Key keyFamily     = new SecretKeySpec(Base64.getDecoder().decode(DatabaseUtils.getFamilyKeyById(connection, id)),"AES");
+
                 while (!message.equals("Exit")) {
                     try {
                         is = new BufferedInputStream(socket.getInputStream());
@@ -64,8 +76,6 @@ public class Server {
                          id = receivedJson1.get("ID").getAsInt();
                          nonce = Base64.getDecoder().decode(receivedJson1.get("Nonce").getAsString());
                          //to change the key to the key in the database
-                         Key keyServClient = CL.readAESKey("Keys/KeyServClient.key");
-                         Key keyFamily     = CL.readAESKey("Keys/KeyFamily.key");
                         //decrypt the message
                         JsonObject decryptedJson1 = CL.unprotect(receivedJson1, keyServClient);
                         String song = decryptedJson1.get("M").getAsString();
@@ -96,7 +106,20 @@ public class Server {
                         //Check for Song in the Database
 
                         //Respond to first message
-                        message = "Song Info";
+                        JsonObject songInfo = DatabaseUtils.getSongInfo(connection,song, id).getAsJsonObject();
+                        JsonObject media = songInfo.get("media").getAsJsonObject();
+                        JsonObject media_content = songInfo.get("media_content").getAsJsonObject();
+                        // Read the audio file
+                        byte[] audioBytes = Files.readAllBytes(Paths.get(media_content.get("file_path").getAsString()));
+
+                        // Encode to Base64
+                        String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
+                        media_content.addProperty("file_Bytes",audioBase64);
+                        media.addProperty("media_content_length",audioBytes.length);
+                        media.addProperty("lyrics",media_content.get("lyrics").getAsString());
+                        message = media.toString();
+
+                        //Sending of Song info
                         JsonObject r = CL.protect(message, nonce, keyServClient, keyFamily);
                         byte[] messageBytes = r.toString().getBytes();
                         os = new BufferedOutputStream(socket.getOutputStream());
@@ -110,6 +133,7 @@ public class Server {
                         JsonObject receivedJson2 = JsonParser.parseString(message).getAsJsonObject();
                         nonce = incrementByteNonce(nonce);
                         //decrypt the message
+                        int byteReqInt = 0;
                         JsonObject decryptedJson2 = CL.unprotect("CBC", receivedJson2, keyServClient, nonce);
                         String byteReq = decryptedJson2.get("M").getAsString();
                         if(!check(byteReq,nonce, keyServClient,receivedJson2.get("MAC").getAsString())){
@@ -134,13 +158,15 @@ public class Server {
                                 socket.close();
                                 return;
                             } else {
-                                System.out.printf("Server received %d bytes: %s%n", len, byteReq);
+                                byteReqInt = decryptedJson2.get("M").getAsInt();
+                                System.out.printf("Server received %d bytes: he want the music form the %d", len, byteReqInt);
                                 // Continue to send the second message
                             }
                         }
 
                         //Respond to second message
-                        String rSong = "The entire song starting at byte X";
+                        String rSong = (new JsonObject()).addProperty("media_content", media_content.get("file_Bytes"));
+
                         nonce = incrementByteNonce(nonce);
                         JsonObject encryptedResponse = CL.protect("CTR", rSong, nonce, keyServClient);
                         byte[] encryptedBytes = encryptedResponse.toString().getBytes();
@@ -164,7 +190,12 @@ public class Server {
                         String response = "Error";
                         os.write(response.getBytes(), 0, response.getBytes().length);
                         os.flush();
+                    } catch (UserAccessException e) {
+                        throw new RuntimeException(e);
+                    }catch (SecurityException e) {
+                        startServer(port);
                     }
+
                 }
                 try {
                     is.close();
@@ -174,6 +205,10 @@ public class Server {
                     System.out.println(i);
                     return;
                 }
+            } catch (DataBaseConnectionException e){
+                e.printStackTrace();
+            } catch (SQLException e) {
+                throw new RuntimeException(e);
             }
         }
     }

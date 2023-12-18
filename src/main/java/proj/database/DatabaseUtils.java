@@ -1,7 +1,6 @@
 package proj.database;
 
 
-import org.json.JSONObject;
 import proj.server_client.data_objects.MediaInfo;
 import proj.server_client.data_objects.User;
 import proj.server_client.data_objects.Media;
@@ -12,6 +11,7 @@ import java.sql.ResultSet;
 import java.sql.SQLException;
 import java.util.ArrayList;
 import java.util.List;
+import com.google.gson.*;
 
 public class DatabaseUtils {
 
@@ -185,9 +185,9 @@ public class DatabaseUtils {
         }
     }
 
-    public static JSONObject getSongInfoAsJsonById(Connection conn, int mediaId) throws SQLException {
-        Media media = getMediaById(conn, mediaId);
-        MediaContent mediaContent = getMediaContentById(conn, mediaId);
+    public static JsonObject getSongInfoAsJsonById(Connection conn, String title) throws SQLException {
+        Media media = getMediaByTitle(conn, title);
+        MediaContent mediaContent = getMediaContentById(conn, title);
 
         return MediaInfo.toJson(media, mediaContent);
     }
@@ -195,7 +195,7 @@ public class DatabaseUtils {
     public static boolean checkUserMediaOwnership(Connection conn, int userId, int mediaId) throws SQLException {
         try (PreparedStatement statement = conn.prepareStatement(Queries.COUNT_MEDIA_BY_ID)) {
             statement.setInt(1, userId);
-            statement.setInt(2, mediaId);
+            statement.setString(2, title);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 if (resultSet.next()) {

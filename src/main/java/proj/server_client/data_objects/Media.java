@@ -1,6 +1,7 @@
 package proj.server_client.data_objects;
-import org.json.JSONObject;
+import com.google.gson.*;
 import java.io.Serializable;
+import java.util.Base64;
 
 public class Media implements Serializable{
 
@@ -75,14 +76,13 @@ public class Media implements Serializable{
         this.genre=genre;
     }
 
-    public JSONObject toJson() {
-        JSONObject json = new JSONObject();
-        json.put("media_id", this.getMediaId());
-        json.put("owner_id", this.getOwnerId());
-        json.put("format", this.getFormat());
-        json.put("artist", this.getArtist());
-        json.put("title", this.getTitle());
-        json.put("genre", this.getGenre());
-        return json;
+    public String toJson() {
+        JsonObject json = new JsonObject();
+        json.addProperty("owner_id", this.getOwnerId());
+        json.addProperty("format", this.getFormat());
+        json.addProperty("artist", this.getArtist());
+        json.addProperty("title", this.getTitle());
+        json.addProperty("genre", this.getGenre());
+        return json.toString();
     }
 }

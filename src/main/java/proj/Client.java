@@ -7,6 +7,7 @@ import proj.server_client.data_objects.SecurityException;
 
 import java.io.*;
 import java.security.*;
+import java.util.Base64;
 import java.util.Scanner;
 
 import javax.net.SocketFactory;
@@ -14,6 +15,7 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import static proj.CL.*;
+import javazoom.jl.player.Player;
 
 
 public class Client {
@@ -45,11 +47,11 @@ public class Client {
                         byte[] nonce = new byte[16];
                         random.nextBytes(nonce);
                         int id = 1;
-                        Key key = CL.readAESKey("Keys/KeyServClient.key");
-                        Key key_f = CL.readAESKey("Keys/KeyFamily.key");
+                        Key key = CL.readAESKey("Keys/Key_ServClient_Alice.key");
+                        Key key_f = CL.readAESKey("Keys/Key_Family_Lu.key");
 
                         //First Message
-                        message = "This Song";
+                        message = "Breathe";
                         JsonObject r = CL.protect(message, nonce, id, key);
                         byte[] messageBytes = r.toString().getBytes();
                         os = new BufferedOutputStream(socket.getOutputStream());
@@ -60,6 +62,7 @@ public class Client {
                         is = new BufferedInputStream(socket.getInputStream());
                         data = new byte[2048];
                         len = is.read(data);
+                        JsonObject mediaInfo= null;
                         if (len != -1) {
                             String firstMessage = new String(data, 0, len);
                             JsonObject receivedJson1 = JsonParser.parseString(firstMessage).getAsJsonObject();
@@ -78,12 +81,29 @@ public class Client {
                                 if(m.equalsIgnoreCase("Error")){
                                     System.out.println("Error! Restarting conversation");
                                     //Restart Conversation
-                                }else{ System.out.printf("Client received %d bytes: %s%n", len, m);}
+                                }else {
+                                    mediaInfo = decryptedJson1.get("M").getAsJsonObject();
+                                    System.out.printf("Client received %d bytes: %s%n", len);
+                                    System.out.println("owner_id :" + mediaInfo.get("owner_id").getAsInt());
+                                    System.out.println("format :" + mediaInfo.get("format").getAsString());
+                                    System.out.println("artist :" + mediaInfo.get("artist").getAsString());
+                                    System.out.println("title :" + mediaInfo.get("title").getAsString());
+                                    System.out.println("genre :" + mediaInfo.get("genre").getAsString());
+
+
+                                }
                                 // Continue to send the second message
                             }
                         }
                         // Second message
-                        message = "These Bytes";
+                        do {
+                            System.out.println("From which percentage do you want the music (format 0-100)?");
+                            message = scanner.nextLine();
+                        } while (Integer.parseInt(message) > 0 || Integer.parseInt(message) < 100);
+                        double PercentageBytes = Integer.parseInt(message) / 100;
+                        message = String.valueOf(PercentageBytes);
+
+
                         nonce = incrementByteNonce(nonce);
                         r = CL.protect("CBC",message, nonce, key);
                         messageBytes = r.toString().getBytes();
@@ -126,7 +146,23 @@ public class Client {
                             if(m.equalsIgnoreCase("Error")){
                             System.out.println("Error! Restarting conversation");
                             //Restart Conversation
-                            }else {System.out.printf("Client received %d bytes: %s%n", counter, m);}
+                            }else {
+                                JsonObject mediaContent = decryptedJson3.get("M").getAsJsonObject();
+                                System.out.printf("Client received %d bytes: %s%n", counter, m);
+                                System.out.println("title_content :" + mediaContent.get("title_content").getAsInt());
+                                System.out.println("lyrics :" + mediaInfo.get("lyrics").getAsString());
+                                byte[] musicBytes = Base64.getDecoder().decode(mediaContent.get("media_content").getAsString());
+                                try {
+                                    InputStream in = new ByteArrayInputStream(musicBytes);
+                                    BufferedInputStream bis = new BufferedInputStream(in);
+                                    Player player = new Player(bis);
+                                    player.play();
+                                }
+                                catch (Exception e) {
+                                    System.out.println("Problem playing the MP3 file");
+                                    e.printStackTrace();
+                                }
+                            }
                         }
                     } catch (IOException e) {
                         throw new RuntimeException(e);
