@@ -34,7 +34,7 @@ public class Server {
             InputStream is = null;
             OutputStream os = null;
             int id = 0;
-            byte[] nonce = new byte[];
+            byte[] nonce = new byte[16];
             try (Socket socket = listener.accept()) {
 
                 while (!message.equals("Exit")) {
@@ -167,7 +167,7 @@ public class Server {
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
         System.setProperty("javax.net.ssl.trustStore", "proj/https_cert/databasetruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
-        int port = 5000;
+        int port = 8000;
         startServer(port);
     }
 }
