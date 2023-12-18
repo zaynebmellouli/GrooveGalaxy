@@ -2,6 +2,8 @@ package proj;
 
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import com.google.gson.JsonSyntaxException;
+import proj.server_client.data_objects.SecurityException;
 
 import java.io.*;
 import java.security.*;
@@ -62,36 +64,28 @@ public class Client {
                             String firstMessage = new String(data, 0, len);
                             JsonObject receivedJson1 = JsonParser.parseString(firstMessage).getAsJsonObject();
                             JsonObject decryptedJson1 = unprotect("CBC", receivedJson1, key, nonce);
-                            if(check(decryptedJson1.get("M").getAsString(), nonce,key,receivedJson1.get("MAC").getAsString())){
-                                // Check if the message is an error message
-                                String m = decryptedJson1.get("M").getAsString();
-                                if (m.equalsIgnoreCase("error")) {
-                                    System.out.println("Error message received. Aborting communication.");
-                                    // Close the connection
-                                    socket.close();
-                                    return;
-                                } else {
-                                    System.out.printf("Client received %d bytes: %s%n", len, m);
-                                    // Continue to send the second message
-                                }
-                            }else {
-                                System.out.println("Integrity check failed. Sending error message to server.");
-                                // Send error message to server
-                                String errorMessage = "Error";
+                            if(!check(decryptedJson1.get("M").getAsString(), nonce,key,receivedJson1.get("MAC").getAsString())){
+                                System.out.println("Error! Restarting conversation");
+                                message = "Error";
                                 nonce = incrementByteNonce(nonce);
-                                r = CL.protect("CBC", errorMessage, nonce, key);
+                                r = CL.protect("CBC",message, nonce, key);
                                 messageBytes = r.toString().getBytes();
                                 os.write(messageBytes);
                                 os.flush();
-                                // Close the connection
-                                socket.close();
-                                return;
+                            }else {
+                                // Check if the message is an error message
+                                String m = decryptedJson1.get("M").getAsString();
+                                if(m.equalsIgnoreCase("Error")){
+                                    System.out.println("Error! Restarting conversation");
+                                    //Restart Conversation
+                                }else{ System.out.printf("Client received %d bytes: %s%n", len, m);}
+                                // Continue to send the second message
                             }
                         }
                         // Second message
                         message = "These Bytes";
                         nonce = incrementByteNonce(nonce);
-                        r = CL.protect(message, nonce, key, key_f);
+                        r = CL.protect("CBC",message, nonce, key);
                         messageBytes = r.toString().getBytes();
                         os.write(messageBytes);
                         os.flush();
@@ -114,22 +108,36 @@ public class Client {
                         }
 
                         // Convert the total response into a string
-                        String totalResponse = new String(buffer.toByteArray());
+                        String totalResponse = buffer.toString();
                         JsonObject receivedJson3 = JsonParser.parseString(totalResponse).getAsJsonObject();
                         nonce = incrementByteNonce(nonce);
                         JsonObject decryptedJson3 = unprotect("CTR", receivedJson3, key, nonce);
-                        if(check(decryptedJson3.get("M").getAsString(), nonce,key,receivedJson3.get("MAC").getAsString())){
+                        if(!check(decryptedJson3.get("M").getAsString(), nonce,key,receivedJson3.get("MAC").getAsString())){
+                            System.out.println("Error! Restarting conversation");
+                            message = "Error";
+                            nonce = incrementByteNonce(nonce);
+                            r = CL.protect("CBC",message, nonce, key);
+                            messageBytes = r.toString().getBytes();
+                            os.write(messageBytes);
+                            os.flush();
+                        }else   {
                             // Check if the message is an error message
                             String m = decryptedJson3.get("M").getAsString();
-                            System.out.printf("Client received %d bytes: %s%n", counter, m);}
-
-                    } catch (IOException i) {
-                        System.out.println(i);
-                        return;
+                            if(m.equalsIgnoreCase("Error")){
+                            System.out.println("Error! Restarting conversation");
+                            //Restart Conversation
+                            }else {System.out.printf("Client received %d bytes: %s%n", counter, m);}
+                        }
+                    } catch (IOException e) {
+                        throw new RuntimeException(e);
                     } catch (GeneralSecurityException e) {
                         throw new RuntimeException(e);
+                    } catch (JsonSyntaxException e) {
+                        throw new RuntimeException(e);
                     }
-                }
+
+            }
+
             try {
                     //scanner.close();
                     is.close();
@@ -137,15 +145,14 @@ public class Client {
                     socket.close();
                 } catch (IOException i) {
                     System.out.println(i);
-                    return;
-                }
+            }
             }
 
         }
 
 
 
-    public static void main(String args[]) throws IOException {
+    public static void main(String[] args) throws IOException {
         System.setProperty("javax.net.ssl.keyStore", "https_cert/user.p12");
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
         System.setProperty("javax.net.ssl.trustStore", "https_cert/usertruststore.jks");

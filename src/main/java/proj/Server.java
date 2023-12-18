@@ -42,15 +42,12 @@ public class Server {
             byte[] nonce = new byte[16];
 
             try (Socket socket = listener.accept()) {
-
-
                 while (!message.equals("Exit")) {
                     try {
                         is = new BufferedInputStream(socket.getInputStream());
                         byte[] data = new byte[2048];
                         int len = is.read(data);
                         if (len == -1) {return;}
-
                         message = new String(data, 0, len);
                         os = new BufferedOutputStream(socket.getOutputStream());
                         System.out.printf("server received %d bytes: %s%n", len, message);
@@ -72,9 +69,17 @@ public class Server {
                         //decrypt the message
                         JsonObject decryptedJson1 = CL.unprotect(receivedJson1, keyServClient);
                         String song = decryptedJson1.get("M").getAsString();
-                        if(check(song,id,nonce, keyServClient,receivedJson1.get("MAC").getAsString())){
+                        if(!check(song,id,nonce, keyServClient,receivedJson1.get("MAC").getAsString())){
+                            System.out.println("Error! Restarting conversation");
+                            message = "Error";
+                            nonce = incrementByteNonce(nonce);
+                            JsonObject r = CL.protect("CBC", message, nonce, keyServClient);
+                            byte[] messageBytes = r.toString().getBytes();
+                            os.write(messageBytes);
+                            os.flush();
+                            }else {
                                 // Check if the message is an error message
-                                if (song.equalsIgnoreCase("error")) {
+                                if (song.equalsIgnoreCase("Error")) {
                                     System.out.println("Error message received. Aborting communication.");
                                     // Close the connection
                                     socket.close();
@@ -83,19 +88,6 @@ public class Server {
                                     System.out.printf("Server received %d bytes: %s%n", len, song);
                                     // Continue to send the second message
                                 }
-                            }else {
-                                System.out.println("Integrity check failed. Sending error message to client.");
-                                // Send error message to server
-                                String errorMessage = "Error";
-                                nonce = incrementByteNonce(nonce);
-                            JsonObject r = CL.protect("CBC",errorMessage, nonce, keyServClient);
-                            //HELP - the client is expecting a concatinated message with the family fey
-                            byte[] messageBytes = r.toString().getBytes();
-                                os.write(messageBytes);
-                                os.flush();
-                                // Close the connection
-                                socket.close();
-                                return;
                             }
 
 
@@ -120,7 +112,21 @@ public class Server {
                         //decrypt the message
                         JsonObject decryptedJson2 = CL.unprotect("CBC", receivedJson2, keyServClient, nonce);
                         String byteReq = decryptedJson2.get("M").getAsString();
-                        if(check(byteReq,nonce, keyServClient,receivedJson2.get("MAC").getAsString())){
+                        if(!check(byteReq,nonce, keyServClient,receivedJson2.get("MAC").getAsString())){
+                            System.out.println("Integrity check failed. Sending error message to client.");
+                            // Send error message to server
+                            String errorMessage = "Error";
+                            nonce = incrementByteNonce(nonce);
+                            r = CL.protect("CTR",errorMessage, nonce, keyServClient);
+                            //HELP - the client is expecting a concatinated message with the family fey
+                            messageBytes = r.toString().getBytes();
+                            os.write(messageBytes);
+                            os.flush();
+                            // Close the connection
+                            socket.close();
+                            return;
+
+                        }else {
                             // Check if the message is an error message
                             if (byteReq.equalsIgnoreCase("error")) {
                                 System.out.println("Error message received. Aborting communication.");
@@ -131,19 +137,6 @@ public class Server {
                                 System.out.printf("Server received %d bytes: %s%n", len, byteReq);
                                 // Continue to send the second message
                             }
-                        }else {
-                            System.out.println("Integrity check failed. Sending error message to client.");
-                            // Send error message to server
-                            String errorMessage = "Error";
-                            nonce = incrementByteNonce(nonce);
-                            r = CL.protect("CBC",errorMessage, nonce, keyServClient);
-                            //HELP - the client is expecting a concatinated message with the family fey
-                            messageBytes = r.toString().getBytes();
-                            os.write(messageBytes);
-                            os.flush();
-                            // Close the connection
-                            socket.close();
-                            return;
                         }
 
                         //Respond to second message
