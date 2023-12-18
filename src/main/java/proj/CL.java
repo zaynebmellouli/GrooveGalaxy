@@ -312,5 +312,14 @@ public class CL {
         return adjustedNonce;
     }
 
+    // Method to increment a byte array nonce
+    public static byte[] incrementByteNonce(byte[] n) {
+        byte[] nonce = n;
+        for (int i = nonce.length - 1; i >= 0; i--) {
+            if (++nonce[i] != 0) break; // Overflow check
+        }
+        return nonce;
+    }
+
 }
 
