@@ -33,8 +33,8 @@ public class Queries {
 
     public static final String GET_MEDIA_CONTENT_BY_ID_QUERY = "SELECT * FROM media_content WHERE media_id=?";
 
-    public static final String ADD_MEDIA_CONTENT_QUERY = "INSERT INTO media_content(media_id, lyrics, audio_base64) "
+    public static final String ADD_MEDIA_CONTENT_QUERY = "INSERT INTO media_content(media_id, file_path, lyrics) "
             + "VALUES (?,?,?)";
 
-    public static final String REMOVE_MEDIA_CONTENT_QUERY = "DELETE FROM media_content WHERE media_id=?";
+    public static final String COUNT_MEDIA_BY_ID = "SELECT COUNT(*) AS count FROM media WHERE owner_id = ? AND media_id = ?";
 }

@@ -1,6 +1,8 @@
 package proj.database;
 
 
+import org.json.JSONObject;
+import proj.server_client.data_objects.MediaInfo;
 import proj.server_client.data_objects.User;
 import proj.server_client.data_objects.Media;
 import proj.server_client.data_objects.MediaContent;
@@ -123,7 +125,8 @@ public class DatabaseUtils {
         MediaContent mediaContent = new MediaContent();
         mediaContent.setMediaId(resultSet.getInt("media_id"));
         mediaContent.setLyrics(resultSet.getString("lyrics"));
-        mediaContent.setAudioBase64(resultSet.getString("audio_base64"));
+        mediaContent.setFilePath(resultSet.getString("file_path"));
+        //mediaContent.setAudiobase64(resultSet.getString("audio_base64"));
         return mediaContent;
     }
 
@@ -176,9 +179,33 @@ public class DatabaseUtils {
         try (PreparedStatement statement = conn.prepareStatement(Queries.ADD_MEDIA_CONTENT_QUERY)) {
             statement.setInt(1, mediaContent.getMediaId());
             statement.setString(2, mediaContent.getLyrics());
-            statement.setString(3, mediaContent.getAudioBase64());
+            statement.setString(3, mediaContent.getFilePath());
+            //statement.setString(4, mediaContent.getAudiobase64());
 
             statement.executeUpdate();
         }
     }
+
+    public static JSONObject getSongInfoAsJsonById(Connection conn, int mediaId) throws SQLException {
+        Media media = getMediaById(conn, mediaId);
+        MediaContent mediaContent = getMediaContentById(conn, mediaId);
+
+        return MediaInfo.toJson(media, mediaContent);
+    }
+
+    public static boolean checkUserMediaOwnership(Connection conn, int userId, int mediaId) throws SQLException {
+        try (PreparedStatement statement = conn.prepareStatement(Queries.COUNT_MEDIA_BY_ID)) {
+            statement.setInt(1, userId);
+            statement.setInt(2, mediaId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    int count = resultSet.getInt("count");
+                    return count > 0;
+                }
+            }
+        }
+        return false;
+    }
+
 }
