@@ -146,13 +146,20 @@ public class Server {
                             return;
                         }
 
-                        System.out.println("finish");
+                        //Respond to second message
+                        String rSong = "The entire song starting at byte X";
+                        nonce = incrementByteNonce(nonce);
+                        JsonObject encryptedResponse = CL.protect("CTR", rSong, nonce, keyServClient);
+                        byte[] encryptedBytes = encryptedResponse.toString().getBytes();
+                        int offset = 0;
+                        while (offset < encryptedBytes.length) {
+                            int chunkSize = Math.min(16, encryptedBytes.length - offset);
+                            os.write(encryptedBytes, offset, chunkSize);
+                            os.flush();
+                            offset += chunkSize;
+                        }
 
-                        os = new BufferedOutputStream(socket.getOutputStream());
-                        System.out.printf("server received %d bytes: %s%n", len, message);
-                        response = message + " processed by server";
-                        os.write(response.getBytes(), 0, response.getBytes().length);
-                        os.flush();
+
                     } catch (IOException i) {
                         System.out.println(i);
                         return;
@@ -183,7 +190,7 @@ public class Server {
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
         System.setProperty("javax.net.ssl.trustStore", "https_cert/servertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
-        int port = 5000;
+        int port = 8000;
         startServer(port);
     }
 }

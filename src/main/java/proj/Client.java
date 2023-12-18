@@ -3,14 +3,8 @@ package proj;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
-import java.io.BufferedInputStream;
-import java.io.BufferedOutputStream;
-import java.io.IOException;
-import java.io.InputStream;
-import java.io.OutputStream;
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.security.SecureRandom;
+import java.io.*;
+import java.security.*;
 import java.util.Scanner;
 
 import javax.net.SocketFactory;
@@ -102,39 +96,32 @@ public class Client {
                         os.write(messageBytes);
                         os.flush();
 
-                        System.out.println("finished");
                         //Listen for Response
-                        len = is.read(data);
-                        if (len != -1) {
-                            String secondMessage = new String(data, 0, len);
-                            JsonObject receivedJson2 = JsonParser.parseString(secondMessage).getAsJsonObject();
-                            JsonObject decryptedJson2 = unprotect("CTR", receivedJson2, key, nonce);
-                            if(check(decryptedJson2.get("M").getAsString(), nonce,key,receivedJson2.get("MAC").getAsString())){
-                                // Check if the message is an error message
-                                String m = decryptedJson2.get("M").getAsString();
-                                if (m.equalsIgnoreCase("error")) {
-                                    System.out.println("Error message received. Aborting communication.");
-                                    // Close the connection
-                                    socket.close();
-                                    return;
-                                } else {
-                                    System.out.printf("Client received %d bytes: %s%n", len, message);
-                                }
-                            }else {
-                                System.out.println("Integrity check failed. Sending error message to server.");
-                                // Send error message to server
-                                String errorMessage = "Error";
-                                nonce = incrementByteNonce(nonce);
-                                r = CL.protect(message, nonce, key, key_f);
-                                messageBytes = r.toString().getBytes();
-                                os.write(messageBytes);
-                                os.flush();
-                                // Close the connection
-                                socket.close();
-                                return;
+                        // Buffer to store the total response
+                        ByteArrayOutputStream buffer = new ByteArrayOutputStream();
+                        byte[] packet = new byte[16]; // Buffer for individual packets
+                        int bytesRead;
+
+                        int counter=0;
+                        while ((bytesRead = is.read(packet)) != -1) {
+                            buffer.write(packet, 0, bytesRead);
+                            counter += bytesRead;
+                            if (bytesRead < 16) {
+                                // Break the loop if we receive a packet that's less than 16 bytes
+                                // It indicates the end of the data stream
+                                break;
                             }
                         }
 
+                        // Convert the total response into a string
+                        String totalResponse = new String(buffer.toByteArray());
+                        JsonObject receivedJson3 = JsonParser.parseString(totalResponse).getAsJsonObject();
+                        nonce = incrementByteNonce(nonce);
+                        JsonObject decryptedJson3 = unprotect("CTR", receivedJson3, key, nonce);
+                        if(check(decryptedJson3.get("M").getAsString(), nonce,key,receivedJson3.get("MAC").getAsString())){
+                            // Check if the message is an error message
+                            String m = decryptedJson3.get("M").getAsString();
+                            System.out.printf("Client received %d bytes: %s%n", counter, m);}
 
                     } catch (IOException i) {
                         System.out.println(i);
@@ -164,9 +151,9 @@ public class Client {
         System.setProperty("javax.net.ssl.trustStore", "https_cert/usertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
         String host =
-//                "localhost";
-                "192.168.0.100";
-        int port = 5000;
+               "localhost";
+                //"192.168.0.100";
+        int port = 8000;
         startClient(host, port);
     }
 }
