@@ -163,9 +163,9 @@ public class Server {
     }
 
     public static void main(String args[]) throws IOException {
-        System.setProperty("javax.net.ssl.keyStore", "proj/https_cert/database.p12");
+        System.setProperty("javax.net.ssl.keyStore", "proj/https_cert/server.p12");
         System.setProperty("javax.net.ssl.keyStorePassword", "changeme");
-        System.setProperty("javax.net.ssl.trustStore", "proj/https_cert/databasetruststore.jks");
+        System.setProperty("javax.net.ssl.trustStore", "proj/https_cert/servertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
         int port = 8000;
         startServer(port);
