@@ -48,7 +48,7 @@ This document presents installation and demonstration instructions.
 To see the project in action, it is necessary to setup a virtual environment, with 2 networks and 4 machines.  
 
 The following diagram shows the networks and machines:
-![](img/VMS and Networks.jpg)
+![](img/VMsNetworks.jpg)
 
 ### Prerequisites
 
