@@ -20,6 +20,12 @@
 
 *(add face photos with 150px height; faces should have similar size and framing)*
 
+## Introduction
+
+GrooveGalaxy is an online music store that sells songs in a custom format.
+GrooveGalaxy allows users to search and browse through a wide range of songs, artists, and genres. The ability to preview songs is particularly helpful, ensuring that consumers only purchase music that resonates with them. Once they decide to buy, the process is seamless, offering choices in file formats like WAV or FLAC, suitable for various devices.
+GrooveGalaxy offers a personal account feature, enabling users to manage their purchases and preferences. It even tailors music recommendations based on listening history. This store effectively caters to the needs of music lovers, combining convenience, variety, and personalization.
+
 ## Contents
 
 This repository contains documentation and source code for the *Network and Computer Security (SIRS)* project.
@@ -31,13 +37,18 @@ This document presents installation and demonstration instructions.
 
 *(adapt all of the following to your project, changing to the specific Linux distributions, programming languages, libraries, etc)*
 
+## Requirements 
+* Apache-maven 3.9.5: build automation tool for Java projects
+* Java Development Kit 17 (JDK 17)
+* PostgreSQL version 16
+* JUnit: unit testing framework for Java programming language
+
 ## Installation
 
-To see the project in action, it is necessary to setup a virtual environment, with N networks and M machines.  
+To see the project in action, it is necessary to setup a virtual environment, with 2 networks and 4 machines.  
 
 The following diagram shows the networks and machines:
-
-*(include a text-based or an image-based diagram)*
+![](img/VMS and Networks.jpg)
 
 ### Prerequisites
 
