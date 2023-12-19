@@ -47,8 +47,22 @@ This document presents installation and demonstration instructions.
 
 To see the project in action, it is necessary to setup a virtual environment, with 2 networks and 4 machines.  
 
-The following diagram shows the networks and machines:
+All machines will be running on Linux and configured according to the following figure and table:
 ![](img/VMsNetworks.jpg)
+
+## Getting started 
+
+##JDK 17
+Run this commands to install the JDK17
+```sh
+$ sudo apt install openjdk-17-jdk
+```
+Set JAVA_HOME at ~/.bashrc:
+```sh
+export JAVA_HOME=/lib/jvm/java-17-openjdk-amd64
+export PATH=$JAVA_HOME/bin:$PATH
+```
+
 
 ### Prerequisites
 
