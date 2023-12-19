@@ -64,10 +64,10 @@ public class DatabaseUtils {
     /**
      * Get media from the database based on a specific query
      */
-    private static List<Media> getMedia(Connection conn, String query, int parameter) throws SQLException {
+    private static List<Media> getMedia(Connection conn, String query, String parameter) throws SQLException {
         List<Media> mediaList = new ArrayList<>();
         try (PreparedStatement statement = conn.prepareStatement(query)) {
-                statement.setInt(1, parameter);
+                statement.setString(1, parameter);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -84,11 +84,10 @@ public class DatabaseUtils {
      */
     private static Media extractMediaFromResultSet(ResultSet resultSet) throws SQLException {
         Media media = new Media();
-        media.setMediaId(resultSet.getInt("media_id"));
+        media.setTitle(resultSet.getString("title"));
         media.setOwnerId(resultSet.getInt("owner_id"));
         media.setFormat(resultSet.getString("format"));
         media.setArtist(resultSet.getString("artist"));
-        media.setTitle(resultSet.getString("title"));
         media.setGenre(resultSet.getString("genre"));
         return media;
     }
@@ -96,17 +95,17 @@ public class DatabaseUtils {
     /**
      * Get media by ID from the database
      */
-    public static Media getMediaById(Connection conn, int mediaId) throws SQLException {
-        List<Media> mediaList = getMedia(conn, Queries.GET_MEDIA_BY_ID_QUERY, mediaId);
+    public static Media getMediaByTitle(Connection conn, String title) throws SQLException {
+        List<Media> mediaList = getMedia(conn, Queries.GET_MEDIA_BY_TITLE_QUERY, title);
         return mediaList.isEmpty() ? null : mediaList.get(0);
     }
     /**
      * Get media content from the database based on a specific query
      */
-    private static List<MediaContent> getMediaContent(Connection conn, String query, int parameter) throws SQLException {
+    private static List<MediaContent> getMediaContent(Connection conn, String query, String parameter) throws SQLException {
         List<MediaContent> mediaContentList = new ArrayList<>();
         try (PreparedStatement statement = conn.prepareStatement(query)) {
-            statement.setInt(1, parameter);
+            statement.setString(1, parameter);
 
             try (ResultSet resultSet = statement.executeQuery()) {
                 while (resultSet.next()) {
@@ -123,7 +122,7 @@ public class DatabaseUtils {
      */
     private static MediaContent extractMediaContentFromResultSet(ResultSet resultSet) throws SQLException {
         MediaContent mediaContent = new MediaContent();
-        mediaContent.setMediaId(resultSet.getInt("media_id"));
+        mediaContent.setTitleContent(resultSet.getString("title_content"));
         mediaContent.setLyrics(resultSet.getString("lyrics"));
         mediaContent.setFilePath(resultSet.getString("file_path"));
         //mediaContent.setAudiobase64(resultSet.getString("audio_base64"));
@@ -133,8 +132,8 @@ public class DatabaseUtils {
     /**
      * Get media content by ID from the database
      */
-    public static MediaContent getMediaContentById(Connection conn, int mediaId) throws SQLException {
-        List<MediaContent> mediaContentList = getMediaContent(conn, Queries.GET_MEDIA_CONTENT_BY_ID_QUERY, mediaId);
+    public static MediaContent getMediaContentById(Connection conn, String title) throws SQLException {
+        List<MediaContent> mediaContentList = getMediaContent(conn, Queries.GET_MEDIA_CONTENT_BY_TITLE_QUERY, title);
         return mediaContentList.isEmpty() ? null : mediaContentList.get(0);
     }
 
@@ -157,14 +156,11 @@ public class DatabaseUtils {
 
     public static void addMedia(Connection conn, Media media) throws SQLException {
         try (PreparedStatement statement = conn.prepareStatement(Queries.ADD_MEDIA_QUERY, PreparedStatement.RETURN_GENERATED_KEYS)) {
-            // Instead of relying on SERIAL, provide a value for media_id explicitly
-            statement.setInt(1, media.getMediaId());
-
+            statement.setString(1, media.getTitle());
             statement.setInt(2, media.getOwnerId());
             statement.setString(3, media.getFormat());
             statement.setString(4, media.getArtist());
-            statement.setString(5, media.getTitle());
-            statement.setString(6, media.getGenre());
+            statement.setString(5, media.getGenre());
 
             int affectedRows = statement.executeUpdate();
 
@@ -176,7 +172,7 @@ public class DatabaseUtils {
 
     public static void addMediaContent(Connection conn, MediaContent mediaContent) throws SQLException {
         try (PreparedStatement statement = conn.prepareStatement(Queries.ADD_MEDIA_CONTENT_QUERY)) {
-            statement.setInt(1, mediaContent.getMediaId());
+            statement.setString(1, mediaContent.getTitleContent());
             statement.setString(2, mediaContent.getLyrics());
             statement.setString(3, mediaContent.getFilePath());
             //statement.setString(4, mediaContent.getAudiobase64());
@@ -192,7 +188,7 @@ public class DatabaseUtils {
         return MediaInfo.toJson(media, mediaContent);
     }
 
-    public static boolean checkUserMediaOwnership(Connection conn, int userId, int mediaId) throws SQLException {
+    public static boolean checkUserMediaOwnership(Connection conn, int userId, String title) throws SQLException {
         try (PreparedStatement statement = conn.prepareStatement(Queries.COUNT_MEDIA_BY_ID)) {
             statement.setInt(1, userId);
             statement.setString(2, title);
@@ -205,6 +201,46 @@ public class DatabaseUtils {
             }
         }
         return false;
+    }
+
+    public static String getUserKeyById(Connection conn, int userId) throws SQLException {
+        try (PreparedStatement statement = conn.prepareStatement(Queries.GET_USER_KEY_BY_ID_QUERY)) {
+            statement.setInt(1, userId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("shared_symmetric_key");
+                }
+            }
+        }
+        return null;
+    }
+
+    public static String getFamilyKeyById(Connection conn, int userId) throws SQLException {
+        try (PreparedStatement statement = conn.prepareStatement(Queries.GET_FAMILY_KEY_BY_ID_QUERY)) {
+            statement.setInt(1, userId);
+
+            try (ResultSet resultSet = statement.executeQuery()) {
+                if (resultSet.next()) {
+                    return resultSet.getString("family_symmetric_key");
+                }
+            }
+        }
+        return null;
+    }
+
+    public static JsonObject getSongInfo(Connection conn, String title, int userId) throws SQLException, UserAccessException {
+        // Check if the user has ownership of the requested media
+        boolean userHasAccess = DatabaseUtils.checkUserMediaOwnership(conn, userId, title);
+
+        if (userHasAccess) {
+            // Get song information in JSON format
+            JsonObject songInfoJson = DatabaseUtils.getSongInfoAsJsonById(conn, title);
+            return songInfoJson;
+        } else {
+            // Handle case where user doesn't have access to the requested media
+            throw new UserAccessException("User does not have access to the requested media.");
+        }
     }
 
 }

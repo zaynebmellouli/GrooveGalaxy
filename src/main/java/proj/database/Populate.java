@@ -1,26 +1,31 @@
 package proj.database;
 
+import proj.CL;
 import proj.server_client.data_objects.User;
 import proj.server_client.data_objects.Media;
 import proj.server_client.data_objects.MediaContent;
 
+import java.io.IOException;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.util.Base64;
 
 public class Populate {
 
     private Populate() {}
 
-    public static void populate() throws DataBaseConnectionException, SQLException {
+    public static void populate() throws DataBaseConnectionException, SQLException, IOException {
         Connection connection = (new DataBaseConnector()).getConnection();
 
-        User user1 = new User(1,"Alice","Bob123","14634823", "462483");
-        User user2 = new User(2,"Bob","Alice123","348823", "384628176");
-        //Media media = new Media(1,2, "WAV1", "Harry Styles", "WaterMelon", "POP");
-        Media media1 = new Media(35,1, "WAV", "Alison Chains", "Man in the Bin", "Grunge");
-        Media media2 = new Media(45,2, "FLAC", "Pink Floyd", "Breathe", "Alternative Rock");
 
-        MediaContent mediaContent1 = new MediaContent(35,
+        User user1 = new User(1, "Alice", "abcde", Base64.getEncoder().encodeToString(CL.readAESKey("Keys/Key_ServClient_Alice.key").getEncoded())
+                , Base64.getEncoder().encodeToString((CL.readAESKey("Keys/Key_Family_Lu.key")).getEncoded()));
+        User user2 = new User(2, "Bob", "7894", Base64.getEncoder().encodeToString(CL.readAESKey("Keys/Key_ServClient_Bob.key").getEncoded())
+                , Base64.getEncoder().encodeToString((CL.readAESKey("Keys/Key_Family_Musterman.key")).getEncoded()));
+        Media media1 = new Media(1, "WAV", "Alison Chains","Man in the Box",  "Grunge");
+        Media media2 = new Media(2, "FLAC", "Pink Floyd", "Breathe", "Alternative Rock");
+
+        MediaContent mediaContent1 = new MediaContent("Man in the Box",
                 "Trapped in a world," +
                         " a box of my own Container whispers, " +
                         "in this space alone Echoes of silence, " +
@@ -28,7 +33,7 @@ public class Populate {
                         "Chained by thoughts, in a silent uproar, " +
                         "Searching for keys, to unlock the door",
                 "C:\\Users\\zayne\\a51-cherilyn-zeineb-rassene\\src\\main\\resources\\songs\\Man in the box.mp3");
-        MediaContent mediaContent2 = new MediaContent(45,
+        MediaContent mediaContent2 = new MediaContent("Breathe",
                 "Breathe, breathe in the air\n" +
                         "Don't be afraid to care\n" +
                         "Leave, but don't leave me\n" +

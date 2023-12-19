@@ -5,7 +5,7 @@ import java.util.Base64;
 
 public class MediaContent implements Serializable {
 
-    private int mediaId;
+    private String titleContent;
     private String lyrics;
     private String filePath;
     private String audiobase64;
@@ -15,16 +15,16 @@ public class MediaContent implements Serializable {
     public MediaContent() {
     }
 
-    public MediaContent(int mediaId, String lyrics, String filePath) {
-        this.mediaId = mediaId;
+    public MediaContent(String titleContent, String lyrics, String filePath) {
+        this.titleContent = titleContent;
         this.lyrics = lyrics;
         this.filePath = filePath;
     }
 
     // Getters
 
-    public int getMediaId() {
-        return mediaId;
+    public String getTitleContent() {
+        return titleContent;
     }
 
     public String getLyrics() {
@@ -40,8 +40,8 @@ public class MediaContent implements Serializable {
         this.filePath = filePath;
     }
 
-    public void setMediaId(int mediaId) {
-        this.mediaId = mediaId;
+    public void setTitleContent(String titleContent) {
+        this.titleContent = titleContent;
     }
 
     public void setLyrics(String lyrics) {

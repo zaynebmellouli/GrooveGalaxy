@@ -39,6 +39,7 @@ public class Server {
     public static void startServer(int port) throws IOException {
         ServerSocketFactory factory    = SSLServerSocketFactory.getDefault();
         try (SSLServerSocket listener = (SSLServerSocket) factory.createServerSocket(port)) {
+
             listener.setNeedClientAuth(true);
             listener.setEnabledCipherSuites(new String[] { "TLS_AES_128_GCM_SHA256" });
             listener.setEnabledProtocols(new String[] { "TLSv1.3" });
@@ -59,17 +60,31 @@ public class Server {
                         is = new BufferedInputStream(socket.getInputStream());
                         byte[] data = new byte[2048];
                         int len = is.read(data);
-                        if (len == -1) {return;}
+                        if (len == -1) {
+                            System.out.println("Error! Restarting conversation");
+                            message = "Error";
+                            nonce = incrementByteNonce(nonce);
+                            JsonObject r = CL.protect(message, nonce, keyServClient, keyFamily);
+                            byte[] messageBytes = r.toString().getBytes();
+                            os.write(messageBytes);
+                            os.flush();
+                            throw new SecurityException("...");}
                         message = new String(data, 0, len);
                         os = new BufferedOutputStream(socket.getOutputStream());
                         System.out.printf("server received %d bytes: %s%n", len, message);
-                        String response = message + " processed by server";
-                        os.write(response.getBytes(), 0, response.getBytes().length);
-                        os.flush();
+
 
                         //first message
                         len = is.read(data);
-                        if (len == -1) {return;}
+                        if (len == -1) {
+                            System.out.println("Error! Restarting conversation");
+                            message = "Error";
+                            nonce = incrementByteNonce(nonce);
+                            JsonObject r = CL.protect(message, nonce, keyServClient, keyFamily);
+                            byte[] messageBytes = r.toString().getBytes();
+                            os.write(messageBytes);
+                            os.flush();
+                            throw new SecurityException("...");}
                         message = new String(data, 0, len);
                         JsonObject receivedJson1 = JsonParser.parseString(message).getAsJsonObject();
                         //get the key of the client from the id form the json
@@ -83,17 +98,16 @@ public class Server {
                             System.out.println("Error! Restarting conversation");
                             message = "Error";
                             nonce = incrementByteNonce(nonce);
-                            JsonObject r = CL.protect("CBC", message, nonce, keyServClient);
+                            JsonObject r = CL.protect(message, nonce, keyServClient, keyFamily);
                             byte[] messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
+                            throw new SecurityException("...");
                             }else {
                                 // Check if the message is an error message
                                 if (song.equalsIgnoreCase("Error")) {
                                     System.out.println("Error message received. Aborting communication.");
-                                    // Close the connection
-                                    socket.close();
-                                    return;
+                                    throw new SecurityException("...");
                                 } else {
                                     System.out.printf("Server received %d bytes: %s%n", len, song);
                                     // Continue to send the second message
@@ -126,9 +140,17 @@ public class Server {
                         os.write(messageBytes);
                         os.flush();
 
-                        //Listen for Response
+                        //Listen for Response - Percentage
                         len = is.read(data);
-                        if (len == -1) {return;}
+                        if (len == -1) {
+                            System.out.println("Error! Restarting conversation");
+                            message = "Error";
+                            nonce = incrementByteNonce(nonce);
+                            r = CL.protect("CTR",message, nonce, keyFamily);
+                            messageBytes = r.toString().getBytes();
+                            os.write(messageBytes);
+                            os.flush();
+                            throw new SecurityException("...");}
                         message = new String(data, 0, len);
                         JsonObject receivedJson2 = JsonParser.parseString(message).getAsJsonObject();
                         nonce = incrementByteNonce(nonce);
@@ -141,42 +163,48 @@ public class Server {
                             // Send error message to server
                             String errorMessage = "Error";
                             nonce = incrementByteNonce(nonce);
-                            r = CL.protect("CTR",errorMessage, nonce, keyServClient);
+                            r = CL.protect("CTR",errorMessage, nonce, keyFamily);
                             //HELP - the client is expecting a concatinated message with the family fey
                             messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
-                            // Close the connection
-                            socket.close();
-                            return;
+                            throw new SecurityException("...");
 
                         }else {
                             // Check if the message is an error message
                             if (byteReq.equalsIgnoreCase("error")) {
                                 System.out.println("Error message received. Aborting communication.");
-                                // Close the connection
-                                socket.close();
-                                return;
+                                // Send error message to server
+                                String errorMessage = "Error";
+                                nonce = incrementByteNonce(nonce);
+                                r = CL.protect("CTR",errorMessage, nonce, keyFamily);
+                                //HELP - the client is expecting a concatinated message with the family fey
+                                messageBytes = r.toString().getBytes();
+                                os.write(messageBytes);
+                                os.flush();
+                                throw new SecurityException("...");
                             } else {
                                 byteReqInt = decryptedJson2.get("M").getAsInt();
-                                System.out.printf("Server received %d bytes: he want the music form the %d", len, byteReqInt);
+                                System.out.printf("Server received %d bytes: he want the music form the %d percentage", len, byteReqInt);
                                 // Continue to send the second message
                             }
                         }
 
                         //Respond to second message
-                        String rSong = (new JsonObject()).addProperty("media_content", media_content.get("file_Bytes"));
-
+                        String originalSong = media_content.get("file_Bytes").getAsString();
+                        String cutSong = dropFirstXPercentBits(originalSong, byteReqInt);
                         nonce = incrementByteNonce(nonce);
-                        JsonObject encryptedResponse = CL.protect("CTR", rSong, nonce, keyServClient);
+                        JsonObject encryptedResponse = CL.protect("CTR", cutSong, nonce, keyFamily);
                         byte[] encryptedBytes = encryptedResponse.toString().getBytes();
-                        int offset = 0;
-                        while (offset < encryptedBytes.length) {
-                            int chunkSize = Math.min(16, encryptedBytes.length - offset);
-                            os.write(encryptedBytes, offset, chunkSize);
-                            os.flush();
-                            offset += chunkSize;
-                        }
+                        os.write(encryptedBytes);
+                        os.flush();
+                        //int offset = 0;
+                        //while (offset < encryptedBytes.length) {
+                        //    int chunkSize = Math.min(16, encryptedBytes.length - offset);
+                        //    os.write(encryptedBytes, offset, chunkSize);
+                        //    os.flush();
+                        //    offset += chunkSize;
+                        //}
 
 
                     } catch (IOException i) {
@@ -211,6 +239,17 @@ public class Server {
                 throw new RuntimeException(e);
             }
         }
+    }
+
+    public static String dropFirstXPercentBits(String originalString, int percentToDrop) {
+        int totalChars = originalString.length();
+        int charsToDrop = (int) Math.ceil(totalChars * (percentToDrop / 100.0));
+
+        if (charsToDrop >= totalChars) {
+            return ""; // Or handle this case as you see fit
+        }
+
+        return originalString.substring(charsToDrop);
     }
 
     public static void main(String args[]) throws IOException {

@@ -5,7 +5,6 @@ import java.util.Base64;
 
 public class Media implements Serializable{
 
-    private int mediaId;
     private int ownerId;
     private String format;
     private String artist;
@@ -17,19 +16,12 @@ public class Media implements Serializable{
     public Media() {
     }
 
-    public Media(int mediaId, int ownerId, String format, String artist, String title, String genre) {
-        this.mediaId = mediaId;
+    public Media (int ownerId, String format, String artist, String title, String genre) {
         this.ownerId = ownerId;
         this.format = format;
         this.artist = artist;
         this.title = title;
         this.genre = genre;
-    }
-
-    // Getters
-
-    public int getMediaId() {
-        return mediaId;
     }
 
     public int getOwnerId() {
@@ -50,10 +42,6 @@ public class Media implements Serializable{
 
     public String getGenre() {
         return genre;
-    }
-
-    public void setMediaId(int mediaId) {
-        this.mediaId=mediaId;
     }
 
     public void setOwnerId(int ownerId) {

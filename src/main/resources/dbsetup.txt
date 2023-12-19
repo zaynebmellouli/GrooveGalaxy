@@ -15,18 +15,17 @@ CREATE TABLE users (
 
 -- Table to store media information
 CREATE TABLE media (
-    media_id INTEGER PRIMARY KEY,
+    title VARCHAR(255) PRIMARY KEY,
     owner_id INTEGER REFERENCES users(user_id) ON DELETE CASCADE,
     format VARCHAR(50) NOT NULL,
     artist VARCHAR(255) NOT NULL,
-    title VARCHAR(255) NOT NULL,
     genre VARCHAR(255) NOT NULL
 );
 
 -- Table to store media content
 CREATE TABLE media_content (
-    media_id INTEGER PRIMARY KEY,
-    FOREIGN KEY (media_id) REFERENCES media(media_id) ON DELETE CASCADE,
+    title_content VARCHAR(255) PRIMARY KEY,
     lyrics TEXT NOT NULL,
-    audio_base64 TEXT NOT NULL
+    file_path TEXT NOT NULL,
+    FOREIGN KEY (title_content) REFERENCES media(title) ON DELETE CASCADE,
 );

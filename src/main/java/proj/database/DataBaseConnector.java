@@ -27,7 +27,6 @@ public class DataBaseConnector {
         this.username = "postgres";
         this.password = "postgres";
 
-
             try {
                 this.createConnection();
             } catch (InstantiationException | IllegalAccessException | ClassNotFoundException | SQLException e) {

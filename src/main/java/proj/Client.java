@@ -3,7 +3,6 @@ package proj;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 import com.google.gson.JsonSyntaxException;
-import proj.server_client.data_objects.SecurityException;
 
 import java.io.*;
 import java.security.*;
@@ -75,11 +74,13 @@ public class Client {
                                 messageBytes = r.toString().getBytes();
                                 os.write(messageBytes);
                                 os.flush();
+                                throw new SecurityException("...");
                             }else {
                                 // Check if the message is an error message
                                 String m = decryptedJson1.get("M").getAsString();
                                 if(m.equalsIgnoreCase("Error")){
                                     System.out.println("Error! Restarting conversation");
+                                    throw new SecurityException("...");
                                     //Restart Conversation
                                 }else {
                                     mediaInfo = decryptedJson1.get("M").getAsJsonObject();
@@ -100,8 +101,9 @@ public class Client {
                             System.out.println("From which percentage do you want the music (format 0-100)?");
                             message = scanner.nextLine();
                         } while (Integer.parseInt(message) > 0 || Integer.parseInt(message) < 100);
-                        double PercentageBytes = Integer.parseInt(message) / 100;
+                        int PercentageBytes = Integer.parseInt(message);
                         message = String.valueOf(PercentageBytes);
+
 
 
                         nonce = incrementByteNonce(nonce);
@@ -131,8 +133,8 @@ public class Client {
                         String totalResponse = buffer.toString();
                         JsonObject receivedJson3 = JsonParser.parseString(totalResponse).getAsJsonObject();
                         nonce = incrementByteNonce(nonce);
-                        JsonObject decryptedJson3 = unprotect("CTR", receivedJson3, key, nonce);
-                        if(!check(decryptedJson3.get("M").getAsString(), nonce,key,receivedJson3.get("MAC").getAsString())){
+                        JsonObject decryptedJson3 = unprotect("CTR", receivedJson3, key_f, nonce);
+                        if(!check(decryptedJson3.get("M").getAsString(), nonce,key_f,receivedJson3.get("MAC").getAsString())){
                             System.out.println("Error! Restarting conversation");
                             message = "Error";
                             nonce = incrementByteNonce(nonce);
@@ -140,11 +142,13 @@ public class Client {
                             messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
+                            throw new SecurityException("...");
                         }else   {
                             // Check if the message is an error message
                             String m = decryptedJson3.get("M").getAsString();
                             if(m.equalsIgnoreCase("Error")){
                             System.out.println("Error! Restarting conversation");
+                                throw new SecurityException("...");
                             //Restart Conversation
                             }else {
                                 JsonObject mediaContent = decryptedJson3.get("M").getAsJsonObject();
@@ -170,6 +174,15 @@ public class Client {
                         throw new RuntimeException(e);
                     } catch (JsonSyntaxException e) {
                         throw new RuntimeException(e);
+                    } catch (SecurityException e) {
+                        try {
+                            //scanner.close();
+                            is.close();
+                            os.close();
+                            socket.close();
+                        } catch (IOException i) {
+                            System.out.println(i);
+                        }
                     }
 
             }
