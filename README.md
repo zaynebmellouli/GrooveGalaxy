@@ -1,4 +1,4 @@
-# C51 GrooveGalaxy Project Read Me
+# C51 GrooveGalaxy Project ReadMe
 
 <!-- this is an instruction line; after you follow the instruction, delete the corresponding line. Do the same for all instruction lines! -->
 
