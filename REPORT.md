@@ -30,28 +30,30 @@ On the client side, the following information is maintained:
 
 #### Message architecture
 
-There will be two set of messages from the client to the server.
+There are two sets of messages from the client to the server.
 
 The first:
-From client to server: ${K_c(hash(Message, ID, nonce)), K_c(Message, ID), ID}$
-The client will send a Message that will contain which song he wants with an ID and MAC of the request ${K_c(hash(Message, ID, nonce))}$
-By adding the ID to the hash we protect the ID from being tampered with. The ID is not cyphered as the server will need it to look up the key of the client sending the request. 
-The server will search in his database with the ID of the client for the symetric key $K_c$ that he shares with the client, and will be able to read the message and know it’s integrity.
-The protect method run by the client will return $K_c(hash(Message, ID, nonce))$ and $K_c(Message, ID)$. To this he will add the ID and transform all three elements to a JSON file.
+From client to server: ${K_c(hash(Message, ID, nonce)), K_c(Message), K_c(Nonce), ID}$
+The client sends a Message that contains which song he wants with an ID and MAC of the request ${K_c(hash(Message, ID, nonce))}$
+The protect method run by the client returns a JSON file with four seperate properties for each element of the message.
+By adding the ID to the hash we protect the ID from being tampered with. The ID is not ciphered as the server needs it to look up the key of the client sending the request. 
+The server searches in his database with the ID for the client's symetric key $K_c$ and is able to read the message and check it's freshness, authenticity and integrity.
 
-From the server to the client: ${K_c(hash(Data, nonce + 1)), K_c(K_f), K_f(Data)}$. 
-The server will send first the info of the music in data and will wait to know from when the client want his music to be streamed.
-The data will be encoded with the family key that the client belongs to ($K_f$). This key will be sent to the client by encoding it with their symmetric key ($K_c(K_f)$) and finally a MAC 
+From the server to the client: ${K_c(hash(Data, nonce+1)), K_c(K_f), K_f(Data)}$. 
+The server first sends the information of the music and it's lyrics and will wait to know from what percentage on the client wants his music to be streamed.
+The data is encoded with the family key that the client belongs to ($K_f$). This key is sent to the client encoded with their symmetric key ($K_c(K_f)$) and finally a MAC 
 with the message to check for integrity, authenticity and freshness.
-After the client decrypted the message, he will have access to his family's symetric key ($K_f$).
+After the client deciphered the message, he has access to his family's symetric key ($K_f$).
 
 The Second:
 From client to server: ${K_c(hash(Message, nonce + 2)), K_c(Message)}$
 The client will indicate in the request from which percentage he wants the music.
 Encrypting the message with the symetrc key ($K_c$) and a MAC to check for integrity, authenticity and freshness. 
 
+NOT YET DETERMINED
 From server to client: ${K_f(hash(P_n), nonce + 3), K_f(P_n)}$
 The server will stream a block of bytes of the music from the percentage requested by the client, encrypted by the the family key. We add to this stream message a MAC for integrity, authenticity and freshness. 
+NOT YET DETERMINED
 
 ![](img/Structure.jpeg)
 
