@@ -2,9 +2,12 @@
 
 ## 1. Introduction
 
-(_Provide a brief overview of your project, including the business scenario and the main components: secure documents, infrastructure, and security challenge._)
+In this project, we implemented the security infrastructure for an online music store. The core of this infrastructure is centered around secure communication and data protection, ensuring both confidentiality and integrity in the store's operations.
+The infrastructure includes a gateway router equipped with a firewall, which acts as the first line of defense in protecting the internal network. The firewall monitors and controls incoming and outgoing network traffic based on predetermined security rules, thereby safeguarding the network against unauthorized access and various types of cyber threats.
 
-(_Include a structural diagram, in UML or other standard notation._)
+The communication between the server and the client is established over an HTTPS connection. This setup ensures that the data exchanged between the user's device and the server is encrypted and secure from eavesdropping or tampering. HTTPS provides a layer of security that is essential for protecting sensitive user data, such as personal information and payment details. Depending on the nature of the message being transmitted, we use Advanced Encryption Standard (AES) encryption in either Cipher Block Chaining (CBC) or Counter (CTR) mode.
+   
+All the infromation about the song, the song itself and the symetric keys are stored in the database. The server communicates with the database using PostgreSQL, a robust and secure database management system. This choice ensures efficient handling of data with reliable performance and strong security features.
 
 ## 2. Project Development
 
@@ -12,35 +15,45 @@
 
 #### 2.1.1. Design
 
-We will have secured communication between the client and the server. 
+There is AES secured communication between the client and the server. 
+On the server side, a database maintains essential information about each client. This includes:
 
-The server will have in his database the informations for each client. These informations are : the client's ID, the symmectric key of the client-server, the last used nonce with the client and the symmetric key of his family (each client is in a family that has a symmetric key known by the server only and will be stored in his data base for each client the symmetric key of his family, if the client doesn't have a family, he will be registered to a family of one).
+1. **Client's ID**: A unique identifier for each client.
+2. **Client-Server Symmetric Key**: A key used for encrypting and decrypting the messages exchanged between the client and the server.
+3. **Last Used Nonce**: The most recent nonce (number used once) employed in communication with the client.
+4. **Family Symmetric Key**: Each client belongs to a 'family' group, which has its own symmetric key known only to the server. This key is stored in the server's database for each client. In cases where a client does not belong to an existing family, they are assigned to a single-member family, and the corresponding family key is managed accordingly.
 
-The client will have the symmetric key of the client-server and his ID for the server.
+On the client side, the following information is maintained:
+
+1. **Client-Server Symmetric Key**: The client holds this key to facilitate secure communication with the server.
+2. **Client's ID**: This identifier is used for interactions with the server, ensuring that the server can correctly recognize and authenticate the client.
+
 #### Message architecture
 
-There will be two set of (request, response) from the client to the server.
+There are two sets of messages from the client to the server.
 
 The first:
-From client to server: ${K_c(hash(Message, ID, nonce)), K_c(Message, ID), ID}$
-The client will send a Message that will contain which song he wants with an ID and MAC of the request ${K_c(hash(Message, ID, nonce))}$
-By adding the ID to the hash we protect the ID from being tampered with. The ID is not cyphered as the server will need it to look up the key of the client sending the request. 
-The server will search in his database with the ID of the client for the symetric key $K_c$ that he shares with the client, and will be able to read the message and know it’s integrity.
-The protect method run by the client will return $K_c(hash(Message, ID, nonce))$ and $K_c(Message, ID)$. To this he will add the ID and transform all three elements to a JSON file.
+From client to server: ${K_c(hash(Message, ID, nonce)), K_c(Message), K_c(Nonce), ID}$
+The client sends a Message that contains which song he wants with an ID and MAC of the request ${K_c(hash(Message, ID, nonce))}$
+The protect method run by the client returns a JSON file with four seperate properties for each element of the message.
+By adding the ID to the hash we protect the ID from being tampered with. The ID is not ciphered as the server needs it to look up the key of the client sending the request. 
+The server searches in his database with the ID for the client's symetric key $K_c$ and is able to read the message and check it's freshness, authenticity and integrity.
 
-From the server to the client: ${K_c(hash(Data, nonce + 1)), K_c(K_f), K_f(Data)}$. 
-The server will send first the info of the music in data and will wait to know from when the client want his music to be streamed.
-The data will be encoded with the family key that the client belongs to ($K_f$). This key will be sent to the client by encoding it with their symmetric key ($K_c(K_f)$) and finally a MAC 
+From the server to the client: ${K_c(hash(Data, nonce+1)), K_c(K_f), K_f(Data)}$. 
+The server first sends the information of the music and it's lyrics and will wait to know from what percentage on the client wants his music to be streamed.
+The data is encoded with the family key that the client belongs to ($K_f$). This key is sent to the client encoded with their symmetric key ($K_c(K_f)$) and finally a MAC 
 with the message to check for integrity, authenticity and freshness.
-After the client decrypted the message, he will have access to his family's symetric key ($K_f$).
+After the client deciphered the message, he has access to his family's symetric key ($K_f$).
 
 The Second:
 From client to server: ${K_c(hash(Message, nonce + 2)), K_c(Message)}$
 The client will indicate in the request from which percentage he wants the music.
 Encrypting the message with the symetrc key ($K_c$) and a MAC to check for integrity, authenticity and freshness. 
 
+NOT YET DETERMINED
 From server to client: ${K_f(hash(P_n), nonce + 3), K_f(P_n)}$
 The server will stream a block of bytes of the music from the percentage requested by the client, encrypted by the the family key. We add to this stream message a MAC for integrity, authenticity and freshness. 
+NOT YET DETERMINED
 
 ![](img/Structure.jpeg)
 
