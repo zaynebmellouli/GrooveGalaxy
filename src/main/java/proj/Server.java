@@ -8,6 +8,7 @@ import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
+import javazoom.jl.player.Player;
 import proj.database.DataBaseConnectionException;
 import proj.database.DataBaseConnector;
 import proj.database.DatabaseUtils;
@@ -31,8 +32,7 @@ import javax.net.ServerSocketFactory;
 import javax.net.ssl.SSLServerSocket;
 import javax.net.ssl.SSLServerSocketFactory;
 
-import static proj.CL.check;
-import static proj.CL.incrementByteNonce;
+import static proj.CL.*;
 
 public class Server {
 
@@ -52,8 +52,8 @@ public class Server {
 
             try (Socket socket = listener.accept();
                  Connection connection = (new DataBaseConnector()).getConnection();) {
-                Key keyServClient = new SecretKeySpec(Base64.getDecoder().decode(DatabaseUtils.getUserKeyById(connection, id)),"AES");
-                Key keyFamily     = new SecretKeySpec(Base64.getDecoder().decode(DatabaseUtils.getFamilyKeyById(connection, id)),"AES");
+                Key keyServClient = null;
+                Key keyFamily     = null;
 
                 while (!message.equals("Exit")) {
                     try {
@@ -64,7 +64,7 @@ public class Server {
                             System.out.println("Error! Restarting conversation");
                             message = "Error";
                             nonce = incrementByteNonce(nonce);
-                            JsonObject r = CL.protect(message, nonce, keyServClient, keyFamily);
+                            JsonObject r = CL.protect(message.getBytes(), nonce, keyServClient, keyFamily);
                             byte[] messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
@@ -72,6 +72,9 @@ public class Server {
                         message = new String(data, 0, len);
                         os = new BufferedOutputStream(socket.getOutputStream());
                         System.out.printf("server received %d bytes: %s%n", len, message);
+                        String response = message + " processed by server";
+                        os.write(response.getBytes(), 0, response.getBytes().length);
+                        os.flush();
 
 
                         //first message
@@ -80,7 +83,7 @@ public class Server {
                             System.out.println("Error! Restarting conversation");
                             message = "Error";
                             nonce = incrementByteNonce(nonce);
-                            JsonObject r = CL.protect(message, nonce, keyServClient, keyFamily);
+                            JsonObject r = CL.protect(message.getBytes(), nonce, keyServClient, keyFamily);
                             byte[] messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
@@ -89,7 +92,10 @@ public class Server {
                         JsonObject receivedJson1 = JsonParser.parseString(message).getAsJsonObject();
                         //get the key of the client from the id form the json
                          id = receivedJson1.get("ID").getAsInt();
-                         nonce = Base64.getDecoder().decode(receivedJson1.get("Nonce").getAsString());
+                        keyServClient = new SecretKeySpec(Base64.getDecoder().decode(DatabaseUtils.getUserKeyById(connection, id)),"AES");
+                        keyFamily     = new SecretKeySpec(Base64.getDecoder().decode(DatabaseUtils.getFamilyKeyById(connection, id)),"AES");
+
+                        nonce = Base64.getDecoder().decode(receivedJson1.get("Nonce").getAsString());
                          //to change the key to the key in the database
                         //decrypt the message
                         JsonObject decryptedJson1 = CL.unprotect(receivedJson1, keyServClient);
@@ -98,7 +104,7 @@ public class Server {
                             System.out.println("Error! Restarting conversation");
                             message = "Error";
                             nonce = incrementByteNonce(nonce);
-                            JsonObject r = CL.protect(message, nonce, keyServClient, keyFamily);
+                            JsonObject r = CL.protect(message.getBytes(), nonce, keyServClient, keyFamily);
                             byte[] messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
@@ -121,20 +127,21 @@ public class Server {
 
                         //Respond to first message
                         JsonObject songInfo = DatabaseUtils.getSongInfo(connection,song, id).getAsJsonObject();
-                        JsonObject media = songInfo.get("media").getAsJsonObject();
-                        JsonObject media_content = songInfo.get("media_content").getAsJsonObject();
+                        JsonObject media = JsonParser.parseString(songInfo.get("media").getAsString()).getAsJsonObject();
+                        JsonObject media_content = JsonParser.parseString(songInfo.get("media_content").getAsString()).getAsJsonObject();
                         // Read the audio file
                         byte[] audioBytes = Files.readAllBytes(Paths.get(media_content.get("file_path").getAsString()));
 
                         // Encode to Base64
                         String audioBase64 = Base64.getEncoder().encodeToString(audioBytes);
                         media_content.addProperty("file_Bytes",audioBase64);
+
                         media.addProperty("media_content_length",audioBytes.length);
                         media.addProperty("lyrics",media_content.get("lyrics").getAsString());
                         message = media.toString();
 
                         //Sending of Song info
-                        JsonObject r = CL.protect(message, nonce, keyServClient, keyFamily);
+                        JsonObject r = CL.protect(message.getBytes(), nonce, keyServClient, keyFamily);
                         byte[] messageBytes = r.toString().getBytes();
                         os = new BufferedOutputStream(socket.getOutputStream());
                         os.write(messageBytes);
@@ -146,7 +153,7 @@ public class Server {
                             System.out.println("Error! Restarting conversation");
                             message = "Error";
                             nonce = incrementByteNonce(nonce);
-                            r = CL.protect("CTR",message, nonce, keyFamily);
+                            r = CL.protect("CTR",message.getBytes(), nonce, keyFamily);
                             messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
@@ -163,7 +170,7 @@ public class Server {
                             // Send error message to server
                             String errorMessage = "Error";
                             nonce = incrementByteNonce(nonce);
-                            r = CL.protect("CTR",errorMessage, nonce, keyFamily);
+                            r = CL.protect("CTR",errorMessage.getBytes(), nonce, keyFamily);
                             //HELP - the client is expecting a concatinated message with the family fey
                             messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
@@ -177,7 +184,7 @@ public class Server {
                                 // Send error message to server
                                 String errorMessage = "Error";
                                 nonce = incrementByteNonce(nonce);
-                                r = CL.protect("CTR",errorMessage, nonce, keyFamily);
+                                r = CL.protect("CTR",errorMessage.getBytes(), nonce, keyFamily);
                                 //HELP - the client is expecting a concatinated message with the family fey
                                 messageBytes = r.toString().getBytes();
                                 os.write(messageBytes);
@@ -185,19 +192,52 @@ public class Server {
                                 throw new SecurityException("...");
                             } else {
                                 byteReqInt = decryptedJson2.get("M").getAsInt();
-                                System.out.printf("Server received %d bytes: he want the music form the %d percentage", len, byteReqInt);
+                                System.out.printf("Server received %d bytes: He want the music form the %d percentage", len, byteReqInt);
                                 // Continue to send the second message
                             }
                         }
 
                         //Respond to second message
-                        String originalSong = media_content.get("file_Bytes").getAsString();
-                        String cutSong = dropFirstXPercentBits(originalSong, byteReqInt);
-                        nonce = incrementByteNonce(nonce);
-                        JsonObject encryptedResponse = CL.protect("CTR", cutSong, nonce, keyFamily);
-                        byte[] encryptedBytes = encryptedResponse.toString().getBytes();
-                        os.write(encryptedBytes);
-                        os.flush();
+//                        byte[] originalSong = Base64.getDecoder().decode(media_content.get("file_Bytes").getAsString());
+//                        byte[] cutsongBytes= dropFirstXPercentBits(originalSong, byteReqInt);
+//                        String cutSong = Base64.getEncoder().encodeToString(cutsongBytes);
+//                        nonce = incrementByteNonce(nonce);
+//                        JsonObject encryptedResponse = CL.protect("CTR", cutSong.getBytes(), nonce, keyFamily);
+//                        byte[] encryptedBytes = encryptedResponse.toString().getBytes();
+//                        os.write(encryptedBytes);
+//                        os.flush();
+                        byte[] originalSong = Base64.getDecoder().decode(media_content.get("file_Bytes").getAsString());
+                        int from16bytes = (int) Math.floor(byteReqInt * originalSong.length / 16.0);
+                        int nb16bytes = (int) Math.ceil(originalSong.length / 16.0) - from16bytes;
+
+//                        do{
+//                            for (int i = 0; i < 15; i++) {
+
+
+                                byte[]     adjustedNonce     = incrementCounterInNonce(nonce, from16bytes);
+                                byte[]     partSong          = gives16thBytes(originalSong, from16bytes);
+                                JsonObject encryptedResponse = CL.protect("CTR", partSong, adjustedNonce, keyFamily);
+                                byte[]     encryptedBytes    = encryptedResponse.toString().getBytes();
+//                            try {
+//                                InputStream in = new ByteArrayInputStream(partSong);
+//                                BufferedInputStream bis = new BufferedInputStream(in);
+//                                Player player = new Player(bis);
+//                                player.play();
+//                                while (!player.isComplete()) {
+//                                }
+//                            }
+//                            catch (Exception e) {
+//                                System.out.println("Problem playing the MP3 file");
+//                                e.printStackTrace();
+//                            }
+                                os.write(encryptedBytes);
+                                os.write(encryptedBytes, 0, encryptedBytes.length);
+                                os.flush();
+                                from16bytes++;
+//                            }
+//                        } while (from16bytes < nb16bytes);
+
+
                         //int offset = 0;
                         //while (offset < encryptedBytes.length) {
                         //    int chunkSize = Math.min(16, encryptedBytes.length - offset);
@@ -241,15 +281,33 @@ public class Server {
         }
     }
 
-    public static String dropFirstXPercentBits(String originalString, int percentToDrop) {
-        int totalChars = originalString.length();
-        int charsToDrop = (int) Math.ceil(totalChars * (percentToDrop / 100.0));
+    public static byte[] dropFirstXPercentBits(byte[] originalSong, int percentToDrop) {
+        int totalLength = originalSong.length;
+        int bytesToDrop = (int) Math.ceil(totalLength * (percentToDrop / 100.0));
 
-        if (charsToDrop >= totalChars) {
-            return ""; // Or handle this case as you see fit
+        if (bytesToDrop >= totalLength) {
+            return new byte[0]; // Or handle this case as you see fit
         }
+        // Create a new array to hold the result
+        int newLength = totalLength - bytesToDrop;
+        byte[] result = new byte[newLength];
 
-        return originalString.substring(charsToDrop);
+        // Copy the relevant part of the original array into the result
+        System.arraycopy(originalSong, bytesToDrop, result, 0, newLength);
+        return result;
+    }
+
+    public static byte[] gives16thBytes(byte[] originalSong, int nb) {
+        int newLength = 1000;
+        if ((nb * newLength) +16 >= originalSong.length) {
+            newLength = nb * newLength - originalSong.length;// Or handle this case as you see fit
+        }
+        // Create a new array to hold the result
+        byte[] result = new byte[newLength];
+
+        // Copy the relevant part of the original array into the result
+        System.arraycopy(originalSong, nb*16, result, 0, newLength);
+        return result;
     }
 
     public static void main(String args[]) throws IOException {

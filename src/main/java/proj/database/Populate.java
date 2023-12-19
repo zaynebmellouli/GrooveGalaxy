@@ -22,8 +22,8 @@ public class Populate {
                 , Base64.getEncoder().encodeToString((CL.readAESKey("Keys/Key_Family_Lu.key")).getEncoded()));
         User user2 = new User(2, "Bob", "7894", Base64.getEncoder().encodeToString(CL.readAESKey("Keys/Key_ServClient_Bob.key").getEncoded())
                 , Base64.getEncoder().encodeToString((CL.readAESKey("Keys/Key_Family_Musterman.key")).getEncoded()));
-        Media media1 = new Media(1, "WAV", "Alison Chains","Man in the Box",  "Grunge");
-        Media media2 = new Media(2, "FLAC", "Pink Floyd", "Breathe", "Alternative Rock");
+        Media media1 = new Media(2, "WAV", "Alison Chains","Man in the Box",  "Grunge");
+        Media media2 = new Media(1, "FLAC", "Pink Floyd", "Breathe", "Alternative Rock");
 
         MediaContent mediaContent1 = new MediaContent("Man in the Box",
                 "Trapped in a world," +
@@ -50,7 +50,7 @@ public class Populate {
                         "But only if you ride the tide\n" +
                         "Balanced on the biggest wave\n" +
                         "You race towards an early grave",
-                "C:\\Users\\zayne\\a51-cherilyn-zeineb-rassene\\src\\main\\resources\\songs\\Breathe.mp3"
+                "src/main/resources/songs/Man in the box.mp3"
                 );
 
         try {

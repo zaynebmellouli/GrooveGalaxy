@@ -20,7 +20,7 @@ public class Queries {
 
     public static final String GET_MEDIA_CONTENT_BY_TITLE_QUERY = "SELECT * FROM media_content WHERE title_content =?";
 
-    public static final String ADD_MEDIA_CONTENT_QUERY = "INSERT INTO media_content(title_content, file_path, lyrics) "
+    public static final String ADD_MEDIA_CONTENT_QUERY = "INSERT INTO media_content(title_content, lyrics, file_path) "
             + "VALUES (?,?,?)";
 
     public static final String GET_FAMILY_KEY_BY_ID_QUERY = "SELECT family_symmetric_key FROM users WHERE user_id = ?";

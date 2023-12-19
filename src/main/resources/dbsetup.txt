@@ -3,14 +3,13 @@ DROP TABLE IF EXISTS media_content, media, users;
 
 -- Table to store users
 CREATE TABLE users (
-    user_id INTEGER,
+    user_id INTEGER PRIMARY KEY,
     username VARCHAR(255) NOT NULL ,
     password VARCHAR(255) NOT NULL,
     shared_symmetric_key VARCHAR(255) NOT NULL,
     family_symmetric_key VARCHAR(255) NOT NULL,
     UNIQUE(shared_symmetric_key),
-    UNIQUE(family_symmetric_key),
-    PRIMARY KEY (user_id)
+    UNIQUE(family_symmetric_key)
 );
 
 -- Table to store media information
@@ -27,5 +26,5 @@ CREATE TABLE media_content (
     title_content VARCHAR(255) PRIMARY KEY,
     lyrics TEXT NOT NULL,
     file_path TEXT NOT NULL,
-    FOREIGN KEY (title_content) REFERENCES media(title) ON DELETE CASCADE,
+    FOREIGN KEY (title_content) REFERENCES media(title) ON DELETE CASCADE
 );

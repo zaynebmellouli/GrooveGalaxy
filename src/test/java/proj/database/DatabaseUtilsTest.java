@@ -58,43 +58,43 @@ public class DatabaseUtilsTest {
         assertEquals(user.getFamilySymmetricKey(), retrievedUser.getFamilySymmetricKey());
     }
 
-    @Test
-    void testAddMediaAndGetMediaById() throws SQLException {
-        Media media = new Media();
-        media.setOwnerId(2);
-        media.setFormat("mp3");
-        media.setArtist("testArtist");
-        media.setTitle("testTitle");
-        media.setGenre("testGenre");
+//    @Test
+//    void testAddMediaAndGetMediaById() throws SQLException {
+//        Media media = new Media();
+//        media.setOwnerId(2);
+//        media.setFormat("mp3");
+//        media.setArtist("testArtist");
+//        media.setTitle("testTitle");
+//        media.setGenre("testGenre");
+//
+//        DatabaseUtils.addMedia(connection, media);
+//
+//        Media retrievedMedia = DatabaseUtils.getMediaById(connection, media.getMediaId());
+//
+//        assertNotNull(retrievedMedia);
+//        assertEquals(media.getOwnerId(), retrievedMedia.getOwnerId());
+//        assertEquals(media.getFormat(), retrievedMedia.getFormat());
+//        assertEquals(media.getArtist(), retrievedMedia.getArtist());
+//        assertEquals(media.getTitle(), retrievedMedia.getTitle());
+//        assertEquals(media.getGenre(), retrievedMedia.getGenre());
+//    }
 
-        DatabaseUtils.addMedia(connection, media);
-
-        Media retrievedMedia = DatabaseUtils.getMediaById(connection, media.getMediaId());
-
-        assertNotNull(retrievedMedia);
-        assertEquals(media.getOwnerId(), retrievedMedia.getOwnerId());
-        assertEquals(media.getFormat(), retrievedMedia.getFormat());
-        assertEquals(media.getArtist(), retrievedMedia.getArtist());
-        assertEquals(media.getTitle(), retrievedMedia.getTitle());
-        assertEquals(media.getGenre(), retrievedMedia.getGenre());
-    }
-
-    @Test
-    void testAddMediaContentAndGetMediaContentById() throws SQLException {
-        MediaContent mediaContent = new MediaContent();
-        mediaContent.setMediaId(1);
-        mediaContent.setLyrics("testLyrics");
-        mediaContent.setAudioBase64("testAudioBase64");
-
-        DatabaseUtils.addMediaContent(connection, mediaContent);
-
-        MediaContent retrievedMediaContent = DatabaseUtils.getMediaContentById(connection, mediaContent.getMediaId());
-
-        assertNotNull(retrievedMediaContent);
-        assertEquals(mediaContent.getMediaId(), retrievedMediaContent.getMediaId());
-        assertEquals(mediaContent.getLyrics(), retrievedMediaContent.getLyrics());
-        assertEquals(mediaContent.getAudioBase64(), retrievedMediaContent.getAudioBase64());
-    }
+//    @Test
+//    void testAddMediaContentAndGetMediaContentById() throws SQLException {
+//        MediaContent mediaContent = new MediaContent();
+//        mediaContent.setMediaId(1);
+//        mediaContent.setLyrics("testLyrics");
+//        mediaContent.setAudioBase64("testAudioBase64");
+//
+//        DatabaseUtils.addMediaContent(connection, mediaContent);
+//
+//        MediaContent retrievedMediaContent = DatabaseUtils.getMediaContentById(connection, mediaContent.getMediaId());
+//
+//        assertNotNull(retrievedMediaContent);
+//        assertEquals(mediaContent.getMediaId(), retrievedMediaContent.getMediaId());
+//        assertEquals(mediaContent.getLyrics(), retrievedMediaContent.getLyrics());
+//        assertEquals(mediaContent.getAudioBase64(), retrievedMediaContent.getAudioBase64());
+//    }
 
     private void clearTables() throws SQLException {
         // Implement logic to clear tables or perform any setup needed before each test

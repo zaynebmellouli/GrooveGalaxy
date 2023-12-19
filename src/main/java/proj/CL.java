@@ -115,7 +115,7 @@ public class CL {
      * @return a json object with (MAC(M, ID, N), Crypt(M), nonce, ID)
      * @throws GeneralSecurityException if the cipher is not initialized correctly
      */
-    public static JsonObject protect(String message, byte[] nonce, int ID, Key symKey_c) throws GeneralSecurityException {
+    public static JsonObject protect(byte[] message, byte[] nonce, int ID, Key symKey_c) throws GeneralSecurityException {
         // Ensure nonce is the correct size (16 bytes for AES)
         if (nonce.length != 16) {
             throw new IllegalArgumentException("Nonce must be 16 bytes long");
@@ -127,8 +127,8 @@ public class CL {
         cipher.init(Cipher.ENCRYPT_MODE, symKey_c, ivSpec);
 
         JsonObject result = new JsonObject();
-        result.addProperty("MAC", calculateMAC(message, ID, nonce, symKey_c));
-        result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes())));
+        result.addProperty("MAC", calculateMAC(new String(message), ID, nonce, symKey_c));
+        result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message)));
         result.addProperty("Nonce", Base64.getEncoder().encodeToString(nonce));
         result.addProperty("ID", ID);
 
@@ -144,7 +144,7 @@ public class CL {
      * @return a json object with (MAC(M, N), Crypt(M))
      * @throws GeneralSecurityException if the cipher is not initialized correctly
      */
-    public static JsonObject protect(String mode, String message, byte[] nonce, Key symKey_c) throws GeneralSecurityException {
+    public static JsonObject protect(String mode, byte[] message, byte[] nonce, Key symKey_c) throws GeneralSecurityException {
         // Ensure nonce is the correct size (16 bytes for AES)
         if (nonce.length != 16) {
             throw new IllegalArgumentException("Nonce must be 16 bytes long");
@@ -156,8 +156,8 @@ public class CL {
 
         cipher.init(Cipher.ENCRYPT_MODE, symKey_c, ivSpec);
         JsonObject result = new JsonObject();
-        result.addProperty("MAC", calculateMAC(message, nonce, symKey_c));
-        result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes())));
+        result.addProperty("MAC", calculateMAC(new String(message), nonce, symKey_c));
+        result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message)));
         return result;
     }
 
@@ -170,7 +170,7 @@ public class CL {
      * @return a json object with (MAC(M, N), Crypt(K_f) with K_C, Crypt(M) with K_f)
      * @throws GeneralSecurityException if the cipher is not initialized correctly
      */
-    public static JsonObject protect(String message, byte[] nonce, Key symKey_c, Key symKey_f) throws GeneralSecurityException {
+    public static JsonObject protect(byte[] message, byte[] nonce, Key symKey_c, Key symKey_f) throws GeneralSecurityException {
         // Ensure nonce is the correct size (16 bytes for AES)
         if (nonce.length != 16) {
             throw new IllegalArgumentException("Nonce must be 16 bytes long");
@@ -182,10 +182,10 @@ public class CL {
         cipher.init(Cipher.ENCRYPT_MODE, symKey_c, ivSpec);
 
         JsonObject result = new JsonObject();
-        result.addProperty("MAC", calculateMAC(message, nonce, symKey_c));
+        result.addProperty("MAC", calculateMAC(new String(message), nonce, symKey_c));
         result.addProperty("Crypt_Key_f", Base64.getEncoder().encodeToString(cipher.doFinal(symKey_f.getEncoded())));
         cipher.init(Cipher.ENCRYPT_MODE, symKey_f, ivSpec);
-        result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message.getBytes())));
+        result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message)));
 
         return result;
     }
@@ -288,7 +288,7 @@ public class CL {
         return calculatedMac.equalsIgnoreCase(macToCheck);
     }
 
-    public byte[] incrementCounterInNonce(byte[] nonce, int offset) {
+    public static byte[] incrementCounterInNonce(byte[] nonce, int offset) {
         // Copy the original nonce to avoid mutating it
         byte[] adjustedNonce = Arrays.copyOf(nonce, nonce.length);
 

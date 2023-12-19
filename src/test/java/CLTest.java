@@ -32,7 +32,7 @@ class CLTest extends CL {
         CL.generateAESKey("Keys/AESKeytest.key");
         Key key = CL.readAESKey("Keys/AESKeytest.key");
 
-        JsonObject r = CL.protect(message, nonce, id, key);
+        JsonObject r = CL.protect(message.getBytes(), nonce, id, key);
 
         JsonObject     t = CL.unprotect(r, key);
         String M = t.get("M").getAsString();
@@ -54,7 +54,7 @@ class CLTest extends CL {
         Key key_f = CL.readAESKey("Keys/AESFamilyKeytest.key");
 
 
-        JsonObject r = CL.protect(message, nonce, key, key_f);
+        JsonObject r = CL.protect(message.getBytes(), nonce, key, key_f);
 
         JsonObject     t = CL.unprotect("CBC", r, key, nonce);
         String M = t.get("M").getAsString();
@@ -76,7 +76,7 @@ class CLTest extends CL {
         Key key = CL.readAESKey("Keys/AESKeytest.key");
 
 
-        JsonObject r = CL.protect("CBC", message, nonce, key);
+        JsonObject r = CL.protect("CBC", message.getBytes(), nonce, key);
 
         JsonObject     t = CL.unprotect("CBC", r, key, nonce);
         String M = t.get("M").getAsString();
@@ -99,7 +99,7 @@ class CLTest extends CL {
         Key key = CL.readAESKey("Keys/AESKeytest.key");
 
 
-        JsonObject r = CL.protect("CTR", message, nonce, key);
+        JsonObject r = CL.protect("CTR", message.getBytes(), nonce, key);
 
         JsonObject     t = CL.unprotect("CTR", r, key, nonce);
         String M = t.get("M").getAsString();
@@ -129,7 +129,7 @@ class CLTest extends CL {
 
         JsonObject r = null;
         try {
-            r = CL.protect(message, nonce, id, key);
+            r = CL.protect(message.getBytes(), nonce, id, key);
         } catch (GeneralSecurityException e) {
             Assertions.fail("Protection failed", e);
         }
@@ -159,7 +159,7 @@ class CLTest extends CL {
         CL.generateAESKey("Keys/AESKeytest.key");
         Key key = CL.readAESKey("Keys/AESKeytest.key");
 
-        JsonObject r = CL.protect(message, nonce, id, key);
+        JsonObject r = CL.protect(message.getBytes(), nonce, id, key);
 
         //Attack
         r.addProperty("ID", 6);
@@ -182,7 +182,7 @@ class CLTest extends CL {
         Key key_f = CL.readAESKey("Keys/AESFamilyKeytest.key");
 
 
-        JsonObject r = CL.protect(message, nonce, key, key_f);
+        JsonObject r = CL.protect(message.getBytes(), nonce, key, key_f);
 
         // Attack by modifying the encrypted message
         r.addProperty("Crypt_M", Base64.getEncoder().encodeToString("Hello world?".getBytes()));
@@ -216,7 +216,7 @@ class CLTest extends CL {
         Key key_f = CL.readAESKey("Keys/AESFamilyKeytest.key");
 
 
-        JsonObject r = CL.protect(message, nonce, key, key_f);
+        JsonObject r = CL.protect(message.getBytes(), nonce, key, key_f);
 
         // Attack by modifying the encrypted message
         r.addProperty("Crypt_Key_f", Base64.getEncoder().encodeToString("Hello".getBytes()));
@@ -248,7 +248,7 @@ class CLTest extends CL {
         Key key = CL.readAESKey("Keys/AESKeytest.key");
 
         // Protect the message using AES CTR mode
-        JsonObject r = CL.protect("CTR", message, nonce, key);
+        JsonObject r = CL.protect("CTR", message.getBytes(), nonce, key);
 
         // Simulate streaming by decrypting from the 4th byte
         int offset = 1; // Assuming the first byte is at index 0
