@@ -2,10 +2,6 @@
 
 <!-- this is an instruction line; after you follow the instruction, delete the corresponding line. Do the same for all instruction lines! -->
 
-*(replace CXX above with group identifier, for proj, A07 ou T22)*
-
-*(keep only your scenario name and delete the other names)*
-
 ## Team
 
 | Number | Name              | User                             | E-mail                              |
