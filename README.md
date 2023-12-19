@@ -50,18 +50,95 @@ To see the project in action, it is necessary to setup a virtual environment, wi
 All machines will be running on Linux and configured according to the following figure and table:
 ![](img/VMsNetworks.jpg)
 
-## Getting started 
+### Getting started 
 
-##JDK 17
+## JDK 17
 Run this commands to install the JDK17
 ```sh
-$ sudo apt install openjdk-17-jdk
+sudo apt install openjdk-17-jdk
 ```
 Set JAVA_HOME at ~/.bashrc:
 ```sh
 export JAVA_HOME=/lib/jvm/java-17-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ```
+
+## Maven 3.8.7
+Run this commands to install Maven
+```sh
+wget https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz
+tar -xvf apache-maven-3.9.5-bin.tar.gz
+mv apache-maven-3.9.5 /opt/
+```
+Set MAVEN_HOME at ~/.bashrc:
+```sh
+MAVEN_HOME='/opt/apache-maven-3.9.5'
+export "$MAVEN_HOME/bin:$PATH"
+```
+
+## Setup Database
+Run this commands to install postgreSQL
+```sh
+sudo apt-get update
+sudo apt-get install postgresql postgresql-contrib
+```
+To enable remote access to the PostgreSQL database, you need to make changes to the PostgreSQL server configuration file postgresql.conf and the pg_hba.conf file.
+
+1.postgresql.conf: 
+Locate the file at first. Usually, it's placed here :
+Linux: /etc/postgresql/{version}/main/postgresql.conf
+Edit the postgresql.conf file and update the 'listen_addresses' parameter. By default, it might be set to localhost. Change it to listen on all addresses:
+```sh
+listen_addresses = '*'
+```
+2.pg_hba.conf:
+The path is similar to postgresql.conf.
+Add an entry to allow access from your VM. For example, to allow access from any IP address, add the following line to pg_hba.conf:
+```sh
+host    all             all             0.0.0.0/0               md5
+```
+
+3.Restart PostgreSQL:
+After making these changes, restart the PostgreSQL server to apply the new configuration.
+```sh
+sudo service postgresql restart
+```
+
+Now, you can connect to postgreSQL. Please when setting up your postgres usse the username = postgres and password = postgres. 
+If you want to create another username and password, make sure to change it in the class DataBaseConnector
+Use the following command to connect to PostgreSQL:
+```sh
+psql -U postgres;
+```
+Create a database named groovedb:
+```sh
+postgres# CREATE DATABASE groovedb;
+```
+Connect to the groovedb database:
+```sh
+\c groovedb;
+```
+Now once you are in the database, run the content of the file dbsetup.txt(copy-paste in the terminal): 
+```sh
+(-- Drop tables if they exist
+DROP TABLE IF EXISTS media_content, media, users;
+.
+.
+.
+ FOREIGN KEY (title_content) REFERENCES media(title) ON DELETE CASCADE,
+);
+```
+Now you should execute the class mainforpopulate in order to populate the database:(in another terminal)
+```sh
+mvn clean compile
+```
+```sh
+mvn exec:java -Dexec.mainClass="proj.database.mainforpopulate"
+```
+
+
+
+
 
 
 ### Prerequisites
