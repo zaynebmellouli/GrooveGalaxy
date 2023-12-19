@@ -63,7 +63,7 @@ export JAVA_HOME=/lib/jvm/java-17-openjdk-amd64
 export PATH=$JAVA_HOME/bin:$PATH
 ```
 
-## Maven 3.8.7
+## Maven 3.9.5 
 Run this commands to install Maven
 ```sh
 wget https://dlcdn.apache.org/maven/maven-3/3.9.5/binaries/apache-maven-3.9.5-bin.tar.gz
