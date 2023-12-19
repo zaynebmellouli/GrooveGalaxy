@@ -10,8 +10,6 @@
 | 108780  | Cherilyn Christen     | <https://github.com/Cherie000>     | <mailto:cherilyn.christen@epfl.ch>     |
 | 108825 | Zeineb Mellouli   | <https://github.com/zaynebmellouli> | <mailto:zeineb.mellouli@epfl.ch> |
 
-*(fill table above with team member information)*  
-
 ![Alice](img/alice.png) ![Bob](img/bob.png) ![Charlie](img/charlie.png)
 
 *(add face photos with 150px height; faces should have similar size and framing)*
