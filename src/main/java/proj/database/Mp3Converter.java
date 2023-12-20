@@ -17,7 +17,7 @@ public class Mp3Converter {
     public static void main(String[] args) {
 
             try {
-                String filePath = "src/main/resources/songs/Man in the box.mp3";
+                String filePath = "src/main/resources/songs/Free Bird.mp3";
                 byte[] musicBytes = readAudioFile(filePath);
                 InputStream         in     = new ByteArrayInputStream(musicBytes);
                 BufferedInputStream bis    = new BufferedInputStream(in);
