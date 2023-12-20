@@ -119,6 +119,18 @@
             <resource>
                 <directory>src/main/resources</directory>
                 <filtering>true</filtering>
+                <excludes>
+                    <exclude>**/*.mp3</exclude> <!-- Exclude MP3 files from filtering -->
+                    <!-- Add other binary file types as needed -->
+                </excludes>
+            </resource>
+            <resource>
+                <directory>src/main/resources</directory>
+                <filtering>false</filtering>
+                <includes>
+                    <include>**/*.mp3</include> <!-- Include MP3 files without filtering -->
+                    <!-- Add other binary file types as needed -->
+                </includes>
             </resource>
         </resources>
     </build>

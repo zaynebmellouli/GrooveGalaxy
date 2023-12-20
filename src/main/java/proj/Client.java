@@ -99,7 +99,7 @@ public class Client {
                                 System.out.println("title :" + mediaInfo.get("title").getAsString());
                                 System.out.println("genre :" + mediaInfo.get("genre").getAsString());
                                 System.out.println("lyrics :" + mediaInfo.get("lyrics").getAsString());
-
+                                receiveMessage(mediaInfo);
                             }
                             // Continue to send the second message
                         }
@@ -237,6 +237,20 @@ public class Client {
 
     }
 
+    private static GUI guiCallback;
+
+    public static void setGuiCallback(GUI gui) {
+        guiCallback = gui;
+    }
+
+    // Method where you receive messages
+    public static void receiveMessage(JsonObject json) {
+        String receivedMessage = json.get("M").getAsString();
+
+        if (guiCallback != null) {
+            guiCallback.updateMessage(receivedMessage);
+        }
+    }
 
     public static void main(String[] args) throws IOException {
         System.setProperty("javax.net.ssl.keyStore", "https_cert/user.p12");
