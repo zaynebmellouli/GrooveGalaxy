@@ -107,7 +107,7 @@ public class CLI {
                             protectedData = CL.protect(message.getBytes(), nonce, clientKey, familyKey);
                             System.out.println("Encrypted Data: " + protectedData);
                             // Decrypt
-                            decryptedData = CL.unprotect("CBC", protectedData, clientKey, nonce);
+                            decryptedData = CL.unprotect(protectedData, clientKey, nonce);
                             System.out.println("Decrypted Data: " + decryptedData);
                             m = new String(Base64.getDecoder().decode(decryptedData.get("M").getAsString()));
                             System.out.println("Message: " + m);
@@ -116,10 +116,10 @@ public class CLI {
 
                     case 3:
                         // Encrypt
-                        protectedData = CL.protect("CBC", message.getBytes(), nonce, clientKey);
+                        protectedData = CL.protect(message.getBytes(), nonce, clientKey);
                         System.out.println("Encrypted Data: " + protectedData);
                         // Decrypt
-                        decryptedData = CL.unprotect("CBC", protectedData, clientKey, nonce);
+                        decryptedData = CL.unprotect( protectedData, clientKey, nonce);
                         System.out.println("Decrypted Data: " + decryptedData);
                         m = new String(Base64.getDecoder().decode(decryptedData.get("M").getAsString()));
                         System.out.println("Message: " + m);
