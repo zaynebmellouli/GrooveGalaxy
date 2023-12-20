@@ -16,6 +16,7 @@ import proj.database.UserAccessException;
 
 import java.io.*;
 import java.net.Socket;
+import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
 import java.security.GeneralSecurityException;
@@ -34,7 +35,11 @@ import javax.net.ssl.SSLServerSocketFactory;
 
 import static proj.CL.*;
 
+
+
 public class Server {
+
+    public static final int NB_BYTES_PACKET_MUSIC = 100000;
 
     public static void startServer(int port) throws IOException {
         ServerSocketFactory factory    = SSLServerSocketFactory.getDefault();
@@ -99,8 +104,8 @@ public class Server {
                          //to change the key to the key in the database
                         //decrypt the message
                         JsonObject decryptedJson1 = CL.unprotect(receivedJson1, keyServClient);
-                        String song = decryptedJson1.get("M").getAsString();
-                        if(!check(song,id,nonce, keyServClient,receivedJson1.get("MAC").getAsString())){
+                        String song = new String(Base64.getDecoder().decode(decryptedJson1.get("M").getAsString()));
+                        if(!check(decryptedJson1.get("M").getAsString(),id,nonce, keyServClient,receivedJson1.get("MAC").getAsString())){
                             System.out.println("Error! Restarting conversation");
                             message = "Error";
                             nonce = incrementByteNonce(nonce);
@@ -164,8 +169,8 @@ public class Server {
                         //decrypt the message
                         int byteReqInt = 0;
                         JsonObject decryptedJson2 = CL.unprotect("CBC", receivedJson2, keyServClient, nonce);
-                        String byteReq = decryptedJson2.get("M").getAsString();
-                        if(!check(byteReq,nonce, keyServClient,receivedJson2.get("MAC").getAsString())){
+                        String byteReq = new String(Base64.getDecoder().decode(decryptedJson2.get("M").getAsString()));
+                        if(!check(decryptedJson2.get("M").getAsString(),nonce, keyServClient,receivedJson2.get("MAC").getAsString())){
                             System.out.println("Integrity check failed. Sending error message to client.");
                             // Send error message to server
                             String errorMessage = "Error";
@@ -191,13 +196,14 @@ public class Server {
                                 os.flush();
                                 throw new SecurityException("...");
                             } else {
-                                byteReqInt = decryptedJson2.get("M").getAsInt();
+                                byteReqInt = Integer.parseInt(byteReq);
                                 System.out.printf("Server received %d bytes: He want the music form the %d percentage", len, byteReqInt);
                                 // Continue to send the second message
                             }
                         }
 
                         //Respond to second message
+
 //                        byte[] originalSong = Base64.getDecoder().decode(media_content.get("file_Bytes").getAsString());
 //                        byte[] cutsongBytes= dropFirstXPercentBits(originalSong, byteReqInt);
 //                        String cutSong = Base64.getEncoder().encodeToString(cutsongBytes);
@@ -207,44 +213,52 @@ public class Server {
 //                        os.write(encryptedBytes);
 //                        os.flush();
                         byte[] originalSong = Base64.getDecoder().decode(media_content.get("file_Bytes").getAsString());
-                        int from16bytes = (int) Math.floor(byteReqInt * originalSong.length / 16.0);
-                        int nb16bytes = (int) Math.ceil(originalSong.length / 16.0) - from16bytes;
-
-//                        do{
-//                            for (int i = 0; i < 15; i++) {
+                        int from16bytes = (int) Math.floor((byteReqInt/ 100.0) * originalSong.length  / NB_BYTES_PACKET_MUSIC);
+                        int nb16bytes = (int) Math.ceil((double) originalSong.length / NB_BYTES_PACKET_MUSIC) ;
 
 
-                                byte[]     adjustedNonce     = incrementCounterInNonce(nonce, from16bytes);
-                                byte[]     partSong          = gives16thBytes(originalSong, from16bytes);
-                                JsonObject encryptedResponse = CL.protect("CTR", partSong, adjustedNonce, keyFamily);
-                                byte[]     encryptedBytes    = encryptedResponse.toString().getBytes();
-//                            try {
-//                                InputStream in = new ByteArrayInputStream(partSong);
-//                                BufferedInputStream bis = new BufferedInputStream(in);
-//                                Player player = new Player(bis);
-//                                player.play();
-//                                while (!player.isComplete()) {
-//                                }
+                        for (int i = from16bytes; i < nb16bytes; i++) {
+                            byte[] partSong = givePartByte(originalSong, i);
+                            nonce = incrementByteNonce(nonce);
+                            JsonObject encryptedResponse = CL.protect("CBC", partSong, nonce, keyFamily);
+                            byte[] encryptedBytes = encryptedResponse.toString().getBytes();
+                            BufferedOutputStream bufferedOutput = new BufferedOutputStream(os, 100000);
+                            bufferedOutput.write(encryptedBytes);
+                            bufferedOutput.flush();
+                            bufferedOutput.write("stop".getBytes());
+                            bufferedOutput.flush();
+//                            os = new BufferedOutputStream(socket.getOutputStream());
+//                            os.write(encryptedBytes);
+
+
+                            System.out.println("Sending song part");
+//                            bufferedOutput.close();
+
+//                        String parSong = new String(encryptedBytes, StandardCharsets.UTF_8);
+//
+//
+//                        JsonObject receivedJson3 = JsonParser.parseString(parSong).getAsJsonObject();
+
+
+//                        JsonObject decryptedJson3 = unprotect("CBC", receivedJson3, keyFamily, nonce);
+//                        byte[] musicBytes = Base64.getDecoder().decode(decryptedJson3.get("M").getAsString());
+//                        boolean val = check(decryptedJson3.get("M").getAsString(),nonce, keyFamily,receivedJson3.get("MAC").getAsString());
+//                                    byte[] musicBytes = buffer.toByteArray();
+
+//                        try {
+//                            InputStream         in     = new ByteArrayInputStream(musicBytes);
+//                            BufferedInputStream bis    = new BufferedInputStream(in);
+//                            Player              player = new Player(bis);
+//                            player.play();
+//                            while (!player.isComplete()) {
 //                            }
-//                            catch (Exception e) {
-//                                System.out.println("Problem playing the MP3 file");
-//                                e.printStackTrace();
-//                            }
-                                os.write(encryptedBytes);
-                                os.write(encryptedBytes, 0, encryptedBytes.length);
-                                os.flush();
-                                from16bytes++;
-//                            }
-//                        } while (from16bytes < nb16bytes);
+//                            System.out.println("Song part finished playing");
+//                        } catch (Exception e) {
+//                            System.out.println("Problem playing the MP3 file");
+//                            e.printStackTrace();
+//                        }
+                        }
 
-
-                        //int offset = 0;
-                        //while (offset < encryptedBytes.length) {
-                        //    int chunkSize = Math.min(16, encryptedBytes.length - offset);
-                        //    os.write(encryptedBytes, offset, chunkSize);
-                        //    os.flush();
-                        //    offset += chunkSize;
-                        //}
 
 
                     } catch (IOException i) {
@@ -297,16 +311,17 @@ public class Server {
         return result;
     }
 
-    public static byte[] gives16thBytes(byte[] originalSong, int nb) {
-        int newLength = 1000;
-        if ((nb * newLength) +16 >= originalSong.length) {
-            newLength = nb * newLength - originalSong.length;// Or handle this case as you see fit
+    public static byte[] givePartByte(byte[] originalSong, int nb) {
+        int baselength = NB_BYTES_PACKET_MUSIC;
+        int newLength = baselength;
+        if ((nb * baselength) +baselength >= originalSong.length) {
+            newLength =  originalSong.length - nb * newLength;// Or handle this case as you see fit
         }
         // Create a new array to hold the result
         byte[] result = new byte[newLength];
 
         // Copy the relevant part of the original array into the result
-        System.arraycopy(originalSong, nb*16, result, 0, newLength);
+        System.arraycopy(originalSong, nb*baselength, result, 0, newLength);
         return result;
     }
 

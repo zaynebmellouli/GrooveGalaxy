@@ -3,6 +3,7 @@ package proj;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.security.*;
 import javax.crypto.*;
@@ -85,7 +86,7 @@ public class CL {
     public static String calculateMAC(String message, byte[] nonce, Key key)
             throws NoSuchAlgorithmException, InvalidKeyException {
         // Concatenate message, ID, and nonce
-        String data = message + new String(nonce);
+        String data = message + Base64.getEncoder().encodeToString(nonce);
 
         // Create a MAC instance using HMAC-SHA256 algorithm
         Mac mac = Mac.getInstance("HmacSHA256");
@@ -127,7 +128,7 @@ public class CL {
         cipher.init(Cipher.ENCRYPT_MODE, symKey_c, ivSpec);
 
         JsonObject result = new JsonObject();
-        result.addProperty("MAC", calculateMAC(new String(message), ID, nonce, symKey_c));
+        result.addProperty("MAC", calculateMAC(Base64.getEncoder().encodeToString(message), ID, nonce, symKey_c));
         result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message)));
         result.addProperty("Nonce", Base64.getEncoder().encodeToString(nonce));
         result.addProperty("ID", ID);
@@ -156,7 +157,7 @@ public class CL {
 
         cipher.init(Cipher.ENCRYPT_MODE, symKey_c, ivSpec);
         JsonObject result = new JsonObject();
-        result.addProperty("MAC", calculateMAC(new String(message), nonce, symKey_c));
+        result.addProperty("MAC", calculateMAC(Base64.getEncoder().encodeToString(message), nonce, symKey_c));
         result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message)));
         return result;
     }
@@ -182,7 +183,7 @@ public class CL {
         cipher.init(Cipher.ENCRYPT_MODE, symKey_c, ivSpec);
 
         JsonObject result = new JsonObject();
-        result.addProperty("MAC", calculateMAC(new String(message), nonce, symKey_c));
+        result.addProperty("MAC", calculateMAC(Base64.getEncoder().encodeToString(message), nonce, symKey_c));
         result.addProperty("Crypt_Key_f", Base64.getEncoder().encodeToString(cipher.doFinal(symKey_f.getEncoded())));
         cipher.init(Cipher.ENCRYPT_MODE, symKey_f, ivSpec);
         result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message)));
@@ -208,7 +209,7 @@ public class CL {
         cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
 
         // Decrypt the data
-        json.addProperty("M", new String(cipher.doFinal(encryptedM)));
+        json.addProperty("M", Base64.getEncoder().encodeToString(cipher.doFinal(encryptedM)));
         return json;
     }
 
@@ -237,12 +238,12 @@ public class CL {
                 json.addProperty("Key_f", Base64.getEncoder().encodeToString(key_f.getEncoded()));
 
                 cipher.init(Cipher.DECRYPT_MODE, key_f, ivSpec);
-                json.addProperty("M", new String(cipher.doFinal(encryptedM)));
+                json.addProperty("M", Base64.getEncoder().encodeToString(cipher.doFinal(encryptedM)));
                 return json;
 
             } else {
                     // Decrypt the data
-                    json.addProperty("M", new String(cipher.doFinal(encryptedM)));
+                    json.addProperty("M", Base64.getEncoder().encodeToString(cipher.doFinal(encryptedM)));
                     return json;
             }
         } else if (mode.equals("CTR")) {
@@ -253,7 +254,7 @@ public class CL {
             cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
 
             // Decrypt the data
-            json.addProperty("M", new String(cipher.doFinal(encryptedM)));
+            json.addProperty("M", Base64.getEncoder().encodeToString(cipher.doFinal(encryptedM)));
             return json;
 
         } else {
@@ -272,7 +273,7 @@ public class CL {
         return calculatedMac.equalsIgnoreCase(macToCheck);
     }
 
-    public static boolean check(String message, byte[] nonce, Key key, String macToCheck) throws NoSuchAlgorithmException, InvalidKeyException  {
+    public static boolean check(String message , byte[] nonce, Key key, String macToCheck) throws NoSuchAlgorithmException, InvalidKeyException  {
         // Calculate the MAC based on the message, nonce, and key
         String calculatedMac = calculateMAC(message, nonce, key);
 

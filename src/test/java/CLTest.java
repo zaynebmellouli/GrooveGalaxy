@@ -35,10 +35,10 @@ class CLTest extends CL {
         JsonObject r = CL.protect(message.getBytes(), nonce, id, key);
 
         JsonObject     t = CL.unprotect(r, key);
-        String M = t.get("M").getAsString();
+        String M = new String(Base64.getDecoder().decode(t.get("M").getAsString()));
 
         Assertions.assertEquals(message, M);
-        Assertions.assertTrue(check(M, t.get("ID").getAsInt(), Base64.getDecoder().decode(t.get("Nonce").getAsString()), key, t.get("MAC").getAsString()));
+        Assertions.assertTrue(check(t.get("M").getAsString(), t.get("ID").getAsInt(), Base64.getDecoder().decode(t.get("Nonce").getAsString()), key, t.get("MAC").getAsString()));
     }
 
     @org.junit.jupiter.api.Test
@@ -57,13 +57,13 @@ class CLTest extends CL {
         JsonObject r = CL.protect(message.getBytes(), nonce, key, key_f);
 
         JsonObject     t = CL.unprotect("CBC", r, key, nonce);
-        String M = t.get("M").getAsString();
+        String M = new String(Base64.getDecoder().decode(t.get("M").getAsString()));
         Key k_f = new SecretKeySpec(Base64.getDecoder().decode(t.get("Key_f").getAsString()), "AES");
 
 
         Assertions.assertEquals(message, M);
         Assertions.assertEquals(key_f, k_f);
-        Assertions.assertTrue(check(M, nonce, key, r.get("MAC").getAsString()));
+        Assertions.assertTrue(check(t.get("M").getAsString(), nonce, key, r.get("MAC").getAsString()));
     }
     @org.junit.jupiter.api.Test
     void testProtectUnprotectThird() throws IOException, GeneralSecurityException {
@@ -79,11 +79,11 @@ class CLTest extends CL {
         JsonObject r = CL.protect("CBC", message.getBytes(), nonce, key);
 
         JsonObject     t = CL.unprotect("CBC", r, key, nonce);
-        String M = t.get("M").getAsString();
+        String M =new String(Base64.getDecoder().decode(t.get("M").getAsString()));;
 
 
         Assertions.assertEquals(message, M);
-        Assertions.assertTrue(check(M, nonce, key, r.get("MAC").getAsString()));
+        Assertions.assertTrue(check( t.get("M").getAsString(), nonce, key, r.get("MAC").getAsString()));
 
 
     }
@@ -102,11 +102,11 @@ class CLTest extends CL {
         JsonObject r = CL.protect("CTR", message.getBytes(), nonce, key);
 
         JsonObject     t = CL.unprotect("CTR", r, key, nonce);
-        String M = t.get("M").getAsString();
+        String M = new String(Base64.getDecoder().decode(t.get("M").getAsString()));
 
 
         Assertions.assertEquals(message, M);
-        Assertions.assertTrue(check(M, nonce, key, r.get("MAC").getAsString()));
+        Assertions.assertTrue(check(t.get("M").getAsString(), nonce, key, r.get("MAC").getAsString()));
     }
 
 
@@ -268,7 +268,7 @@ class CLTest extends CL {
 
         // Unprotect with the adjusted nonce and partial message
         JsonObject t = CL.unprotect("CTR", r, key, adjustedNonce);
-        String M = t.get("M").getAsString();
+        String M = new String(Base64.getDecoder().decode(t.get("M").getAsString()));
 
         // Since we're starting from the 4th byte, we need to compare with the corresponding substring of the message
 
@@ -276,7 +276,7 @@ class CLTest extends CL {
         System.out.println("Expected partial message: " + expectedPartialMessage);
 
         Assertions.assertEquals(expectedPartialMessage, M);
-        Assertions.assertTrue(check(M, adjustedNonce, key, t.get("MAC").getAsString()));
+        Assertions.assertTrue(check(new String(Base64.getDecoder().decode(t.get("M").getAsString())), adjustedNonce, key, t.get("MAC").getAsString()));
     }
 //    @Test
 //    void testProtectUnprotectFourthStreamPart() throws IOException, GeneralSecurityException {
