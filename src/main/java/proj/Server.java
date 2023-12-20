@@ -39,7 +39,7 @@ import static proj.CL.*;
 
 public class Server {
 
-    public static final int NB_BYTES_PACKET_MUSIC = 100000;
+    public static final int NB_BYTES_PACKET_MUSIC = 200000;
 
     public static void startServer(int port) throws IOException {
         ServerSocketFactory factory    = SSLServerSocketFactory.getDefault();

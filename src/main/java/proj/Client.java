@@ -14,7 +14,9 @@ import javax.net.ssl.SSLSocket;
 import javax.net.ssl.SSLSocketFactory;
 
 import static proj.CL.*;
+import static proj.Server.NB_BYTES_PACKET_MUSIC;
 
+import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
 
 
@@ -118,8 +120,11 @@ public class Client {
                     os.flush();
 
 
-                    int from16bytes = (int) Math.floor((double) (PercentageBytes * media_content_length/100) / 100000);
-                    int nb16bytes   = (int) Math.ceil((double) media_content_length / 100000) ;
+                    int from16bytes = (int) Math.floor((double) (PercentageBytes * media_content_length/100) / NB_BYTES_PACKET_MUSIC);
+                    int nb16bytes   = (int) Math.ceil((double) media_content_length / NB_BYTES_PACKET_MUSIC) ;
+
+                    Thread playerThreadCur = null;
+                    Thread playerThreadPrev = null;
                     for (int i = from16bytes; i < nb16bytes; i++) {
                         //Listen for Response
                         ByteArrayOutputStream buffer = new ByteArrayOutputStream();
@@ -167,15 +172,30 @@ public class Client {
                                 //Restart Conversation
                             }
                             else {
-                                System.out.printf("Client received music from %d", from16bytes);
+                                System.out.printf("Client received music from %d\n", i);
 //                                    byte[] musicBytes = buffer.toByteArray();
 
                                 try {
-                                    InputStream         in     = new ByteArrayInputStream(musicBytes);
-                                    BufferedInputStream bis    = new BufferedInputStream(in);
-                                    Player              player = new Player(bis);
-//
-                                    player.play();
+                                    playerThreadCur = new Thread(() -> {
+                                        InputStream         in     = new ByteArrayInputStream(musicBytes);
+                                        BufferedInputStream bis    = new BufferedInputStream(in);
+                                        Player              player = null;
+                                        try {
+                                            player = new Player(bis);
+                                        } catch (JavaLayerException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                        try {
+                                            player.play();
+                                        } catch (JavaLayerException e) {
+                                            throw new RuntimeException(e);
+                                        }
+                                    });
+                                    if (playerThreadPrev != null) {
+                                        playerThreadPrev.join();
+                                    }
+                                    playerThreadCur.start();
+                                    playerThreadPrev = playerThreadCur;
                                     System.out.println("Song part playing");
                                 } catch (Exception e) {
                                     System.out.println("Problem playing the MP3 file");
