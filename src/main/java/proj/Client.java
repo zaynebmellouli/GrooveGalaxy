@@ -22,8 +22,8 @@ import jdk.jfr.Percentage;
 
 
 public class Client {
-    private static int percentageBytes;
-    private static String choosenSong;
+    private static int percentageBytes = Integer.MAX_VALUE;
+    private static String choosenSong = null;
     public static void startClient(String host, int port) throws IOException {
 
         SocketFactory factory = SSLSocketFactory.getDefault();
@@ -56,6 +56,7 @@ public class Client {
 
                     //First Message
                     //message = "Breathe";
+                    while(choosenSong == null){}
                     JsonObject r            = CL.protect(choosenSong.getBytes(), nonce, id, key);
                     byte[]     messageBytes = r.toString().getBytes();
                     os = new BufferedOutputStream(socket.getOutputStream());
@@ -112,7 +113,7 @@ public class Client {
                     //    message = scanner.nextLine();
                     //} while (Integer.parseInt(message) < 0 || Integer.parseInt(message) >= 100);
                     //int PercentageBytes = Integer.parseInt(message);
-
+                    while(percentageBytes == Integer.MAX_VALUE){}
                     message = String.valueOf(percentageBytes);
 
 
