@@ -18,10 +18,12 @@ import static proj.Server.NB_BYTES_PACKET_MUSIC;
 
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
+import jdk.jfr.Percentage;
 
 
 public class Client {
-
+    private static int percentageBytes;
+    private static String choosenSong;
     public static void startClient(String host, int port) throws IOException {
 
         SocketFactory factory = SSLSocketFactory.getDefault();
@@ -53,8 +55,8 @@ public class Client {
                     Key key_f = CL.readAESKey("Keys/Key_Family_Lu.key");
 
                     //First Message
-                    message = "Breathe";
-                    JsonObject r            = CL.protect(message.getBytes(), nonce, id, key);
+                    //message = "Breathe";
+                    JsonObject r            = CL.protect(choosenSong.getBytes(), nonce, id, key);
                     byte[]     messageBytes = r.toString().getBytes();
                     os = new BufferedOutputStream(socket.getOutputStream());
                     os.write(messageBytes);
@@ -105,12 +107,13 @@ public class Client {
                         }
                     }
                     // Second message
-                    do {
-                        System.out.println("From which percentage do you want the music (format 0-100)?");
-                        message = scanner.nextLine();
-                    } while (Integer.parseInt(message) < 0 || Integer.parseInt(message) >= 100);
-                    int PercentageBytes = Integer.parseInt(message);
-                    message = String.valueOf(PercentageBytes);
+                    //do {
+                    //    System.out.println("From which percentage do you want the music (format 0-100)?");
+                    //    message = scanner.nextLine();
+                    //} while (Integer.parseInt(message) < 0 || Integer.parseInt(message) >= 100);
+                    //int PercentageBytes = Integer.parseInt(message);
+
+                    message = String.valueOf(percentageBytes);
 
 
                     nonce        = incrementByteNonce(nonce);
@@ -120,7 +123,7 @@ public class Client {
                     os.flush();
 
 
-                    int from16bytes = (int) Math.floor((double) (PercentageBytes * media_content_length/100) / NB_BYTES_PACKET_MUSIC);
+                    int from16bytes = (int) Math.floor((double) (percentageBytes * media_content_length/100) / NB_BYTES_PACKET_MUSIC);
                     int nb16bytes   = (int) Math.ceil((double) media_content_length / NB_BYTES_PACKET_MUSIC) ;
 
                     Thread playerThreadCur = null;
@@ -245,12 +248,25 @@ public class Client {
 
     // Method where you receive messages
     public static void receiveMessage(JsonObject json) {
-        String receivedMessage = new String(Base64.getDecoder().decode(json.get("M").getAsString()));
 
         if (guiCallback != null) {
-            guiCallback.updateMessage(receivedMessage);
+            guiCallback.updateMessage(json);
         }
     }
+
+    public static void getPercentageGUI(int percentage) {
+        // Logic to handle the percentage input and song selection
+        percentageBytes =  percentage;
+        // Further processing...
+    }
+
+    public static void getSongGUI(String song) {
+        // Logic to handle the percentage input and song selection
+        choosenSong = song;
+        // Further processing...
+    }
+
+
 
     public static void main(String[] args) throws IOException {
         System.setProperty("javax.net.ssl.keyStore", "https_cert/user.p12");
