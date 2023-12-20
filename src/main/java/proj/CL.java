@@ -3,7 +3,6 @@ package proj;
 import java.io.*;
 import java.nio.ByteBuffer;
 import java.nio.ByteOrder;
-import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.security.*;
 import javax.crypto.*;
@@ -228,8 +227,7 @@ public class CL {
 
     /**
      * Unprotect the message different modes depending on the json received
-     * @param mode the mode of the cipher ("CBC" or "CTR")
-     * @param json the json object with different kind of information depending on the mode
+s     * @param json the json object with different kind of information depending on the mode
      * @param symKey the symmetric key of the client that he shares with the server
      * @param nonce the nonce to use
      * @return the json object with encrypted message in M or in Key_f
