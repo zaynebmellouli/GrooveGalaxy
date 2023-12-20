@@ -138,20 +138,18 @@ public class CL {
 
     /**
      * Protect for the message of the client and the stream of the music in CTR mode
-     * @param mode the mode of the cipher ("CBC" or "CTR")
      * @param message the requested music
      * @param nonce the next nonce to use
      * @param symKey_c  the symmetric key of the client that he shares with the server
      * @return a json object with (MAC(M, N), Crypt(M))
      * @throws GeneralSecurityException if the cipher is not initialized correctly
      */
-    public static JsonObject protect(String mode, byte[] message, byte[] nonce, Key symKey_c) throws GeneralSecurityException {
+    public static JsonObject protect(byte[] message, byte[] nonce, Key symKey_c) throws GeneralSecurityException {
         // Ensure nonce is the correct size (16 bytes for AES)
         if (nonce.length != 16) {
             throw new IllegalArgumentException("Nonce must be 16 bytes long");
         }
-        Cipher cipher = Objects.equals(mode, "CTR") ? Cipher.getInstance("AES/CTR/NoPadding")
-                                                        : Cipher.getInstance("AES/CBC/PKCS5Padding");
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
 
         IvParameterSpec ivSpec = new IvParameterSpec(nonce);
 
@@ -160,6 +158,21 @@ public class CL {
         result.addProperty("MAC", calculateMAC(Base64.getEncoder().encodeToString(message), nonce, symKey_c));
         result.addProperty("Crypt_M", Base64.getEncoder().encodeToString(cipher.doFinal(message)));
         return result;
+    }
+
+
+    public static byte[] protectCTR( byte[] message, byte[] nonce, Key symKey_c) throws GeneralSecurityException {
+        // Ensure nonce is the correct size (16 bytes for AES)
+        if (nonce.length != 16) {
+            throw new IllegalArgumentException("Nonce must be 16 bytes long");
+        }
+        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+
+        IvParameterSpec ivSpec = new IvParameterSpec(nonce);
+
+        cipher.init(Cipher.ENCRYPT_MODE, symKey_c, ivSpec);
+
+        return cipher.doFinal(message);
     }
 
     /**
@@ -222,56 +235,44 @@ public class CL {
      * @return the json object with encrypted message in M or in Key_f
      * @throws GeneralSecurityException
      */
-    public static JsonObject unprotect(String mode, JsonObject json, Key symKey, byte[] nonce) throws GeneralSecurityException {
+    public static JsonObject unprotect(JsonObject json, Key symKey, byte[] nonce) throws GeneralSecurityException {
         // Extract the necessary properties from the JSON object
         byte[] encryptedM = Base64.getDecoder().decode(json.get("Crypt_M").getAsString());
-        if (mode.equals("CBC")) {
-            byte[] encryptedKey_f = json.has("Crypt_Key_f") ? Base64.getDecoder().decode(json.get("Crypt_Key_f").getAsString()): null;
+        byte[] encryptedKey_f = json.has("Crypt_Key_f") ? Base64.getDecoder().decode(json.get("Crypt_Key_f").getAsString()): null;
 
-            // Initialize the cipher for decryption
-            Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
-            IvParameterSpec ivSpec = new IvParameterSpec(nonce);
-            cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
-            if (encryptedKey_f != null){
-                // Decrypt the data
-                Key key_f = new SecretKeySpec(cipher.doFinal(encryptedKey_f), "AES");
-                json.addProperty("Key_f", Base64.getEncoder().encodeToString(key_f.getEncoded()));
-
-                cipher.init(Cipher.DECRYPT_MODE, key_f, ivSpec);
-                json.addProperty("M", Base64.getEncoder().encodeToString(cipher.doFinal(encryptedM)));
-                return json;
-
-            } else {
-                    // Decrypt the data
-                    json.addProperty("M", Base64.getEncoder().encodeToString(cipher.doFinal(encryptedM)));
-                    return json;
-            }
-        } else if (mode.equals("CTR")) {
-            // Initialize the cipher for decryption
-            Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
-            IvParameterSpec ivSpec = new IvParameterSpec(nonce);
-
-            cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
-
+        // Initialize the cipher for decryption
+        Cipher cipher = Cipher.getInstance("AES/CBC/PKCS5Padding");
+        IvParameterSpec ivSpec = new IvParameterSpec(nonce);
+        cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
+        if (encryptedKey_f != null){
             // Decrypt the data
+            Key key_f = new SecretKeySpec(cipher.doFinal(encryptedKey_f), "AES");
+            json.addProperty("Key_f", Base64.getEncoder().encodeToString(key_f.getEncoded()));
+
+            cipher.init(Cipher.DECRYPT_MODE, key_f, ivSpec);
             json.addProperty("M", Base64.getEncoder().encodeToString(cipher.doFinal(encryptedM)));
             return json;
 
         } else {
-            throw new IllegalArgumentException("Mode must be CBC or CTR");
+                // Decrypt the data
+                json.addProperty("M", Base64.getEncoder().encodeToString(cipher.doFinal(encryptedM)));
+                return json;
         }
+
+    }
+
+    public static byte[] unprotectCTR(byte[] encryptedM, Key symKey, byte[] nonce) throws GeneralSecurityException {
+        Cipher cipher = Cipher.getInstance("AES/CTR/NoPadding");
+        IvParameterSpec ivSpec = new IvParameterSpec(nonce);
+
+        cipher.init(Cipher.DECRYPT_MODE, symKey, ivSpec);
+
+        // Decrypt the data
+        return cipher.doFinal(encryptedM);
     }
 
 
-    // Function to check if a given MAC is valid for the message, nonce, and key
-    public static boolean checkMAC(String message, byte[] nonce, Key key, String macToCheck)
-            throws NoSuchAlgorithmException, InvalidKeyException {
-        // Calculate the MAC based on the message, nonce, and key
-        String calculatedMac = calculateMAC(message, nonce, key);
 
-        // Compare the calculated MAC with the given MAC
-        return calculatedMac.equalsIgnoreCase(macToCheck);
-    }
 
     public static boolean check(String message , byte[] nonce, Key key, String macToCheck) throws NoSuchAlgorithmException, InvalidKeyException  {
         // Calculate the MAC based on the message, nonce, and key
@@ -302,9 +303,9 @@ public class CL {
         counterValue += offset / 16; // AES block size is 16 bytes
 
         // If the offset is not a multiple of the block size, we need to account for the partial block
-        if (offset % 16 != 0) {
-            counterValue++;
-        }
+//        if (offset % 16 != 0) {
+//            counterValue++;
+//        }
 
         // Put the incremented counter back into the nonce
         byteBuffer.position(nonce.length - 4);

@@ -56,7 +56,7 @@ class CLTest extends CL {
 
         JsonObject r = CL.protect(message.getBytes(), nonce, key, key_f);
 
-        JsonObject     t = CL.unprotect("CBC", r, key, nonce);
+        JsonObject     t = CL.unprotect(r, key, nonce);
         String M = new String(Base64.getDecoder().decode(t.get("M").getAsString()));
         Key k_f = new SecretKeySpec(Base64.getDecoder().decode(t.get("Key_f").getAsString()), "AES");
 
@@ -76,9 +76,9 @@ class CLTest extends CL {
         Key key = CL.readAESKey("Keys/AESKeytest.key");
 
 
-        JsonObject r = CL.protect("CBC", message.getBytes(), nonce, key);
+        JsonObject r = CL.protect(message.getBytes(), nonce, key);
 
-        JsonObject     t = CL.unprotect("CBC", r, key, nonce);
+        JsonObject     t = CL.unprotect(r, key, nonce);
         String M =new String(Base64.getDecoder().decode(t.get("M").getAsString()));;
 
 
@@ -99,9 +99,9 @@ class CLTest extends CL {
         Key key = CL.readAESKey("Keys/AESKeytest.key");
 
 
-        JsonObject r = CL.protect("CTR", message.getBytes(), nonce, key);
+        JsonObject r = CL.protect(message.getBytes(), nonce, key);
 
-        JsonObject     t = CL.unprotect("CTR", r, key, nonce);
+        JsonObject     t = CL.unprotect( r, key, nonce);
         String M = new String(Base64.getDecoder().decode(t.get("M").getAsString()));
 
 
@@ -194,7 +194,7 @@ class CLTest extends CL {
 
         // Attempt to unprotect and check if the appropriate exception is thrown
         Assertions.assertThrows(GeneralSecurityException.class, () -> {
-            JsonObject t = CL.unprotect("CBC",finalR, finalKey,finalNonce);
+            JsonObject t = CL.unprotect(finalR, finalKey,finalNonce);
             // If the exception is thrown, the following lines will not be executed
             String M = t.get("M").getAsString();
             Assertions.assertNotEquals(message, M);
@@ -228,7 +228,7 @@ class CLTest extends CL {
 
         // Attempt to unprotect and check if the appropriate exception is thrown
         Assertions.assertThrows(GeneralSecurityException.class, () -> {
-            JsonObject t = CL.unprotect("CBC",finalR, finalKey,finalNonce);
+            JsonObject t = CL.unprotect(finalR, finalKey,finalNonce);
             // If the exception is thrown, the following lines will not be executed
             String M = t.get("M").getAsString();
             Assertions.assertEquals(message, M);
@@ -243,32 +243,30 @@ class CLTest extends CL {
         byte[] nonce = new byte[16];
 //        random.nextBytes(nonce);
 
-        String message = "This is the Music of the Night";
+        String message = "This is the Music of the Night jjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjjj";
         CL.generateAESKey("Keys/AESKeytest.key");
         Key key = CL.readAESKey("Keys/AESKeytest.key");
 
         // Protect the message using AES CTR mode
-        JsonObject r = CL.protect("CTR", message.getBytes(), nonce, key);
+        byte[] encryptedMessage = CL.protectCTR(message.getBytes(), nonce, key);
 
         // Simulate streaming by decrypting from the 4th byte
-        int offset = 1; // Assuming the first byte is at index 0
-        byte[] encryptedMessage = Base64.getDecoder().decode(r.get("Crypt_M").getAsString());
-        byte[] partialEncryptedMessage = new byte[encryptedMessage.length - offset * 16];
-        System.arraycopy(encryptedMessage, offset * 16, partialEncryptedMessage, 0, partialEncryptedMessage.length);
+        int offset = 16; // Assuming the first byte is at index 0
+        byte[] partialEncryptedMessage = new byte[encryptedMessage.length - offset];
+        System.arraycopy(encryptedMessage, offset, partialEncryptedMessage, 0, partialEncryptedMessage.length);
 
         // You need to adjust the nonce to account for the offset in CTR mode
-        byte[] adjustedNonce = incrementCounterInNonce(nonce, offset ); // Assuming each byte is 2 hex characters
+        byte[] adjustedNonce = incrementCounterInNonce(nonce, offset); // Assuming each byte is 2 hex characters
 
         System.out.println("Nonce: " + Base64.getEncoder().encodeToString(nonce));
         System.out.println("Adjusted nonce: " + Base64.getEncoder().encodeToString(adjustedNonce));
-        String expectedPartialMessage = message.substring(offset * 16);
+        String expectedPartialMessage = message.substring(offset);
 
-        r.addProperty("Crypt_M", Base64.getEncoder().encodeToString(partialEncryptedMessage));
-        r.addProperty("MAC", CL.calculateMAC(expectedPartialMessage, adjustedNonce, key));
+        String mac = CL.calculateMAC(Base64.getEncoder().encodeToString(partialEncryptedMessage), adjustedNonce, key);
 
         // Unprotect with the adjusted nonce and partial message
-        JsonObject t = CL.unprotect("CTR", r, key, adjustedNonce);
-        String M = new String(Base64.getDecoder().decode(t.get("M").getAsString()));
+        byte[] t = CL.unprotectCTR( partialEncryptedMessage, key, adjustedNonce);
+        String M = new String(t);
 
         // Since we're starting from the 4th byte, we need to compare with the corresponding substring of the message
 
@@ -276,8 +274,11 @@ class CLTest extends CL {
         System.out.println("Expected partial message: " + expectedPartialMessage);
 
         Assertions.assertEquals(expectedPartialMessage, M);
-        Assertions.assertTrue(check(new String(Base64.getDecoder().decode(t.get("M").getAsString())), adjustedNonce, key, t.get("MAC").getAsString()));
+        Assertions.assertTrue(check(Base64.getEncoder().encodeToString(partialEncryptedMessage), adjustedNonce, key, mac));
     }
+
+
+
 //    @Test
 //    void testProtectUnprotectFourthStreamPart() throws IOException, GeneralSecurityException {
 //        SecureRandom random = new SecureRandom();

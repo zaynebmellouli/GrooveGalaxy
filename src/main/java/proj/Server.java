@@ -39,7 +39,7 @@ import static proj.CL.*;
 
 public class Server {
 
-    public static final int NB_BYTES_PACKET_MUSIC = 200000;
+    public static final int NB_BYTES_PACKET_MUSIC = 100000;
 
     public static void startServer(int port) throws IOException {
         ServerSocketFactory factory    = SSLServerSocketFactory.getDefault();
@@ -158,7 +158,7 @@ public class Server {
                             System.out.println("Error! Restarting conversation");
                             message = "Error";
                             nonce = incrementByteNonce(nonce);
-                            r = CL.protect("CTR",message.getBytes(), nonce, keyFamily);
+                            r = CL.protect(message.getBytes(), nonce, keyFamily);
                             messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
@@ -168,14 +168,14 @@ public class Server {
                         nonce = incrementByteNonce(nonce);
                         //decrypt the message
                         int byteReqInt = 0;
-                        JsonObject decryptedJson2 = CL.unprotect("CBC", receivedJson2, keyServClient, nonce);
+                        JsonObject decryptedJson2 = CL.unprotect( receivedJson2, keyServClient, nonce);
                         String byteReq = new String(Base64.getDecoder().decode(decryptedJson2.get("M").getAsString()));
                         if(!check(decryptedJson2.get("M").getAsString(),nonce, keyServClient,receivedJson2.get("MAC").getAsString())){
                             System.out.println("Integrity check failed. Sending error message to client.");
                             // Send error message to server
                             String errorMessage = "Error";
                             nonce = incrementByteNonce(nonce);
-                            r = CL.protect("CTR",errorMessage.getBytes(), nonce, keyFamily);
+                            r = CL.protect(errorMessage.getBytes(), nonce, keyFamily);
                             //HELP - the client is expecting a concatinated message with the family fey
                             messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
@@ -189,8 +189,7 @@ public class Server {
                                 // Send error message to server
                                 String errorMessage = "Error";
                                 nonce = incrementByteNonce(nonce);
-                                r = CL.protect("CTR",errorMessage.getBytes(), nonce, keyFamily);
-                                //HELP - the client is expecting a concatinated message with the family fey
+                                r = CL.protect(errorMessage.getBytes(), nonce, keyFamily);
                                 messageBytes = r.toString().getBytes();
                                 os.write(messageBytes);
                                 os.flush();
@@ -213,19 +212,20 @@ public class Server {
 //                        os.write(encryptedBytes);
 //                        os.flush();
                         byte[] originalSong = Base64.getDecoder().decode(media_content.get("file_Bytes").getAsString());
-                        int from16bytes = (int) Math.floor((byteReqInt/ 100.0) * originalSong.length  / NB_BYTES_PACKET_MUSIC);
-                        int nb16bytes = (int) Math.ceil((double) originalSong.length / NB_BYTES_PACKET_MUSIC) ;
+                        byte[] encryptedOriginalSong = CL.protectCTR(originalSong, nonce, keyFamily);
+                        int from16bytes = (int) Math.floor((byteReqInt/ 100.0) * encryptedOriginalSong.length  / NB_BYTES_PACKET_MUSIC);
+                        int nb16bytes = (int) Math.ceil((double) encryptedOriginalSong.length / NB_BYTES_PACKET_MUSIC) ;
 
 
                         for (int i = from16bytes; i < nb16bytes; i++) {
-                            byte[] partSong = givePartByte(originalSong, i);
-                            nonce = incrementByteNonce(nonce);
-                            JsonObject encryptedResponse = CL.protect("CBC", partSong, nonce, keyFamily);
-                            byte[] encryptedBytes = encryptedResponse.toString().getBytes();
-                            BufferedOutputStream bufferedOutput = new BufferedOutputStream(os, 100000);
-                            bufferedOutput.write(encryptedBytes);
+                            byte[] partEncryptedSong = givePartByte(encryptedOriginalSong, i);
+                            byte[] nonceCTR = incrementCounterInNonce(nonce,i * NB_BYTES_PACKET_MUSIC);
+                            BufferedOutputStream bufferedOutput = new BufferedOutputStream(os, 1000);
+                            bufferedOutput.write(partEncryptedSong);
                             bufferedOutput.flush();
-                            bufferedOutput.write("stop".getBytes());
+                            bufferedOutput.write("MAC".getBytes());
+                            bufferedOutput.flush();
+                            bufferedOutput.write(calculateMAC(Base64.getEncoder().encodeToString(partEncryptedSong),nonceCTR, keyFamily).getBytes());
                             bufferedOutput.flush();
 //                            os = new BufferedOutputStream(socket.getOutputStream());
 //                            os.write(encryptedBytes);
@@ -241,8 +241,10 @@ public class Server {
 
 
 //                        JsonObject decryptedJson3 = unprotect("CBC", receivedJson3, keyFamily, nonce);
-//                        byte[] musicBytes = Base64.getDecoder().decode(decryptedJson3.get("M").getAsString());
-//                        boolean val = check(decryptedJson3.get("M").getAsString(),nonce, keyFamily,receivedJson3.get("MAC").getAsString());
+//                        byte[] musicBytes =  unprotectCTR(partEncryptedSong, keyFamily, nonceCTR);
+//                        byte[] musicBytesu =  givePartByte(originalSong, i);
+
+                        //                        boolean val = check(decryptedJson3.get("M").getAsString(),nonce, keyFamily,receivedJson3.get("MAC").getAsString());
 //                                    byte[] musicBytes = buffer.toByteArray();
 
 //                        try {

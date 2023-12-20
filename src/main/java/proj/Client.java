@@ -70,11 +70,11 @@ public class Client {
 //                            nonce        = incrementByteNonce(nonce);
                         String     firstMessage   = new String(data, 0, len);
                         JsonObject receivedJson1  = JsonParser.parseString(firstMessage).getAsJsonObject();
-                        JsonObject decryptedJson1 = unprotect("CBC", receivedJson1, key, nonce);
+                        JsonObject decryptedJson1 = unprotect(receivedJson1, key, nonce);
                         if (!check( decryptedJson1.get("M").getAsString(), nonce, key, receivedJson1.get("MAC").getAsString())) {
                             System.out.println("Error! Restarting conversation");
                             message      = "Error";
-                            r            = CL.protect("CBC", message.getBytes(), nonce, key);
+                            r            = CL.protect( message.getBytes(), nonce, key);
                             messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
@@ -99,7 +99,7 @@ public class Client {
                                 System.out.println("title :" + mediaInfo.get("title").getAsString());
                                 System.out.println("genre :" + mediaInfo.get("genre").getAsString());
                                 System.out.println("lyrics :" + mediaInfo.get("lyrics").getAsString());
-                                receiveMessage(mediaInfo);
+                                receiveMessage(decryptedJson1);
                             }
                             // Continue to send the second message
                         }
@@ -114,7 +114,7 @@ public class Client {
 
 
                     nonce        = incrementByteNonce(nonce);
-                    r            = CL.protect("CBC", message.getBytes(), nonce, key);
+                    r            = CL.protect( message.getBytes(), nonce, key);
                     messageBytes = r.toString().getBytes();
                     os.write(messageBytes);
                     os.flush();
@@ -132,10 +132,12 @@ public class Client {
                         // Buffer to store the total response
                         is = new BufferedInputStream(socket.getInputStream());
                         byte[] packet = new byte[1000]; // Buffer for individual packets
+                        byte[] mac    = new byte[64];
                         int    bytesRead;
 
                         while ((bytesRead = is.read(packet)) != -1) {
-                            if (Arrays.equals(packet,0,bytesRead -1, "stop".getBytes(),0,3)) {
+                            if (Arrays.equals(packet,0,bytesRead -1, "MAC".getBytes(),0,2)) {
+                                is.read(mac);
                                 break;
                             }else {
                                 buffer.write(packet, 0, bytesRead);
@@ -143,41 +145,39 @@ public class Client {
 //
                         }
                         // Convert the total response into a string
-                        String parSong = new String(buffer.toByteArray(), StandardCharsets.UTF_8);
-                        JsonObject receivedJson3 = null;
+                        byte[] partSong = buffer.toByteArray();
 
 
-                        receivedJson3 = JsonParser.parseString(parSong).getAsJsonObject();
 
-                        nonce = incrementByteNonce(nonce);
+                        byte[] nonceCTR = incrementCounterInNonce(nonce,i * NB_BYTES_PACKET_MUSIC);
 
-                        JsonObject decryptedJson3 = unprotect("CBC", receivedJson3, key_f, nonce);
-                        if (!check(decryptedJson3.get("M").getAsString(), nonce, key_f, receivedJson3.get("MAC").getAsString())) {
+                        byte[] decryptPartSong = unprotectCTR(partSong, key_f, nonceCTR);
+                        if (!check(Base64.getEncoder().encodeToString(partSong), nonceCTR, key_f, new String(mac))) {
                             System.out.println("Error! Restarting conversation");
                             message      = "Error";
                             nonce        = incrementByteNonce(nonce);
-                            r            = CL.protect("CBC", message.getBytes(), nonce, key);
+                            r            = CL.protect(message.getBytes(), nonce, key);
                             messageBytes = r.toString().getBytes();
                             os.write(messageBytes);
                             os.flush();
                             throw new SecurityException("...");
                         }
                         else {
-//                             Check if the message is an error message
-                            byte[] musicBytes =Base64.getDecoder().decode(decryptedJson3.get("M").getAsString());
-                            String m = new String(musicBytes);
-                            if (m.equalsIgnoreCase("Error")) {
-                                System.out.println("Error! Restarting conversation");
-                                throw new SecurityException("...");
-                                //Restart Conversation
-                            }
-                            else {
+////                             Check if the message is an error message
+//                            byte[] musicBytes =Base64.getDecoder().decode(decryptedJson3.get("M").getAsString());
+//                            String m = new String(musicBytes);
+//                            if (m.equalsIgnoreCase("Error")) {
+//                                System.out.println("Error! Restarting conversation");
+//                                throw new SecurityException("...");
+//                                //Restart Conversation
+//                            }
+//                            else {
                                 System.out.printf("Client received music from %d\n", i);
 //                                    byte[] musicBytes = buffer.toByteArray();
 
                                 try {
                                     playerThreadCur = new Thread(() -> {
-                                        InputStream         in     = new ByteArrayInputStream(musicBytes);
+                                        InputStream         in     = new ByteArrayInputStream(decryptPartSong);
                                         BufferedInputStream bis    = new BufferedInputStream(in);
                                         Player              player = null;
                                         try {
@@ -202,7 +202,7 @@ public class Client {
                                     e.printStackTrace();
                                 }
                             }
-                        }
+//                        }
                     }
 //                        from16bytes++;
 //                        } while (from16bytes < nb16bytes);
@@ -245,7 +245,7 @@ public class Client {
 
     // Method where you receive messages
     public static void receiveMessage(JsonObject json) {
-        String receivedMessage = json.get("M").getAsString();
+        String receivedMessage = new String(Base64.getDecoder().decode(json.get("M").getAsString()));
 
         if (guiCallback != null) {
             guiCallback.updateMessage(receivedMessage);
