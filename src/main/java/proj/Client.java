@@ -159,7 +159,7 @@ public class Client {
     }
 
     public static void promptSongSelection() throws GeneralSecurityException, IOException {
-        String[] songs = {"Song1", "Song2", "Song3"};
+        String[] songs = {"Free Bird", "Song2", "Song3"};
         choosenSong = (String) JOptionPane.showInputDialog(frame,
                 "Which song would you like to listen to?",
                 "Select Song",
