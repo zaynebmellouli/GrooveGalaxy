@@ -4,24 +4,30 @@ import java.io.Serializable;
 import java.util.Base64;
 
 public class MediaContent implements Serializable {
-
+    private int mediaContentId;
     private String titleContent;
+    private int ownerId;
     private String lyrics;
     private String filePath;
-    private String audiobase64;
 
-    // Constructors
 
     public MediaContent() {
     }
 
-    public MediaContent(String titleContent, String lyrics, String filePath) {
+    public MediaContent(int mediaContentId, int ownerId,String titleContent, String lyrics, String filePath) {
+        this.mediaContentId= mediaContentId;
+        this.ownerId = ownerId;
         this.titleContent = titleContent;
         this.lyrics = lyrics;
         this.filePath = filePath;
     }
 
     // Getters
+
+
+    public int getMediaContentId() {
+        return mediaContentId;
+    }
 
     public String getTitleContent() {
         return titleContent;
@@ -35,7 +41,7 @@ public class MediaContent implements Serializable {
         return filePath;
     }
 
-    //public String getAudiobase64(){ return audiobase64;}
+    public int getOwnerId(){ return ownerId;}
     public void setFilePath(String filePath) {
         this.filePath = filePath;
     }
@@ -47,14 +53,20 @@ public class MediaContent implements Serializable {
     public void setLyrics(String lyrics) {
         this.lyrics = lyrics;
     }
-    //public void setAudiobase64(String audiobase64) {
-      //  this.audiobase64 = audiobase64;
-    //}
 
+    public void setMediaContentId(int mediaContentId) {
+        this.mediaContentId = mediaContentId;
+    }
+
+    public void setOwnerId(Integer ownerId) {
+        this.ownerId = ownerId;
+    }
 
     public String toJson() {
         JsonObject json = new JsonObject();
+        json.addProperty("media_content_id", this.getMediaContentId());
         json.addProperty("title_content", this.getTitleContent());
+        json.addProperty("owner_id", this.getOwnerId());
         json.addProperty("lyrics", this.getLyrics());
         json.addProperty("file_path", this.getFilePath());
         return json.toString();
