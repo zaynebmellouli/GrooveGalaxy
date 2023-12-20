@@ -149,8 +149,11 @@ public class Server {
                         JsonObject r = CL.protect(message.getBytes(), nonce, keyServClient, keyFamily);
                         byte[] messageBytes = r.toString().getBytes();
                         os = new BufferedOutputStream(socket.getOutputStream());
-                        os.write(messageBytes);
-                        os.flush();
+                        BufferedOutputStream bufferedOutput = new BufferedOutputStream(os, 1000);
+                        bufferedOutput.write(messageBytes);
+                        bufferedOutput.flush();
+                        bufferedOutput.write("stop".getBytes());
+                        bufferedOutput.flush();
 
                         //Listen for Response - Percentage
                         len = is.read(data);
@@ -220,7 +223,8 @@ public class Server {
                         for (int i = from16bytes; i < nb16bytes; i++) {
                             byte[] partEncryptedSong = givePartByte(encryptedOriginalSong, i);
                             byte[] nonceCTR = incrementCounterInNonce(nonce,i * NB_BYTES_PACKET_MUSIC);
-                            BufferedOutputStream bufferedOutput = new BufferedOutputStream(os, 1000);
+//                            BufferedOutputStream bufferedOutput = new BufferedOutputStream(os, 1000);
+                            bufferedOutput = new BufferedOutputStream(os, 1000);
                             bufferedOutput.write(partEncryptedSong);
                             bufferedOutput.flush();
                             bufferedOutput.write("MAC".getBytes());

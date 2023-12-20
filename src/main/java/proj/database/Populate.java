@@ -112,53 +112,53 @@ public class Populate {
                 );
         MediaContent mediaContent3 = new MediaContent(3,3, "Herzbeben",
                 "Durch meine Venen fließt der Bass, hämmert gegen meine Sehnen\n" +
-                "        Auf das Leben ist Verlass, es hat noch viel zu geben\n" +
-                "        Und ich nehm deine Hand, muss tanzen, immer weiter\n" +
-                "        Ich vergesse den Verstand, der Horizont wird breiter\n" +
-                "        Herzbeben, lass uns leben, wir woll'n was erleben\n" +
-                "        Herzbeben, vorwärts, Herz, lass es beben, beben\n" +
-                "        Herzbeben, deinem Beat total ergeben\n" +
-                "        Lass mich leben, Herzbeben, lass es beben\n" +
-                "        Herzbeben, lass uns leben, wir woll'n was erleben\n" +
-                "        Herzbeben, vorwärts, Herz, lass es beben, beben\n" +
-                "        Herzbeben, lass uns durch die Decke heben\n" +
-                "        Herzbeben, lass uns leben, lass doch unsre Körper reden\n" +
-                "        Reiß dich los, ich will schweben dir entgegen\n" +
-                "        Herzbeben, lass uns leben\n" +
-                "        Komm und reiß dich los, ja, wir haben uns gefunden\n" +
-                "        Unsre Seelen sind verbunden\n" +
-                "        Herzbeben\n" +
-                "        Ja, mein Herzschlag ist, was zählt, der Beat macht mich lebendig\n" +
-                "        Hab dich längst schon ausgewählt, bin völlig überwältigt\n" +
-                "        Komm mit auf meine Umlaufbahn, bring mich aus dem Takt\n" +
-                "        Vergessen wir den Lebensplan, genießen den Kontakt\n" +
-                "        Spürst du den Rhythmus? Dann steig mit ein\n" +
-                "        Das kann unsere Reise sein\n" +
-                "        Herzbeben, lass uns leben, wir woll'n was erleben\n" +
-                "        Herzbeben, vorwärts, Herz, lass es beben, beben\n" +
-                "        Herzbeben, lass uns durch die Decke heben\n" +
-                "        Herzbeben, lass uns leben, lass doch unsre Körper reden\n" +
-                "        Reiß dich los, ich will schweben dir entgegen\n" +
-                "        Herzbeben, lass uns leben\n" +
-                "        Komm und reiß dich los, ja, wir haben uns gefunden\n" +
-                "        Unsre Seelen sind verbunden\n" +
-                "        Herzbeben\n" +
-                "        Verlangsamt sich der Puls der Nacht, doch mein\n" +
-                "        Mein Atem möcht dich finden\n" +
-                "        Der Tag ist längst nicht aufgewacht, wenn sich\n" +
-                "        Wenn sich die Energien verbünden\n" +
-                "        Spürst du immer noch mein Herz?\n" +
-                "        Herzbeben\n" +
-                "                Herzbeben\n" +
-                "        Herzbeben, lass uns leben, wir woll'n was erleben\n" +
-                "        Herzbeben, vorwärts, Herz, lass es beben, beben\n" +
-                "        Herzbeben, deinem Beat total ergeben\n" +
-                "        Lass mich leben, Herzbeben, lass es beben\n" +
-                "        Reiß dich los, ich will schweben dir entgegen\n" +
-                "        Herzbeben, lass uns leben\n" +
-                "        Komm und reiß dich los, ja, wir haben uns gefunden\n" +
-                "        Unsre Seelen sind verbunden\n" +
-                "        Herzbeben\"",
+                "Auf das Leben ist Verlass, es hat noch viel zu geben\n" +
+                "Und ich nehm deine Hand, muss tanzen, immer weiter\n" +
+                "Ich vergesse den Verstand, der Horizont wird breiter\n" +
+                "Herzbeben, lass uns leben, wir woll'n was erleben\n" +
+                "Herzbeben, vorwärts, Herz, lass es beben, beben\n" +
+                "Herzbeben, deinem Beat total ergeben\n" +
+                "Lass mich leben, Herzbeben, lass es beben\n" +
+                "Herzbeben, lass uns leben, wir woll'n was erleben\n" +
+                "Herzbeben, vorwärts, Herz, lass es beben, beben\n" +
+                "Herzbeben, lass uns durch die Decke heben\n" +
+                "Herzbeben, lass uns leben, lass doch unsre Körper reden\n" +
+                "Reiß dich los, ich will schweben dir entgegen\n" +
+                "Herzbeben, lass uns leben\n" +
+                "Komm und reiß dich los, ja, wir haben uns gefunden\n" +
+                "Unsre Seelen sind verbunden\n" +
+                "Herzbeben\n" +
+                "Ja, mein Herzschlag ist, was zählt, der Beat macht mich lebendig\n" +
+                "Hab dich längst schon ausgewählt, bin völlig überwältigt\n" +
+                "Komm mit auf meine Umlaufbahn, bring mich aus dem Takt\n" +
+                "Vergessen wir den Lebensplan, genießen den Kontakt\n" +
+                "Spürst du den Rhythmus? Dann steig mit ein\n" +
+                "Das kann unsere Reise sein\n" +
+                "Herzbeben, lass uns leben, wir woll'n was erleben\n" +
+                "Herzbeben, vorwärts, Herz, lass es beben, beben\n" +
+                "Herzbeben, lass uns durch die Decke heben\n" +
+                "Herzbeben, lass uns leben, lass doch unsre Körper reden\n" +
+                "Reiß dich los, ich will schweben dir entgegen\n" +
+                "Herzbeben, lass uns leben\n" +
+                "Komm und reiß dich los, ja, wir haben uns gefunden\n" +
+                "Unsre Seelen sind verbunden\n" +
+                "Herzbeben\n" +
+                "Verlangsamt sich der Puls der Nacht, doch mein\n" +
+                "Mein Atem möcht dich finden\n" +
+                "Der Tag ist längst nicht aufgewacht, wenn sich\n" +
+                "Wenn sich die Energien verbünden\n" +
+                "Spürst du immer noch mein Herz?\n" +
+                "Herzbeben\n" +
+                "Herzbeben\n" +
+                "Herzbeben, lass uns leben, wir woll'n was erleben\n" +
+                "Herzbeben, vorwärts, Herz, lass es beben, beben\n" +
+                "Herzbeben, deinem Beat total ergeben\n" +
+                "Lass mich leben, Herzbeben, lass es beben\n" +
+                "Reiß dich los, ich will schweben dir entgegen\n" +
+                "Herzbeben, lass uns leben\n" +
+                "Komm und reiß dich los, ja, wir haben uns gefunden\n" +
+                "Unsre Seelen sind verbunden\n" +
+                "Herzbeben\"",
                 "src/main/resources/songs/Herzbeben.mp3");
 
         MediaContent mediaContent4 = new MediaContent(4,4, "I Lived",
@@ -350,37 +350,37 @@ public class Populate {
 
         MediaContent mediaContent7 = new MediaContent(7,6,"Let's Groove",
         "Let this groove, get you to move,\n" +
-                "                It's alright, alright\n" +
-                "        Let this groove, set in your shoes,\n" +
-                "                Stand up, alright\n" +
-                "        Gonna tell you what you can do,\n" +
-                "        With my love, alright\n" +
-                "        Let you know girl you're looking good\n" +
-                "        You're out of sight and alright\n" +
-                "        Move yourself and glide like a 747\n" +
-                "        Loose yourself in the sky among the clouds in the heavens\n" +
-                "        Let this groove, light up your fuse, alright\n" +
-                "        Let this groove, set in your shoes\n" +
-                "        Stand up, alright\n" +
-                "        Let me tell you what you can do\n" +
-                "            With my love, alright\n" +
-                "        Gotta let you know girl you're looking good\n" +
-                "        You're out of sight, you're alright\n" +
-                "        Tell the DJ to play your favorite tune\n" +
-                "        Then you know it's okay\n" +
-                "        What you found is happiness, now\n" +
-                "        Let this groove, get you to move, alright\n" +
-                "        Let this groove set in your shoes\n" +
-                "        Stand up, alright\n" +
-                "        You will find peace of mind on the floor\n" +
-                "        Take a little time, come and see, you and me\n" +
-                "        Make a little sign, I'll be there after a while\n" +
-                "        If you want my love\n" +
-                "        We can boogie on down, down, down, down\n" +
-                "        Let's groove tonight\n" +
-                "        Share the spice of life\n" +
-                "        Baby slice it right\n" +
-                "        We're gonna groove tonight",
+                "It's alright, alright\n" +
+                "Let this groove, set in your shoes,\n" +
+                "Stand up, alright\n" +
+                "Gonna tell you what you can do,\n" +
+                "With my love, alright\n" +
+                "Let you know girl you're looking good\n" +
+                "You're out of sight and alright\n" +
+                "Move yourself and glide like a 747\n" +
+                "Loose yourself in the sky among the clouds in the heavens\n" +
+                "Let this groove, light up your fuse, alright\n" +
+                "Let this groove, set in your shoes\n" +
+                "Stand up, alright\n" +
+                "Let me tell you what you can do\n" +
+                "With my love, alright\n" +
+                "Gotta let you know girl you're looking good\n" +
+                "You're out of sight, you're alright\n" +
+                "Tell the DJ to play your favorite tune\n" +
+                "Then you know it's okay\n" +
+                "What you found is happiness, now\n" +
+                "Let this groove, get you to move, alright\n" +
+                "Let this groove set in your shoes\n" +
+                "Stand up, alright\n" +
+                "You will find peace of mind on the floor\n" +
+                "Take a little time, come and see, you and me\n" +
+                "Make a little sign, I'll be there after a while\n" +
+                "If you want my love\n" +
+                "We can boogie on down, down, down, down\n" +
+                "Let's groove tonight\n" +
+                "Share the spice of life\n" +
+                "Baby slice it right\n" +
+                "We're gonna groove tonight",
                 "src/main/resources/songs/Let's Groove.mp3");
 
         MediaContent mediaContent8 = new MediaContent(8,8,"I will survive",

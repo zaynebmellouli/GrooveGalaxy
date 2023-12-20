@@ -48,27 +48,43 @@ public class Client {
                     SecureRandom random = new SecureRandom();
                     byte[]       nonce  = new byte[16];
                     random.nextBytes(nonce);
-                    int id    = 1;
-                    Key key   = CL.readAESKey("Keys/Key_ServClient_Alice.key");
-                    Key key_f = CL.readAESKey("Keys/Key_Family_Lu.key");
+                    int id    = 6;
+                    Key key   = CL.readAESKey("Keys/Key_ServClient_Amelia.key");
+                    Key key_f = CL.readAESKey("Keys/Key_Family_Patel.key");
 
                     //First Message
-                    message = "Breathe";
+                    message = "Let's Groove";
                     JsonObject r            = CL.protect(message.getBytes(), nonce, id, key);
                     byte[]     messageBytes = r.toString().getBytes();
                     os = new BufferedOutputStream(socket.getOutputStream());
                     os.write(messageBytes);
                     os.flush();
 
-                    //Listen for Response
-                    is   = new BufferedInputStream(socket.getInputStream());
-                    data = new byte[2048];
-                    len  = is.read(data);
+//Listen for Response
+                    ByteArrayOutputStream buffer1     = new ByteArrayOutputStream();
+
+                    // Buffer to store the total response
+                    is = new BufferedInputStream(socket.getInputStream());
+                    byte[] packet1 = new byte[10000000]; // Buffer for individual packets
+                    int    bytesRead1;
+
+                    while ((bytesRead1 = is.read(packet1)) != -1) {
+                        if (Arrays.equals(packet1,0,bytesRead1 -1, "stop".getBytes(),0,3)) {
+                            break;
+                        }else {
+                            buffer1.write(packet1, 0, bytesRead1);
+                        }
+//
+                    }
+                    // Convert the total response into a string
+                    data = buffer1.toByteArray();
                     JsonObject mediaInfo            = null;
                     int        media_content_length = 0;
                     if (len != -1) {
 //                            nonce        = incrementByteNonce(nonce);
-                        String     firstMessage   = new String(data, 0, len);
+//                        String     firstMessage   = new String(data, 0, len);
+                        String     firstMessage   = new String(data, StandardCharsets.UTF_8);
+
                         JsonObject receivedJson1  = JsonParser.parseString(firstMessage).getAsJsonObject();
                         JsonObject decryptedJson1 = unprotect(receivedJson1, key, nonce);
                         if (!check( decryptedJson1.get("M").getAsString(), nonce, key, receivedJson1.get("MAC").getAsString())) {
