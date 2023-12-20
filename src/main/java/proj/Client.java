@@ -24,8 +24,11 @@ import jdk.jfr.Percentage;
 public class Client {
     private static int percentageBytes = Integer.MAX_VALUE;
     private static String choosenSong = null;
-    public static void startClient(String host, int port) throws IOException {
 
+    private static boolean play = false;
+    static GUI gui = new GUI();
+    public static void startClient(String host, int port) throws IOException {
+        gui.promptUserName();
         SocketFactory factory = SSLSocketFactory.getDefault();
         try (SSLSocket socket = (SSLSocket) factory.createSocket(host, port)) {
 
@@ -198,6 +201,7 @@ public class Client {
                                     if (playerThreadPrev != null) {
                                         playerThreadPrev.join();
                                     }
+                                    while(!play){}
                                     playerThreadCur.start();
                                     playerThreadPrev = playerThreadCur;
                                     System.out.println("Song part playing");
@@ -241,29 +245,29 @@ public class Client {
 
     }
 
-    private static GUI guiCallback;
-
-    public static void setGuiCallback(GUI gui) {
-        guiCallback = gui;
-    }
-
     // Method where you receive messages
     public static void receiveMessage(JsonObject json) {
 
-        if (guiCallback != null) {
-            guiCallback.updateMessage(json);
-        }
+        //if (gui != null) {
+        //    gui.updateMessage(json);
+        //}
     }
 
-    public static void getPercentageGUI(int percentage) {
+    public static void setPercentageGUI(int percentage) {
         // Logic to handle the percentage input and song selection
         percentageBytes =  percentage;
         // Further processing...
     }
 
-    public static void getSongGUI(String song) {
+    public static void setSongGUI(String song) {
         // Logic to handle the percentage input and song selection
         choosenSong = song;
+        // Further processing...
+    }
+
+    public static void setPlay(boolean p) {
+        // Logic to handle the percentage input and song selection
+        play = p;
         // Further processing...
     }
 

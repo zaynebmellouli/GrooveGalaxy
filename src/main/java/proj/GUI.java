@@ -1,72 +1,39 @@
 package proj;
 
 import com.google.gson.JsonObject;
-
 import javax.swing.*;
 import java.awt.*;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.IOException;
 
-public class GUI implements ActionListener {
+public class GUI {
     private JLabel welcomeMessage = new JLabel("Hey! Let's get started");
     private JLabel musicInfo = new JLabel();
     private JFrame frame = new JFrame();
-    private JButton button = new JButton("Create a User"); // Make button a class member
+    private JButton createUserButton = new JButton("Create a User");
     private JButton chooseSongButton = new JButton("Choose Song");
     private JButton playMusicButton = new JButton("Play Music");
     private String userName; // Variable to store the user's name
-    private int percentage;
-
+    private String selectedSong; // Variable to store the selected song
+    private int percentage; // Variable to store the percentage
 
     public GUI() {
-
-        // the clickable button
-        button.addActionListener(this);
-        chooseSongButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // List of songs
-                String[] songs = {"Song1", "Song2", "Song3"};
-                String song = (String) JOptionPane.showInputDialog(frame,
-                        "Which song would you like to listen to?",
-                        "Select Song",
-                        JOptionPane.QUESTION_MESSAGE,
-                        null,
-                        songs,
-                        songs[0]);
-
-                if (song != null && !song.trim().isEmpty()) {
-                    updateMessage("Hey " + userName + ", you have chosen " + song);
-                    Client.getSongGUI(song);
-                }
-                chooseSongButton.setVisible(false);
-                percentage = getPercentageInput();
-                Client.getPercentageGUI(percentage);
-                playMusicButton.setVisible(true);
-
-            }
-        });
-        playMusicButton.addActionListener(new ActionListener() {
-            @Override
-            public void actionPerformed(ActionEvent e) {
-                // Handle music playing logic here
-                System.out.println("Playing music...");
-            }
-        });
+        createUserButton.addActionListener(e -> promptUserName());
+        chooseSongButton.addActionListener(e -> promptSongSelection());
+        playMusicButton.addActionListener(e -> playMusic());
 
         chooseSongButton.setVisible(false); // Initially hide the "Choose Song" button
         playMusicButton.setVisible(false); // Initially hide the "Play Music" button
 
-        // the panel with the button and text
         JPanel panel = new JPanel();
         panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
         panel.setLayout(new GridLayout(0, 1));
         panel.add(welcomeMessage);
-        panel.add(playMusicButton);
-        panel.add(button);
+        panel.add(musicInfo);
+        panel.add(createUserButton);
         panel.add(chooseSongButton);
-        // set up the frame and display it
+        panel.add(playMusicButton);
+
         frame.add(panel, BorderLayout.CENTER);
         frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
         frame.setTitle("GrooveGalaxy");
@@ -74,49 +41,32 @@ public class GUI implements ActionListener {
         frame.setVisible(true);
     }
 
-    public void updateMessage(String message) {
-        welcomeMessage.setText(message);
-    }
-    public void updateMessage(JsonObject mediaInfo) {
-        // Extracting information from the JsonObject
-        int mediaContentLength = mediaInfo.get("media_content_length").getAsInt();
-        int ownerId = mediaInfo.get("owner_id").getAsInt();
-        String format = mediaInfo.get("format").getAsString();
-        String artist = mediaInfo.get("artist").getAsString();
-        String title = mediaInfo.get("title").getAsString();
-        String genre = mediaInfo.get("genre").getAsString();
-        String lyrics = mediaInfo.get("lyrics").getAsString();
-
-        // Formatting the message
-        String message = "<html>Media Content Length: " + mediaContentLength +
-                "<br>Owner ID: " + ownerId +
-                "<br>Format: " + format +
-                "<br>Artist: " + artist +
-                "<br>Title: " + title +
-                "<br>Genre: " + genre +
-                "<br>Lyrics: " + lyrics + "</html>";
-
-        // Updating the label
-        musicInfo.setText(message);
-    }
-
-
-    // process the button clicks
-    public void actionPerformed(ActionEvent e) {
+    public void promptUserName() {
         userName = JOptionPane.showInputDialog(frame, "Enter your name:", "Name Entry", JOptionPane.PLAIN_MESSAGE);
         if (userName != null && !userName.trim().isEmpty()) {
-            updateMessage("Hey " + userName); // Update message with the greeting
-            button.setVisible(false); // Hide the "Create Client" button
-            chooseSongButton.setVisible(true); // Show the "Choose Song" button
-        }
-
-        try {
-            Client.main(new String[0]); // You might want to pass the name and song to the client
-        } catch (IOException ex) {
-            ex.printStackTrace(); // Handle the exception
+            updateMessage("Hey " + userName);
+            createUserButton.setVisible(false);
+            chooseSongButton.setVisible(true);
         }
     }
 
+    public void promptSongSelection() {
+        String[] songs = {"Song1", "Song2", "Song3"};
+        selectedSong = (String) JOptionPane.showInputDialog(frame,
+                "Which song would you like to listen to?",
+                "Select Song",
+                JOptionPane.QUESTION_MESSAGE,
+                null,
+                songs,
+                songs[0]);
+
+        if (selectedSong != null && !selectedSong.trim().isEmpty()) {
+            updateMessage("Hey " + userName + ", you have chosen " + selectedSong);
+            Client.setSongGUI(selectedSong);
+            Client.setPercentageGUI(getPercentageInput());
+            playMusicButton.setVisible(true);
+        }
+    }
 
     private int getPercentageInput() {
         while (true) {
@@ -133,11 +83,23 @@ public class GUI implements ActionListener {
             }
         }
     }
+    public void playMusic() {
+        Client.setPlay(true);
+    }
 
-    // create one Frame
+    public void updateMessage(String message) {
+        welcomeMessage.setText(message);
+    }
+
+    public void updateMusicInfo(JsonObject mediaInfo) {
+        // Extracting information from the JsonObject and updating musicInfo label
+        // ...
+    }
+
+    // Additional public methods to interact with the Client class
+    // ...
+
     public static void main(String[] args) {
         new GUI();
     }
 }
-
-
