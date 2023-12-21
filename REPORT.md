@@ -127,7 +127,7 @@ CTR (Counter) Mode: AES in CTR mode is used for streaming audio content because 
 
 4. **Gateway/Router Machine (e.g., VM2)**:
    - **Description**: This machine acts as a gateway or router, managing the traffic between the internet and the internal network. It also enforces firewall rules and monitors for unauthorized access.
-   - **Technology Justification**: The gateway/router is equipped with advanced firewall capabilities and possibly intrusion detection systems (IDS) like Snort. It's crucial for this machine to have robust security configurations to protect against external threats. SSL/TLS termination can also be configured here for added security.
+   - **Technology Justification**: The gateway/router is equipped with firewall capabilities. It's crucial for this machine to have robust security configurations to protect against external threats. 
 
 **Security Considerations**:
 - **SSL/TLS**: Secure Socket Layer (SSL) and Transport Layer Security (TLS) protocols are essential for encrypting data in transit between the client, server, and database machines, protecting against eavesdropping and man-in-the-middle attacks.
