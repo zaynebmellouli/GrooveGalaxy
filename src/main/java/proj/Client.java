@@ -156,7 +156,7 @@ public class Client {
         }
     }
     public static void promptUserName() {
-        choosenSong = "Alice";
+        userName = "Alice";
         if (userName != null && !userName.trim().isEmpty()) {
             updateMessage("Hey " + userName);
             createUserButton.setVisible(false);
@@ -395,8 +395,8 @@ public class Client {
         System.setProperty("javax.net.ssl.trustStore", "https_cert/usertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
         String host =
-                "localhost";
-//                "192.168.0.100";
+//                "localhost";
+                "192.168.0.100";
         int port = 8000;
         startClient(host, port);
     }
