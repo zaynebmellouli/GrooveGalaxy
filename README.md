@@ -151,46 +151,202 @@ For each machine, there is an initialization script with the machine name, with 
 Inside each machine, use Git to obtain a copy of all the scripts and code.
 
 ```sh
-$git clone https://github.com/tecnico-sec/a51-cherilyn-zeineb-rassene.git
+git clone https://github.com/tecnico-sec/a51-cherilyn-zeineb-rassene.git
 ```
 
 Next we have custom instructions for each machine.
 
-#### Machine **Server**
+#### Machine 1: **Server**
 
-This machine runs **Server**
+For **VM1 server**, the mapping with the network should be:
+eth0 is connected to sw-1
 
- 
 
-*(describe what kind of software runs on this machine, e.g. a database server (PostgreSQL 16.1))*
-
-To verify:
-
+For the configuration:
 ```sh
-$ setup command
+$ sudo ifconfig eth0 192.168.0.100/24 up
 ```
 
-*(replace with actual commands)*
-
-To test:
+Now set VM2 as the default gateway for VM1  by doing this:
 
 ```sh
-$ test command
+$ sudo ip route add default via 192.168.0.10   # on VM1
 ```
 
-*(replace with actual commands)*
 
-The expected results are ...
+#### Machine 2: **Gateway**
 
-*(explain what is supposed to happen if all goes well)*
+For **VM2 Gateway**, the mapping with the network should be:
+eth0 should be connected to sw-1;
+eth1 should be connected to sw-2;
+eth2 should be connected to the Internet;
 
-If you receive the following message ... then ...
 
-*(explain how to fix some known problem)*
+For the configuration:
 
-#### Machine **Client**
+```sh
+$ sudo ifconfig eth0 192.168.0.10/24 up
+$ sudo ifconfig eth1  192.168.1.254/24
+```
 
-*(similar content structure as Machine 1)*
+
+Activate IP forwarding with:
+```sh
+$ sudo sysctl net.ipv4.ip_forward=1   # on VM2
+```
+
+Confirm that the flag value was updated to 1:
+```sh
+$ sysctl net.ipv4.conf.all.forwarding
+```
+
+Also, setup forwarding rules in VM2:
+
+```sh
+$ sudo iptables -P FORWARD ACCEPT    # Defines default policy for FORWARD
+$ sudo iptables -F FORWARD           # Flushes all the rules from chain FORWARD
+```
+
+
+
+#### Machine 3:  **Database**
+
+For **VM3 database**, the mapping with the network should be:
+eth0 is connected to sw-1
+
+For the configuration:
+
+```sh
+$ sudo ifconfig eth0 192.168.0.1/24 up
+```
+
+Now set VM2 as the default gateway for VM3 by doing this:
+
+```sh
+$ sudo ip route add default via 192.168.0.10   # on VM3
+```
+
+#### Machine 4: **Client**
+
+For **VM4 client**, it is :
+eth0 is connected to sw-2
+
+For the configuration: 
+```sh
+$ sudo ifconfig eth0 192.168.1.1/24 up
+```
+
+Now set VM2 as the default gateway for VM4 by doing this:
+```sh
+$ sudo ip route add default via 192.168.1.254   # on VM4
+```
+
+
+**Make changes permanent**
+The changes you made before will be lost once you perform a reboot of your machine. In order to make them permanent you have to edit the corresponding /etc/network/interfaces file.
+
+### On VM1:
+```sh
+source /etc/network/interfaces.d/*
+```
+
+```sh
+# The loopback network interface and sw-1 interface
+auto lo eth0                    
+iface lo inet loopback
+
+# sw-1 interface
+iface eth0 inet static          
+        address 192.168.0.100
+        netmask 255.255.255.0
+        gateway 192.168.0.10
+```
+
+### On VM2:
+
+```sh
+source /etc/network/interfaces.d/*
+```
+
+```sh
+# The loopback network interface, sw-1 interface and sw-2 interface
+auto lo eth0 eth1               
+iface lo inet loopback
+
+# sw-1 interface
+iface eth0 inet static         
+        address 192.168.0.10
+        netmask 255.255.255.0
+
+# sw-2 interface
+iface eth1 inet static          
+        address 192.168.1.254
+        netmask 255.255.255.0
+```
+
+### On VM3:
+
+```sh
+source /etc/network/interfaces.d/*
+```
+
+```sh
+# The loopback network interface and sw-2 interface
+auto lo eth0                    
+iface lo inet loopback
+
+# sw-1 interface
+iface eth0 inet static          
+        address 192.168.0.1
+        netmask 255.255.255.0
+        gateway 192.168.0.10
+```
+
+
+### On VM4:
+
+```sh
+source /etc/network/interfaces.d/*
+```
+
+```sh
+# The loopback network interface and sw-2 interface
+auto lo eth0                    
+iface lo inet loopback
+
+# sw-2 interface
+iface eth0 inet static          
+        address 192.168.1.1
+        netmask 255.255.255.0
+        gateway 192.168.1.254
+```
+
+You should also enable IP forwarding permanently on VM2. For that you need to edit **/etc/sysctl.conf** and uncomment the following line:
+```sh
+net.ipv4.ip_forward=1
+```
+
+
+To make the iptables rules persistent, in VM2 install (select "yes" to save the current rules):
+
+```sh
+$ sudo apt install iptables-persistent
+```
+
+To save the current rules again, do:
+
+# FOR IPv4
+```sh
+$ sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
+```
+
+# FOR IPv6
+```sh
+$ sudo sh -c 'ip6tables-save > /etc/iptables/rules.v6'
+```
+
+To test the four virtual machines, you could ping each machine to another.
+
 
 ## Demonstration
 
@@ -201,11 +357,6 @@ Now that all the networks and machines are up and running, ...
 ```sh
 $ demo command
 ```
-#### Machine **Database**
-
-
-
-#### Machine **Gateway**
 
 *(replace with actual commands)*
 
