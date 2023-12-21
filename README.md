@@ -335,12 +335,12 @@ $ sudo apt install iptables-persistent
 
 To save the current rules again, do:
 
-# FOR IPv4
+### FOR IPv4
 ```sh
 $ sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
 ```
 
-# FOR IPv6
+### FOR IPv6
 ```sh
 $ sudo sh -c 'ip6tables-save > /etc/iptables/rules.v6'
 ```
@@ -350,19 +350,18 @@ To test the four virtual machines, you could ping each machine to another.
 
 ## Demonstration
 
-Now that all the networks and machines are up and running, ...
+Now that all the networks and machines are up and running, we have implemented some features to our application.
 
-*(give a tour of the best features of the application; add screenshots when relevant)*
+**Progressive Streaming:**
+- Music is streamed progressively, allowing users to start listening to the content before it's fully downloaded.
+- Users can enjoy a seamless listening experience without waiting for the entire file to be downloaded.
 
-```sh
-$ demo command
-```
 
-*(replace with actual commands)*
+**User-Controlled Playback:**
+- Users have control over when they start playing the music.
+- The application provides options for users to choose whether to start playback immediately or wait until a certain percentage of the file is buffered.
+stream, playback 
 
-*(IMPORTANT: show evidence of the security mechanisms in action; show message payloads, print relevant messages, perform simulated attacks to show the defenses in action, etc.)*
-
-This concludes the demonstration.
 
 ## Additional Information
 
