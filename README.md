@@ -10,7 +10,7 @@
 | 108780  | Cherilyn Christen     | <https://github.com/Cherie000>     | <mailto:cherilyn.christen@epfl.ch>     |
 | 108825 | Zeineb Mellouli   | <https://github.com/zaynebmellouli> | <mailto:zeineb.mellouli@epfl.ch> |
 
-![Alice](img/alice.png) ![Bob](img/bob.png) ![Charlie](img/charlie.png)
+![Rassene](img/rassene.jpg) ![Zayneb](img/Zayneb.jpg) ![Charlie](img/charlie.png)
 
 *(add face photos with 150px height; faces should have similar size and framing)*
 
@@ -41,7 +41,7 @@ This document presents installation and demonstration instructions.
 
 To see the project in action, it is necessary to setup a virtual environment, with 2 networks and 4 machines.  
 
-All machines will be running on Linux and configured according to the following figure and table:
+All machines will be running on Kali Linux and configured according to the following figure and table:
 ![](img/VMSNetworks.jpg)
 
 ## Getting started 
@@ -71,7 +71,7 @@ export "$MAVEN_HOME/bin:$PATH"
 ```
 
 ### Setup Database
-Run this commands to install postgreSQL
+Run this commands to install postgreSQL and Choose the default port 5432
 ```sh
 sudo apt-get update
 sudo apt-get install postgresql postgresql-contrib
@@ -91,7 +91,7 @@ listen_addresses = '*'
 **2. pg_hba.conf**:
 
 The path is similar to postgresql.conf.
-Add an entry to allow access from your VM. For example, to allow access from any IP address, add the following line to pg_hba.conf:
+Add an entry to allow access from the VM in the same subnet. For example, to allow access from any IP address, add the following line to pg_hba.conf:
 ```sh
 host    all             all             195.168.0.0/24               md5
 ```
@@ -108,14 +108,16 @@ If you want to create another username and password, make sure to change it in t
 Use the following command to connect to PostgreSQL:
 
 ```sh
-$sudo -i -u postgres;
+sudo -i -u postgres;
 ```
 ```sh
 psql -U postgres;
 ```
+Now you should be in here `postgres#`.
+
 Create a database named groovedb:
 ```sh
-postgres# CREATE DATABASE groovedb;
+CREATE DATABASE groovedb;
 ```
 Connect to the groovedb database:
 ```sh
@@ -131,7 +133,10 @@ DROP TABLE IF EXISTS media_content, media, users;
  FOREIGN KEY (title_content) REFERENCES media(title) ON DELETE CASCADE,
 );
 ```
-Now you should execute the class mainforpopulate in order to populate the database:(in another terminal)
+Now you should execute the class mainforpopulate in order to populate the database. You can do it directly on the VM of the
+Database or on the VM of the server to ensure that the communication works. 
+
+To do that just go to the folder of the project and run the following commands: 
 ```sh
 mvn clean compile
 ```
@@ -145,8 +150,6 @@ You can follow the guidelines for the the whole setup here: https://github.com/t
 [Download](https://cdimage.kali.org/) and [install](https://github.com/tecnico-sec/Setup/blob/master/KaliSetup.md) a virtual machine of Kali Linux 2023.3.  
 
 ### Machine configurations
-
-For each machine, there is an initialization script with the machine name, with prefix `init-` and suffix `.sh`, that installs all the necessary packages and makes all required configurations in the a clean machine.
 
 Inside each machine, use Git to obtain a copy of all the scripts and code.
 
@@ -164,13 +167,13 @@ eth0 is connected to sw-1
 
 For the configuration:
 ```sh
-$ sudo ifconfig eth0 192.168.0.100/24 up
+sudo ifconfig eth0 192.168.0.100/24 up
 ```
 
 Now set VM2 as the default gateway for VM1  by doing this:
 
 ```sh
-$ sudo ip route add default via 192.168.0.10   # on VM1
+sudo ip route add default via 192.168.0.10   # on VM1
 ```
 
 
@@ -185,29 +188,33 @@ eth2 should be connected to the Internet;
 For the configuration:
 
 ```sh
-$ sudo ifconfig eth0 192.168.0.10/24 up
-$ sudo ifconfig eth1  192.168.1.254/24
+sudo ifconfig eth0 192.168.0.10/24 up
+sudo ifconfig eth1  192.168.1.254/24
 ```
 
 
 Activate IP forwarding with:
 ```sh
-$ sudo sysctl net.ipv4.ip_forward=1   # on VM2
+sudo sysctl net.ipv4.ip_forward=1   # on VM2
 ```
 
 Confirm that the flag value was updated to 1:
 ```sh
-$ sysctl net.ipv4.conf.all.forwarding
+sysctl net.ipv4.conf.all.forwarding
 ```
 
 Also, setup forwarding rules in VM2:
 
 ```sh
-$ sudo iptables -P FORWARD ACCEPT    # Defines default policy for FORWARD
-$ sudo iptables -F FORWARD           # Flushes all the rules from chain FORWARD
+sudo iptables -P FORWARD ACCEPT    # Defines default policy for FORWARD
+sudo iptables -F FORWARD           # Flushes all the rules from chain FORWARD
 ```
 
-
+If you need to give access to the NAT to the other VMs run the following commands in VM2 to have NAT do the source and destination mapping:
+```sh
+sudo iptables -t nat -F            # Flushes all the rules from table NAT
+sudo iptables -t nat -A POSTROUTING  -o eth2 -j MASQUERADE    # Creates a source NAT on interface eth2
+```
 
 #### Machine 3:  **Database**
 
@@ -217,7 +224,7 @@ eth0 is connected to sw-1
 For the configuration:
 
 ```sh
-$ sudo ifconfig eth0 192.168.0.1/24 up
+$ sudo ifconfig eth0 192.168.0.1/24 up
 ```
 
 Now set VM2 as the default gateway for VM3 by doing this:
@@ -233,7 +240,7 @@ eth0 is connected to sw-2
 
 For the configuration: 
 ```sh
-$ sudo ifconfig eth0 192.168.1.1/24 up
+$ sudo ifconfig eth0 192.168.1.1/24 up
 ```
 
 Now set VM2 as the default gateway for VM4 by doing this:
@@ -243,7 +250,8 @@ $ sudo ip route add default via 192.168.1.254   # on VM4
 
 
 **Make changes permanent**
-The changes you made before will be lost once you perform a reboot of your machine. In order to make them permanent you have to edit the corresponding /etc/network/interfaces file.
+The changes you made before will be lost once you perform a reboot of your machine. 
+In order to make them permanent you have to edit the corresponding /etc/network/interfaces file.
 
 ### On VM1:
 ```sh
@@ -353,8 +361,10 @@ To test the four virtual machines, you could ping each machine to another.
 Now that all the networks and machines are up and running, we have implemented some features to our application.
 
 **Progressive Streaming:**
-- Music is streamed progressively and securely, allowing users to start listening to the content before it's fully downloaded.
-- Users can enjoy a seamless listening experience without waiting for the entire file to be downloaded.
+- Music is streamed progressively and securely, allowing users to start listening
+to the content before it's fully downloaded.
+- Users can enjoy a seamless listening experience without waiting for the entire 
+file to be downloaded. Achieving this using threads.
 
 ![](img/playback.jpeg)
 
@@ -364,6 +374,41 @@ Now that all the networks and machines are up and running, we have implemented s
 
 **Secure Mechanism**
 We're using CTR in order to stream the music directly ciphered.
+
+### Running the application:
+
+First be sure that you compiled the project by running the following command in the project folder for one of the VMS:
+```sh
+mvn clean compile
+```
+
+To run the server application, you need to run the following commands in the VM of the server
+from the project folder;
+
+```sh
+mvn exec:java -Dexec.mainClass="proj.Server"
+```
+
+To run the client application, you need to run the following commands in the VM of the client
+
+```sh
+mvn exec:java -Dexec.mainClass="proj.Client"
+```
+
+FFor this demonstration, we've pre-loaded the database with a selection of songs and user profiles. Our client is 
+logged in as 'Alice'.
+
+To successfully run the application, you need to select the track "Let's Groove." Additionally, you must specify a 
+percentage value indicating the portion of the song you wish to listen to.
+
+Please note: Selecting a track that Alice doesn't have access to, or failing to specify a percentage, will cause the
+application to crash. This is because we haven't yet implemented exception handling, so in such cases, the application 
+is designed to fail.
+
+After the server completes streaming the selected music portion, it will reset to await a new client connection.
+
+Once the client finishes listening to the music, you'll need to close and restart the application to choose and listen 
+to another song.
 
 ## Additional Information
 
