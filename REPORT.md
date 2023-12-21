@@ -172,6 +172,25 @@ Secondly, the concept of family sharing introduces a complex layer of key manage
 (_Define who is fully trusted, partially trusted, or untrusted._)
 
 (_Define how powerful the attacker is, with capabilities and limitations, i.e., what can he do and what he cannot do_)
+### Attacker Model for the GrooveGalaxy Project
+
+In the GrooveGalaxy project, the attacker model is defined based on the trust levels and the capabilities and limitations of potential attackers. 
+
+**Trust Levels:**
+- **Fully Trusted Entities:** These include our server infrastructure and the client application when operated by a legitimate user. We assume these entities operate in good faith and follow the prescribed security protocols.
+- **Partially Trusted Entities:** Network intermediaries, such as Internet Service Providers (ISPs) and routing nodes, are considered partially trusted. They are expected to correctly forward traffic but may have the capability to intercept or observe data.
+- **Untrusted Entities:** This includes any external actors who might attempt to compromise the communication or data integrity. These attackers are not trusted under any circumstances.
+
+**Attacker Capabilities and Limitations:**
+- **Capabilities:**
+  - **Interception of Non-Encrypted Data:** The attacker can intercept and read the first nonce and ID sent in plaintext. While these pieces of information are protected by a Message Authentication Code (MAC), their visibility could offer some insights into the communication patterns.
+  - **Disruption of Streaming:** Since the "stop" signal at the end of streamed data is not encrypted, an attacker could potentially send premature "stop" signals. This could lead to the client's buffer stopping early, causing an incomplete data reception. To counteract the potential disruption caused by fake "stop" signals, the implementation could, in the future, include sequence checks or additional verification steps to ensure that "stop" signals are legitimate and correspond to the expected end of the data stream.
+
+- **Limitations:**
+  - **Impersonation:** The attacker cannot impersonate the client or server due to the lack of access to the encryption keys. Without these keys, the attacker is unable to forge valid encrypted messages or MACs that would be considered authentic.
+  - **Decryption of Data:** The attacker is unable to decrypt the content of the communication protected by AES encryption in both CTR and CBC modes. This limitation ensures the confidentiality of the transmitted data. 
+
+In conclusion, while key aspects of communication are well-protected, certain areas, particularly those involving non-encrypted elements, present opportunities for enhancement to further fortify the system against potential attacks.
 
 #### 2.3.3. Solution Design and Implementation
 
