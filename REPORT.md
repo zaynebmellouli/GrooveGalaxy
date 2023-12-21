@@ -112,10 +112,11 @@ For hashing, we will implement the SHA-2 algorithm. Given that SHA-2 offers a hi
 
 1. **Client Machine**: 
    - **Description**: The Client Machine serves as the user's interface for interacting with GrooveGalaxy. It provides a user-friendly GUI through which users can receive song information and stream music.
-   - **Technology Justification**: HTTPS Connection: The use of HTTPS (Hypertext Transfer Protocol Secure) for client-server communication is crucial for ensuring the confidentiality and integrity of the data transmitted. HTTPS encrypts the data sent between the client and the server, protecting information from eavesdropping and man-in-the-middle attacks. 
-AES in CBC and CTR Modes:
-CBC (Cipher Block Chaining) Mode: AES in CBC mode is employed for scenarios where data integrity is as crucial as confidentiality. CBC mode ensures that each block of ciphertext depends on all preceding plaintext blocks, providing strong data protection.
-CTR (Counter) Mode: AES in CTR mode is used for streaming audio content because it allows for random access to encrypted data. This means users can start playback from any part of the stream without needing to decrypt the entire file first, enhancing the user experience with quick and efficient access to music.
+   - **Technology Justification**: 
+         - HTTPS Connection: The use of HTTPS (Hypertext Transfer Protocol Secure) for client-server communication is crucial for ensuring the confidentiality and integrity of the data               transmitted. HTTPS encrypts the data sent between the client and the server, protecting information from eavesdropping and man-in-the-middle attacks. 
+         - AES in CBC and CTR Modes:
+               - CBC (Cipher Block Chaining) Mode: AES in CBC mode is employed for scenarios where data integrity is as crucial as confidentiality. CBC mode ensures that each block of                      ciphertext depends on all preceding plaintext blocks, providing strong data protection.
+               - CTR (Counter) Mode: AES in CTR mode is used for streaming audio content because it allows for random access to encrypted data. This means users can start playback from                     any part of the stream without needing to decrypt the entire file first, enhancing the user experience with quick and efficient access to music.
      
 2. **Server Machine**:
    - **Description**: This server handles requests from clients. It also has access to user accounts and key accesses through the connection to the database.
