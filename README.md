@@ -42,7 +42,7 @@ This document presents installation and demonstration instructions.
 To see the project in action, it is necessary to setup a virtual environment, with 2 networks and 4 machines.  
 
 All machines will be running on Linux and configured according to the following figure and table:
-![](img/VMsNetworks.jpg)
+![](img/VMSNetworks.jpg)
 
 ## Getting started 
 
