@@ -93,7 +93,7 @@ listen_addresses = '*'
 The path is similar to postgresql.conf.
 Add an entry to allow access from your VM. For example, to allow access from any IP address, add the following line to pg_hba.conf:
 ```sh
-host    all             all             0.0.0.0/0               md5
+host    all             all             195.168.0.0/24               md5
 ```
 
 **3. Restart PostgreSQL:**
@@ -105,6 +105,10 @@ sudo service postgresql restart
 Now, you can connect to postgreSQL. Please when setting up your postgres use the **username = postgres** and **password = postgres**. 
 If you want to create another username and password, make sure to change it in the class DataBaseConnector
 Use the following command to connect to PostgreSQL:
+
+```sh
+$sudo -i -u postgres;
+```
 ```sh
 psql -U postgres;
 ```
@@ -134,19 +138,11 @@ mvn clean compile
 mvn exec:java -Dexec.mainClass="proj.database.mainforpopulate"
 ```
 
-
-
-
-
-
 ### Prerequisites
 
 All the virtual machines are based on: Linux 64-bit, Kali 2023.3  
-
-[Download](https://...link_to_download_installation_media) and [install](https://...link_to_installation_instructions) a virtual machine of Kali Linux 2023.3.  
-Clone the base machine to create the other machines.
-
-*(above, replace witch actual links)*
+You can follow the guidelines for the the whole setup here: https://github.com/tecnico-sec/Setup/
+[Download]((https://cdimage.kali.org/)) and [install]((https://github.com/tecnico-sec/Setup/blob/master/KaliSetup.md)) a virtual machine of Kali Linux 2023.3.  
 
 ### Machine configurations
 
@@ -155,16 +151,16 @@ For each machine, there is an initialization script with the machine name, with 
 Inside each machine, use Git to obtain a copy of all the scripts and code.
 
 ```sh
-$ git clone https://github.com/tecnico-sec/cxx...
+$(https://github.com/tecnico-sec/a51-cherilyn-zeineb-rassene.git)
 ```
-
-*(above, replace with link to actual repository)*
 
 Next we have custom instructions for each machine.
 
-#### Machine 1
+#### Machine **Server**
 
-This machine runs ...
+This machine runs **Server**
+
+ 
 
 *(describe what kind of software runs on this machine, e.g. a database server (PostgreSQL 16.1))*
 
@@ -192,7 +188,7 @@ If you receive the following message ... then ...
 
 *(explain how to fix some known problem)*
 
-#### Machine ...
+#### Machine **Client**
 
 *(similar content structure as Machine 1)*
 
@@ -205,6 +201,11 @@ Now that all the networks and machines are up and running, ...
 ```sh
 $ demo command
 ```
+#### Machine **Database**
+
+
+
+#### Machine **Gateway**
 
 *(replace with actual commands)*
 
