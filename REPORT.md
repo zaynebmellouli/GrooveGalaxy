@@ -212,7 +212,7 @@ In conclusion, the GrooveGalaxy project has been an invaluable learning experien
    - [AES Encryption in Java](https://www.baeldung.com/java-aes-encryption-decryption)
 
 4. **Streaming Audio in Java**:
-   - 
+   - blablabla
 
 5. **Database Security**:
    - [PostgreSQL Security](https://www.postgresql.org/docs/current/security.html)
