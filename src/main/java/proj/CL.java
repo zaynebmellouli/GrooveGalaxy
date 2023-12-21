@@ -301,10 +301,6 @@ s     * @param json the json object with different kind of information depending
         // Increment the counter by the number of blocks offset
         counterValue += offset / 16; // AES block size is 16 bytes
 
-        // If the offset is not a multiple of the block size, we need to account for the partial block
-//        if (offset % 16 != 0) {
-//            counterValue++;
-//        }
 
         // Put the incremented counter back into the nonce
         byteBuffer.position(nonce.length - 4);

@@ -68,7 +68,7 @@ public class Client {
             len  = is.read(data);
             System.out.printf("client received %d bytes: %s%n", len, new String(data, 0, len));
 
-            try (Scanner scanner = new Scanner(System.in)) {
+
                 System.out.println("Type: 'Exit' to close the connection");
 
                 try {
@@ -127,7 +127,6 @@ public class Client {
                     throw new RuntimeException(e);
                 } catch (SecurityException e) {
                     try {
-                        //scanner.close();
                         is.close();
                         os.close();
                         socket.close();
@@ -136,7 +135,7 @@ public class Client {
                     }
                 }
 
-            }
+
 
         } catch (IOException e) {
             throw new RuntimeException(e);
@@ -147,7 +146,6 @@ public class Client {
     }
     public static void promptExit() {
         try {
-            //scanner.close();
             is.close();
             os.close();
             socket.close();
@@ -184,12 +182,12 @@ public class Client {
             os.write(messageBytes);
             os.flush();
             //Listen for Response
-            ByteArrayOutputStream buffer1     = new ByteArrayOutputStream();
+            ByteArrayOutputStream buffer1 = new ByteArrayOutputStream();
 
             // Buffer to store the total response
             is = new BufferedInputStream(socket.getInputStream());
             byte[] packet1 = new byte[10000000]; // Buffer for individual packets
-            int    bytesRead1;
+            int bytesRead1;
 
             while ((bytesRead1 = is.read(packet1)) != -1) {
                 if (Arrays.equals(packet1,0,bytesRead1 -1, "stop".getBytes(),0,3)) {
@@ -197,14 +195,12 @@ public class Client {
                 }else {
                     buffer1.write(packet1, 0, bytesRead1);
                 }
-//
+
             }
             // Convert the total response into a string
             data = buffer1.toByteArray();
-            JsonObject mediaInfo            = null;
+            JsonObject mediaInfo = null;
             if (len != -1) {
-//                            nonce        = incrementByteNonce(nonce);
-//                        String     firstMessage   = new String(data, 0, len);
                         String     firstMessage   = new String(data, StandardCharsets.UTF_8);
                 JsonObject receivedJson1  = JsonParser.parseString(firstMessage).getAsJsonObject();
                 JsonObject decryptedJson1 = unprotect(receivedJson1, key_c, nonce);
@@ -223,7 +219,6 @@ public class Client {
                     if (m.equalsIgnoreCase("Error")) {
                         System.out.println("Error! Restarting conversation");
                         throw new SecurityException("...");
-                        //Restart Conversation
                     }
                     else {
                         mediaInfo            = JsonParser.parseString(new String(Base64.getDecoder().decode(decryptedJson1.get("M").getAsString())))
@@ -248,6 +243,7 @@ public class Client {
 
 
     public static void playMusic() throws IOException, GeneralSecurityException {
+        exitButton.addActionListener(e -> promptExit());
         int from16bytes = (int) Math.floor((double) (percentageBytes * media_content_length/100) / NB_BYTES_PACKET_MUSIC);
         int nb16bytes   = (int) Math.ceil((double) media_content_length / NB_BYTES_PACKET_MUSIC) ;
 
@@ -256,7 +252,6 @@ public class Client {
         for (int i = from16bytes; i < nb16bytes; i++) {
             //Listen for Response
             ByteArrayOutputStream buffer = new ByteArrayOutputStream();
-
             // Buffer to store the total response
             is = new BufferedInputStream(socket.getInputStream());
             byte[] packet = new byte[1000]; // Buffer for individual packets
@@ -291,18 +286,6 @@ public class Client {
                 throw new SecurityException("...");
             }
             else {
-////                             Check if the message is an error message
-//                            byte[] musicBytes =Base64.getDecoder().decode(decryptedJson3.get("M").getAsString());
-//                            String m = new String(musicBytes);
-//                            if (m.equalsIgnoreCase("Error")) {
-//                                System.out.println("Error! Restarting conversation");
-//                                throw new SecurityException("...");
-//                                //Restart Conversation
-//                            }
-//                            else {
-                System.out.printf("Client received music from %d\n", i);
-//                                    byte[] musicBytes = buffer.toByteArray();
-
                 try {
                     playerThreadCur = new Thread(() -> {
                         InputStream         in     = new ByteArrayInputStream(decryptPartSong);
@@ -333,7 +316,6 @@ public class Client {
 //                        }
         }
         try {
-            //scanner.close();
             is.close();
             os.close();
             socket.close();

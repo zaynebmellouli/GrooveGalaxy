@@ -1,14 +1,10 @@
 package proj;
 
-import com.google.gson.Gson;
 import com.google.gson.JsonObject;
 import com.google.gson.JsonParser;
 
 import java.io.BufferedInputStream;
 import java.io.BufferedOutputStream;
-import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
-import javazoom.jl.player.Player;
 import proj.database.DataBaseConnectionException;
 import proj.database.DataBaseConnector;
 import proj.database.DatabaseUtils;
@@ -16,12 +12,9 @@ import proj.database.UserAccessException;
 
 import java.io.*;
 import java.net.Socket;
-import java.nio.charset.StandardCharsets;
 import java.nio.file.Files;
 import java.nio.file.Paths;
-import java.security.GeneralSecurityException;
-import java.security.Key;
-import java.net.Socket;
+import java.security.*;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.sql.Connection;
@@ -65,15 +58,7 @@ public class Server {
                         is = new BufferedInputStream(socket.getInputStream());
                         byte[] data = new byte[2048];
                         int len = is.read(data);
-                        if (len == -1) {
-                            System.out.println("Error! Restarting conversation");
-                            message = "Error";
-                            nonce = incrementByteNonce(nonce);
-                            JsonObject r = CL.protect(message.getBytes(), nonce, keyServClient, keyFamily);
-                            byte[] messageBytes = r.toString().getBytes();
-                            os.write(messageBytes);
-                            os.flush();
-                            throw new SecurityException("...");}
+                        if (len != -1){
                         message = new String(data, 0, len);
                         os = new BufferedOutputStream(socket.getOutputStream());
                         System.out.printf("server received %d bytes: %s%n", len, message);
@@ -81,18 +66,9 @@ public class Server {
                         os.write(response.getBytes(), 0, response.getBytes().length);
                         os.flush();
 
-
                         //first message
                         len = is.read(data);
-                        if (len == -1) {
-                            System.out.println("Error! Restarting conversation");
-                            message = "Error";
-                            nonce = incrementByteNonce(nonce);
-                            JsonObject r = CL.protect(message.getBytes(), nonce, keyServClient, keyFamily);
-                            byte[] messageBytes = r.toString().getBytes();
-                            os.write(messageBytes);
-                            os.flush();
-                            throw new SecurityException("...");}
+                        if (len != -1) {
                         message = new String(data, 0, len);
                         JsonObject receivedJson1 = JsonParser.parseString(message).getAsJsonObject();
                         //get the key of the client from the id form the json
@@ -124,11 +100,6 @@ public class Server {
                                     // Continue to send the second message
                                 }
                             }
-
-
-
-                        //Contact Database for the Song Info
-                        //Check for Song in the Database
 
                         //Respond to first message
                         JsonObject songInfo = DatabaseUtils.getSongInfo(connection,song, id).getAsJsonObject();
@@ -206,14 +177,6 @@ public class Server {
 
                         //Respond to second message
 
-//                        byte[] originalSong = Base64.getDecoder().decode(media_content.get("file_Bytes").getAsString());
-//                        byte[] cutsongBytes= dropFirstXPercentBits(originalSong, byteReqInt);
-//                        String cutSong = Base64.getEncoder().encodeToString(cutsongBytes);
-//                        nonce = incrementByteNonce(nonce);
-//                        JsonObject encryptedResponse = CL.protect("CTR", cutSong.getBytes(), nonce, keyFamily);
-//                        byte[] encryptedBytes = encryptedResponse.toString().getBytes();
-//                        os.write(encryptedBytes);
-//                        os.flush();
                         byte[] originalSong = Base64.getDecoder().decode(media_content.get("file_Bytes").getAsString());
                         byte[] encryptedOriginalSong = CL.protectCTR(originalSong, nonce, keyFamily);
                         int from16bytes = (int) Math.floor((byteReqInt/ 100.0) * encryptedOriginalSong.length  / NB_BYTES_PACKET_MUSIC);
@@ -223,7 +186,6 @@ public class Server {
                         for (int i = from16bytes; i < nb16bytes; i++) {
                             byte[] partEncryptedSong = givePartByte(encryptedOriginalSong, i);
                             byte[] nonceCTR = incrementCounterInNonce(nonce,i * NB_BYTES_PACKET_MUSIC);
-//                            BufferedOutputStream bufferedOutput = new BufferedOutputStream(os, 1000);
                             bufferedOutput = new BufferedOutputStream(os, 1000);
                             bufferedOutput.write(partEncryptedSong);
                             bufferedOutput.flush();
@@ -231,61 +193,24 @@ public class Server {
                             bufferedOutput.flush();
                             bufferedOutput.write(calculateMAC(Base64.getEncoder().encodeToString(partEncryptedSong),nonceCTR, keyFamily).getBytes());
                             bufferedOutput.flush();
-//                            os = new BufferedOutputStream(socket.getOutputStream());
-//                            os.write(encryptedBytes);
+
 
 
                             System.out.println("Sending song part");
-//                            bufferedOutput.close();
-
-//                        String parSong = new String(encryptedBytes, StandardCharsets.UTF_8);
-//
-//
-//                        JsonObject receivedJson3 = JsonParser.parseString(parSong).getAsJsonObject();
-
-
-//                        JsonObject decryptedJson3 = unprotect("CBC", receivedJson3, keyFamily, nonce);
-//                        byte[] musicBytes =  unprotectCTR(partEncryptedSong, keyFamily, nonceCTR);
-//                        byte[] musicBytesu =  givePartByte(originalSong, i);
-
-                        //                        boolean val = check(decryptedJson3.get("M").getAsString(),nonce, keyFamily,receivedJson3.get("MAC").getAsString());
-//                                    byte[] musicBytes = buffer.toByteArray();
-
-//                        try {
-//                            InputStream         in     = new ByteArrayInputStream(musicBytes);
-//                            BufferedInputStream bis    = new BufferedInputStream(in);
-//                            Player              player = new Player(bis);
-//                            player.play();
-//                            while (!player.isComplete()) {
-//                            }
-//                            System.out.println("Song part finished playing");
-//                        } catch (Exception e) {
-//                            System.out.println("Problem playing the MP3 file");
-//                            e.printStackTrace();
-//                        }
-                        }
-
-
-
-                    } catch (IOException i) {
-                        System.out.println(i);
-                        return;
+                    }
+                    }}
+                } catch (SQLException e) {
+                        throw new RuntimeException(e);
+                    } catch (NoSuchAlgorithmException e) {
+                        throw new RuntimeException(e);
+                    } catch (InvalidKeyException e) {
+                        throw new RuntimeException(e);
                     } catch (GeneralSecurityException e) {
-                        e.printStackTrace();
-                        System.out.println("Error decrypting message, maybe hacked");
-                        os = new BufferedOutputStream(socket.getOutputStream());
-                        System.out.printf("Sending error message");
-                        String response = "Error";
-                        os.write(response.getBytes(), 0, response.getBytes().length);
-                        os.flush();
+                        throw new RuntimeException(e);
                     } catch (UserAccessException e) {
                         throw new RuntimeException(e);
-                    }catch (SecurityException e) {
-                        startServer(port);
                     }
-
-                }
-                try {
+                    try {
                     is.close();
                     os.close();
                     socket.close();
@@ -293,29 +218,14 @@ public class Server {
                     System.out.println(i);
                     return;
                 }
-            } catch (DataBaseConnectionException e){
-                e.printStackTrace();
-            } catch (SQLException e) {
+            }} catch (SQLException e) {
+                throw new RuntimeException(e);
+            } catch (DataBaseConnectionException e) {
                 throw new RuntimeException(e);
             }
         }
     }
 
-    public static byte[] dropFirstXPercentBits(byte[] originalSong, int percentToDrop) {
-        int totalLength = originalSong.length;
-        int bytesToDrop = (int) Math.ceil(totalLength * (percentToDrop / 100.0));
-
-        if (bytesToDrop >= totalLength) {
-            return new byte[0]; // Or handle this case as you see fit
-        }
-        // Create a new array to hold the result
-        int newLength = totalLength - bytesToDrop;
-        byte[] result = new byte[newLength];
-
-        // Copy the relevant part of the original array into the result
-        System.arraycopy(originalSong, bytesToDrop, result, 0, newLength);
-        return result;
-    }
 
     public static byte[] givePartByte(byte[] originalSong, int nb) {
         int baselength = NB_BYTES_PACKET_MUSIC;
@@ -338,5 +248,7 @@ public class Server {
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
         int port = 8000;
         startServer(port);
-    }
+
+        }
+
 }

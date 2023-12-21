@@ -1,12 +1,10 @@
 package proj;
 import com.google.gson.JsonObject;
-import com.google.gson.JsonParser;
 
 import java.io.IOException;
 import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.security.SecureRandom;
-import java.util.Arrays;
 import java.util.Base64;
 import java.util.Scanner;
 
@@ -76,8 +74,9 @@ public class CLI {
                 System.out.println("1.Message Client->Server: ");
                 System.out.println("2.Message Server->Client: ");
                 System.out.println("3.Message Client->Server: ");
-                System.out.println("4. Exit");
-                System.out.print("Enter your choice: (format: 1-4)");
+                System.out.println("4.Stream  Server->Client: ");
+                System.out.println("5. Exit");
+                System.out.print("Enter your choice: (format: 1-5)");
 
                 int choice2 = scanner.nextInt();
                 switch (choice2) {
@@ -125,6 +124,14 @@ public class CLI {
                         System.out.println("Message: " + m);
                         break;
                     case 4:
+                        // Encrypt
+                        byte[] protectedDataCTR = cl.protectCTR(message.getBytes(), nonce, clientKey);
+                        System.out.println("Encrypted Data (Base64 encoded): " + protectedDataCTR);
+                        // Decrypt
+                        byte[] decryptedDataCTR = cl.unprotectCTR(protectedDataCTR, clientKey, nonce);
+                        System.out.println("Decrypted Data: " + new String(decryptedDataCTR));
+                        break;
+                    case 5:
                         System.out.println("Exiting...");
                         return;
                     default:
