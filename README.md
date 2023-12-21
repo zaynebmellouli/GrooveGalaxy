@@ -335,12 +335,12 @@ $ sudo apt install iptables-persistent
 
 To save the current rules again, do:
 
-# FOR IPv4
+### FOR IPv4
 ```sh
 $ sudo sh -c 'iptables-save > /etc/iptables/rules.v4'
 ```
 
-# FOR IPv6
+### FOR IPv6
 ```sh
 $ sudo sh -c 'ip6tables-save > /etc/iptables/rules.v6'
 ```
@@ -350,31 +350,28 @@ To test the four virtual machines, you could ping each machine to another.
 
 ## Demonstration
 
-Now that all the networks and machines are up and running, ...
+Now that all the networks and machines are up and running, we have implemented some features to our application.
 
-*(give a tour of the best features of the application; add screenshots when relevant)*
+**Progressive Streaming:**
+- Music is streamed progressively and securely, allowing users to start listening to the content before it's fully downloaded.
+- Users can enjoy a seamless listening experience without waiting for the entire file to be downloaded.
 
-```sh
-$ demo command
-```
+![](img/playback.jpeg)
 
-*(replace with actual commands)*
+**User-Controlled Playback:**
+- Users have control over when they start playing the music.
+![](img/streaming.jpeg)
 
-*(IMPORTANT: show evidence of the security mechanisms in action; show message payloads, print relevant messages, perform simulated attacks to show the defenses in action, etc.)*
-
-This concludes the demonstration.
+**Secure Mechanism**
+We're using CTR in order to stream the music directly ciphered.
 
 ## Additional Information
 
 ### Links to Used Tools and Libraries
 
-- [Java 11.0.16.1](https://openjdk.java.net/)
+- [Java 17](https://openjdk.java.net/)
 - [Maven 3.9.5](https://maven.apache.org/)
-- ...
-
-### Versioning
-
-We use [SemVer](http://semver.org/) for versioning.  
+- [PostgreSQL](https://www.postgresql.org/)
 
 ### License
 

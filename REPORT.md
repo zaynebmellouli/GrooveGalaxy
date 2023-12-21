@@ -50,10 +50,10 @@ From client to server: ${K_c(hash(Message, nonce + 2)), K_c(Message)}$
 The client will indicate in the request from which percentage he wants the music.
 Encrypting the message with the symetrc key ($K_c$) and a MAC to check for integrity, authenticity and freshness. 
 
-NOT YET DETERMINED
+
 From server to client: ${K_f(hash(P_n), nonce + 3), K_f(P_n)}$
-The server will stream a block of bytes of the music from the percentage requested by the client, encrypted by the the family key. We add to this stream message a MAC for integrity, authenticity and freshness. 
-NOT YET DETERMINED
+The server sents segments of an encrypted audio files (with the the family key), each followed by its corresponding MAC for verification. This approach ensures the secure transmission of the audio data, allowing for streaming playback starting from a specified percentage of the file, while also maintaining the integrity and authenticity of each data segment through the use of MACs.
+
 
 ![](img/Structure.jpeg)
 
@@ -62,20 +62,21 @@ NOT YET DETERMINED
 For this method we will make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
 The standard method used by the client takes as input the message to be encrypted, the next nonce and the symmetric key of the client. 
 (When identifying himself in the first message the client concatinates the request and the ID to form a single message, encrypting that with the protect method and then adding the uncyphered ID to the output before sending the message) 
-The overloaded version will expect an additional parameter for the symmetric key of the client's family.
-Both methods will return the encoded MAC and the encoded message. The overloaded method will additionally return the family key encrypted with the clients key Kc(Kf)
-
+The second overloaded version will expect an additional parameter for the symmetric key of the client's family.
+All three methods will return the encoded MAC and the encoded message as a JsonObject. The second overloaded method will additionally return the family key encrypted with the clients key Kc(Kf)
+For the streaming of the audio file we implemented a forth method called protectCTR which encrypts a given `message` using AES encryption in Counter (CTR) mode with no padding, taking a `nonce` and a symmetric key (`symKey_f`) as parameters and then returns the encrypted version of the message as a byte array.
 ![](img/ProtectMethod.jpeg)
 
 #### Unprotect Method
-For the unprotect method, used by both the client and the server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This will ensure the integrity, authenticity and the freshness of the communication.
-We will make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
-The client will have to decrypt two messages:
+For the unprotect method, used by both the client and the server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This ensures the integrity, authenticity and the freshness of the communication.
+We make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
+The client haves to decrypt two messages:
 -M1: the encrypted family key sent by the server 
 -M2: once the client has the symmetric family key, he will be able to decrypt the second message with it (song).
 
-The server, he will have to decrypt only the request sent by the client using the symmetric shared key. When decoding the first request of the client he will first seperate the unciphered ID from the MAC and the ciphered Message. Then he will run the unprotect message on the encoded MAC address, the encoded Message and the ID. In this specific case of the identification the $Message_d$ and $Message_e$ corresponds to the concatination of the inital request and the client's ID. The ID is also hash into the MAC to ensure it's protection.
+The server haves to decrypt only the request sent by the client using the symmetric shared key. When decoding the first request of the client he first seperates the unciphered ID from the MAC and the ciphered Message. Then he runs the unprotect message on the encoded MAC address, the encoded Message and the ID. In this specific case of the identification the $Message_d$ and $Message_e$ corresponds to the concatination of the inital request and the client's ID. The ID is also hashed into the MAC to ensure it's protection.
 Both functions(overloaded and standard) will return the decoded MAC and the decoded message. 
+For the streaming of the audio file we implemented a third method called unprotectCTR which decrypts an array of bytes (`encryptedM`) using AES in Counter (CTR) mode with no padding, utilizing a provided symmetric key (`symKey`) and a nonce. It initializes a `Cipher` instance in decryption mode with these parameters and returns the decrypted data as an array of bytes.
 
 ![](img/UnprotectMethod.jpeg)
 
@@ -161,10 +162,7 @@ For the encryption of data, symmetric keys are used. These keys are generated an
 #### 2.3.1. Challenge Overview
 
 (_Describe the new requirements introduced in the security challenge and how they impacted your original design._)
-
-The new requirements introduced in the security challenge significantly impact our original cryptographic design, necessitating both functional and architectural modifications. Firstly, the demand for quick playback initiation in the middle of an audio stream requires the implementation of a more flexible encryption scheme, such as symmetric key encryption with a mode that supports random access, like Counter (CTR) mode. This adaptation ensures that users can start playback from any point in the audio without needing to decrypt the entire file first. 
-The CipherStream library in Java provides a convenient way to implement streaming encryption and decryption. The choice of symmetric encryption (e.g., AES) in a mode that supports random access, like CTR (Counter Mode), is essential here. This mode allows for decrypting any part of the stream independently, facilitating the quick start of playback.
-Secondly, the concept of family sharing introduces a complex layer of key management where each family member must access the same encrypted content using their unique key. In this scenario, each family unit shares a common symmetric key that is used to encrypt the JSON files. However, since each user still has their own unique key,  a secure method to distribute the family key to each user is necessary. We do this by  using the individual client's keys to encrypt the family key before distributing it.
+The security challenge introduced two significant new requirements that impacted our original cryptographic design. The first requirement was the ability for quick playback initiation in the middle of an audio stream. This necessitated the implementation of a flexible encryption scheme capable of supporting random access. The second requirement was the introduction of a family sharing feature, which added complexity to our key management system. Each family member needed to access the same encrypted content using a unique key, while also sharing a common symmetric key for the family unit.
 
 #### 2.3.2. Attacker Model
 -nos buffers a un moment il faudra qu'on stop on envoie un "stop" un attackant peut venir 
@@ -173,11 +171,30 @@ Secondly, the concept of family sharing introduces a complex layer of key manage
 
 (_Define how powerful the attacker is, with capabilities and limitations, i.e., what can he do and what he cannot do_)
 
+**Trust Levels:**
+- **Fully Trusted Entities:** These include our server infrastructure and the client application when operated by a legitimate user. We assume these entities operate in good faith and follow the prescribed security protocols.
+- **Partially Trusted Entities:** Network intermediaries, such as Internet Service Providers (ISPs) and routing nodes, are considered partially trusted. They are expected to correctly forward traffic but may have the capability to intercept or observe data.
+- **Untrusted Entities:** This includes any external actors who might attempt to compromise the communication or data integrity. These attackers are not trusted under any circumstances.
+
+**Attacker Capabilities and Limitations:**
+- **Capabilities:**
+  - **Interception of Non-Encrypted Data:** The attacker can intercept and read the first nonce and ID sent in plaintext. While these pieces of information are protected by a Message Authentication Code (MAC), their visibility could offer some insights into the communication patterns.
+  - **Disruption of Streaming:** Since the "stop" signal at the end of streamed data is not encrypted, an attacker could potentially send premature "stop" signals. This could lead to the client's buffer stopping early, causing an incomplete data reception. To counteract the potential disruption caused by fake "stop" signals, the implementation could, in the future, include sequence checks or additional verification steps to ensure that "stop" signals are legitimate and correspond to the expected end of the data stream.
+
+- **Limitations:**
+  - **Impersonation:** The attacker cannot impersonate the client or server due to the lack of access to the encryption keys. Without these keys, the attacker is unable to forge valid encrypted messages or MACs that would be considered authentic.
+  - **Decryption of Data:** The attacker is unable to decrypt the content of the communication protected by AES encryption in both CTR and CBC modes. This limitation ensures the confidentiality of the transmitted data. 
+
+In conclusion, while key aspects of communication are well-protected, certain areas, particularly those involving non-encrypted elements, present opportunities for enhancement to further fortify the system against potential attacks.
+
 #### 2.3.3. Solution Design and Implementation
 
 (_Explain how your team redesigned and extended the solution to meet the security challenge, including key distribution and other security measures._)
 
 (_Identify communication entities and the messages they exchange with a UML sequence or collaboration diagram._)  
+   To meet these new requirements, our team redesigned the solution with specific focus on encryption methods and key management. For the quick playback feature, we adopted symmetric key encryption using AES in Counter (CTR) mode, facilitated by the CipherStream library in Java. CTR mode was chosen for its ability to decrypt any part of the stream independently, enabling users to start playback from any point without decrypting the entire file.
+
+   Addressing the family sharing feature, we developed a secure key distribution mechanism. Each family unit was assigned a common symmetric key for encrypting shared content. To distribute this key securely to each family member, we encrypted the family key using the individual client's unique keys. This approach ensured that while all family members could access shared content, the distribution and usage of the family key remained secure and individualized.
 
 ## 3. Conclusion
 
