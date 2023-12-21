@@ -161,10 +161,7 @@ For the encryption of data, symmetric keys are used. These keys are generated an
 #### 2.3.1. Challenge Overview
 
 (_Describe the new requirements introduced in the security challenge and how they impacted your original design._)
-
-The new requirements introduced in the security challenge significantly impact our original cryptographic design, necessitating both functional and architectural modifications. Firstly, the demand for quick playback initiation in the middle of an audio stream requires the implementation of a more flexible encryption scheme, such as symmetric key encryption with a mode that supports random access, like Counter (CTR) mode. This adaptation ensures that users can start playback from any point in the audio without needing to decrypt the entire file first. 
-The CipherStream library in Java provides a convenient way to implement streaming encryption and decryption. The choice of symmetric encryption (e.g., AES) in a mode that supports random access, like CTR (Counter Mode), is essential here. This mode allows for decrypting any part of the stream independently, facilitating the quick start of playback.
-Secondly, the concept of family sharing introduces a complex layer of key management where each family member must access the same encrypted content using their unique key. In this scenario, each family unit shares a common symmetric key that is used to encrypt the JSON files. However, since each user still has their own unique key,  a secure method to distribute the family key to each user is necessary. We do this by  using the individual client's keys to encrypt the family key before distributing it.
+The security challenge introduced two significant new requirements that impacted our original cryptographic design. The first requirement was the ability for quick playback initiation in the middle of an audio stream. This necessitated the implementation of a flexible encryption scheme capable of supporting random access. The second requirement was the introduction of a family sharing feature, which added complexity to our key management system. Each family member needed to access the same encrypted content using a unique key, while also sharing a common symmetric key for the family unit.
 
 #### 2.3.2. Attacker Model
 -nos buffers a un moment il faudra qu'on stop on envoie un "stop" un attackant peut venir 
@@ -172,9 +169,6 @@ Secondly, the concept of family sharing introduces a complex layer of key manage
 (_Define who is fully trusted, partially trusted, or untrusted._)
 
 (_Define how powerful the attacker is, with capabilities and limitations, i.e., what can he do and what he cannot do_)
-### Attacker Model for the GrooveGalaxy Project
-
-In the GrooveGalaxy project, the attacker model is defined based on the trust levels and the capabilities and limitations of potential attackers. 
 
 **Trust Levels:**
 - **Fully Trusted Entities:** These include our server infrastructure and the client application when operated by a legitimate user. We assume these entities operate in good faith and follow the prescribed security protocols.
@@ -197,6 +191,9 @@ In conclusion, while key aspects of communication are well-protected, certain ar
 (_Explain how your team redesigned and extended the solution to meet the security challenge, including key distribution and other security measures._)
 
 (_Identify communication entities and the messages they exchange with a UML sequence or collaboration diagram._)  
+   To meet these new requirements, our team redesigned the solution with specific focus on encryption methods and key management. For the quick playback feature, we adopted symmetric key encryption using AES in Counter (CTR) mode, facilitated by the CipherStream library in Java. CTR mode was chosen for its ability to decrypt any part of the stream independently, enabling users to start playback from any point without decrypting the entire file.
+
+   Addressing the family sharing feature, we developed a secure key distribution mechanism. Each family unit was assigned a common symmetric key for encrypting shared content. To distribute this key securely to each family member, we encrypted the family key using the individual client's unique keys. This approach ensured that while all family members could access shared content, the distribution and usage of the family key remained secure and individualized.
 
 ## 3. Conclusion
 
