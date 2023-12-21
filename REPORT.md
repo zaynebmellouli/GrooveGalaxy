@@ -124,7 +124,7 @@ For hashing, we will implement the SHA-2 algorithm. Given that SHA-2 offers a hi
 
 
 3. **Database Machine**:
-   - **Description**: This machine is dedicated to storing and managing data. In our database schema, we created --- The media content will store the lyrics and the path_file.
+   - **Description**: This machine is dedicated to storing and managing data. In our database schema, we created three tables. THe first one will contain details about the user (username,password) and will stock all the different keys (shared symmetric key and the family key). The other two tables will record informations about the song: media will manage artists'name, genre, format, title and the media content will store have the lyrics and the file path leading to the actual song to play.
    - **Technology Justification**:PostgreSQL is selected as the RDBMS for its open-source nature, reliability, and extensibility. 
 
 4. **Gateway/Router Machine (e.g., VM2)**:
