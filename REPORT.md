@@ -119,8 +119,8 @@ For hashing, we will implement the SHA-2 algorithm. Given that SHA-2 offers a hi
    - **Technology Justification**: 
 
 3. **Database Machine**:
-   - **Description**: This machine is dedicated to storing and managing data such as user information, song metadata, purchase history, and encrypted audio files.
-   - **Technology Justification**: 
+   - **Description**: This machine is dedicated to storing and managing data. In our database schema, we created one table for users that collect different informations about the user. Two tables will be designed for the songs: media and media_content. First will contain the title, format, artists and the genre. The media content will store the lyrics and the path_file.
+   - **Technology Justification**:PostgreSQL is selected as the RDBMS for its open-source nature, reliability, and extensibility. 
 
 4. **Gateway/Router Machine (e.g., VM2)**:
    - **Description**: This machine acts as a gateway or router, managing the traffic between the internet and the internal network. It also enforces firewall rules and monitors for unauthorized access.
@@ -162,6 +162,7 @@ The CipherStream library in Java provides a convenient way to implement streamin
 Secondly, the concept of family sharing introduces a complex layer of key management where each family member must access the same encrypted content using their unique key. In this scenario, each family unit shares a common symmetric key that is used to encrypt the JSON files. However, since each user still has their own unique key,  a secure method to distribute the family key to each user is necessary. We do this by  using the individual client's keys to encrypt the family key before distributing it.
 
 #### 2.3.2. Attacker Model
+-nos buffers a un moment il faudra qu'on stop on envoie un "stop" un attackant peut venir 
 
 (_Define who is fully trusted, partially trusted, or untrusted._)
 
