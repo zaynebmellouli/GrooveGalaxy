@@ -103,7 +103,8 @@ After making these changes, restart the PostgreSQL server to apply the new confi
 sudo service postgresql restart
 ```
 Now, you can connect to postgreSQL. Please when setting up your postgres use the **username = postgres** and **password = postgres**. 
-If you want to create another username and password, make sure to change it in the class DataBaseConnector
+If you want to create another username and password, make sure to change it in the class DataBaseConnector.
+
 Use the following command to connect to PostgreSQL:
 
 ```sh
