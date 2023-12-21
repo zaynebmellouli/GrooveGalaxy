@@ -191,6 +191,31 @@ Secondly, the concept of family sharing introduces a complex layer of key manage
 
 ## 4. Bibliography
 
+1. **HTTPS and SSL/TLS**:
+   - [Mozilla Developer Network (MDN) - HTTPS](https://developer.mozilla.org/en-US/docs/Web/HTTP/Overview#https) 
+   - [Let's Encrypt - How HTTPS Works](https://letsencrypt.org/how-it-works/)
+
+2. **Java Secure Socket Extension (JSSE) Reference Guide**:
+   - [Oracle JSSE Reference Guide](https://docs.oracle.com/javase/8/docs/technotes/guides/security/jsse/JSSERefGuide.html)
+
+3. **AES Encryption**:
+   - [NIST Publication on AES](https://nvlpubs.nist.gov/nistpubs/FIPS/NIST.FIPS.197.pdf)
+   - [AES Encryption in Java](https://www.baeldung.com/java-aes-encryption-decryption)
+
+4. **Streaming Audio in Java**:
+   - [Java Sound API Guide](https://docs.oracle.com/javase/tutorial/sound/index.html)
+   - [Streaming Audio and Video (Java Oracle Docs)](https://docs.oracle.com/javase/7/docs/technotes/guides/sound/programmer_guide/chapter7.html)
+
+5. **Database Security**:
+   - [PostgreSQL Security](https://www.postgresql.org/docs/current/security.html)
+   - [OWASP Guide to Database Security](https://owasp.org/www-project-cheat-sheets/cheatsheets/Database_Security_Cheat_Sheet.html)
+
+6. **General Security Best Practices**:
+   - [OWASP Top Ten Web Application Security Risks](https://owasp.org/www-project-top-ten/)
+   - [NIST Guide to General Server Security](https://csrc.nist.gov/publications/detail/sp/800-123/final)
+
+
+
 (_Present bibliographic references, with clickable links. Always include at least the authors, title, "where published", and year._)
 
 ----
