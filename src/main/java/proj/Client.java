@@ -3,6 +3,7 @@ package proj;
 import com.google.gson.*;
 
 import java.io.*;
+import java.nio.charset.StandardCharsets;
 import java.security.*;
 import java.util.Arrays;
 import java.util.Base64;
@@ -73,9 +74,9 @@ public class Client {
                     SecureRandom random = new SecureRandom();
                     nonce  = new byte[16];
                     random.nextBytes(nonce);
-                    id    = 1;
-                    key_c = CL.readAESKey("Keys/Key_ServClient_Alice.key");
-                    key_f = CL.readAESKey("Keys/Key_Family_Lu.key");
+                    id    = 6;
+                    key_c = CL.readAESKey("Keys/Key_ServClient_Amelia.key");
+                    key_f = CL.readAESKey("Keys/Key_Family_Patel.key");
                     createUserButton.addActionListener(e -> promptUserName());
                     chooseSongButton.addActionListener(e -> {
                         try {
@@ -153,7 +154,7 @@ public class Client {
     }
 
     public static void promptSongSelection() throws GeneralSecurityException, IOException {
-        String[] songs = {"Free Bird", "Song2", "Song3"};
+        String[] songs = {"Free Bird", "Let's Groove", "Song3"};
         choosenSong = (String) JOptionPane.showInputDialog(frame,
                 "Which song would you like to listen to?",
                 "Select Song",
@@ -172,26 +173,25 @@ public class Client {
             os.write(messageBytes);
             os.flush();
             //Listen for Response
-                    ByteArrayOutputStream buffer1     = new ByteArrayOutputStream();
+            ByteArrayOutputStream buffer1     = new ByteArrayOutputStream();
 
-                    // Buffer to store the total response
-                    is = new BufferedInputStream(socket.getInputStream());
-                    byte[] packet1 = new byte[10000000]; // Buffer for individual packets
-                    int    bytesRead1;
+            // Buffer to store the total response
+            is = new BufferedInputStream(socket.getInputStream());
+            byte[] packet1 = new byte[10000000]; // Buffer for individual packets
+            int    bytesRead1;
 
-                    while ((bytesRead1 = is.read(packet1)) != -1) {
-                        if (Arrays.equals(packet1,0,bytesRead1 -1, "stop".getBytes(),0,3)) {
-                            break;
-                        }else {
-                            buffer1.write(packet1, 0, bytesRead1);
-                        }
+            while ((bytesRead1 = is.read(packet1)) != -1) {
+                if (Arrays.equals(packet1,0,bytesRead1 -1, "stop".getBytes(),0,3)) {
+                    break;
+                }else {
+                    buffer1.write(packet1, 0, bytesRead1);
+                }
 //
-                    }
-                    // Convert the total response into a string
-                    data = buffer1.toByteArray();
-                    JsonObject mediaInfo            = null;
-                    int        media_content_length = 0;
-                    if (len != -1) {
+            }
+            // Convert the total response into a string
+            data = buffer1.toByteArray();
+            JsonObject mediaInfo            = null;
+            if (len != -1) {
 //                            nonce        = incrementByteNonce(nonce);
 //                        String     firstMessage   = new String(data, 0, len);
                         String     firstMessage   = new String(data, StandardCharsets.UTF_8);
