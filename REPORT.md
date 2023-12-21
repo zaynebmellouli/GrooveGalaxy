@@ -50,10 +50,10 @@ From client to server: ${K_c(hash(Message, nonce + 2)), K_c(Message)}$
 The client will indicate in the request from which percentage he wants the music.
 Encrypting the message with the symetrc key ($K_c$) and a MAC to check for integrity, authenticity and freshness. 
 
-NOT YET DETERMINED
+
 From server to client: ${K_f(hash(P_n), nonce + 3), K_f(P_n)}$
-The server will stream a block of bytes of the music from the percentage requested by the client, encrypted by the the family key. We add to this stream message a MAC for integrity, authenticity and freshness. 
-NOT YET DETERMINED
+The server sents segments of an encrypted audio files (with the the family key), each followed by its corresponding MAC for verification. This approach ensures the secure transmission of the audio data, allowing for streaming playback starting from a specified percentage of the file, while also maintaining the integrity and authenticity of each data segment through the use of MACs.
+
 
 ![](img/Structure.jpeg)
 
@@ -62,20 +62,21 @@ NOT YET DETERMINED
 For this method we will make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
 The standard method used by the client takes as input the message to be encrypted, the next nonce and the symmetric key of the client. 
 (When identifying himself in the first message the client concatinates the request and the ID to form a single message, encrypting that with the protect method and then adding the uncyphered ID to the output before sending the message) 
-The overloaded version will expect an additional parameter for the symmetric key of the client's family.
-Both methods will return the encoded MAC and the encoded message. The overloaded method will additionally return the family key encrypted with the clients key Kc(Kf)
-
+The second overloaded version will expect an additional parameter for the symmetric key of the client's family.
+All three methods will return the encoded MAC and the encoded message as a JsonObject. The second overloaded method will additionally return the family key encrypted with the clients key Kc(Kf)
+For the streaming of the audio file we implemented a forth method called protectCTR which encrypts a given `message` using AES encryption in Counter (CTR) mode with no padding, taking a `nonce` and a symmetric key (`symKey_f`) as parameters and then returns the encrypted version of the message as a byte array.
 ![](img/ProtectMethod.jpeg)
 
 #### Unprotect Method
-For the unprotect method, used by both the client and the server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This will ensure the integrity, authenticity and the freshness of the communication.
-We will make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
-The client will have to decrypt two messages:
+For the unprotect method, used by both the client and the server, we need to decrypt at first the MAC received (MIC + freshness : MIC is composed of the hashed message encrypted with the symmetric key). This ensures the integrity, authenticity and the freshness of the communication.
+We make use of the Java feature “method overloading” such that it can be used by both the server and the client. 
+The client haves to decrypt two messages:
 -M1: the encrypted family key sent by the server 
 -M2: once the client has the symmetric family key, he will be able to decrypt the second message with it (song).
 
-The server, he will have to decrypt only the request sent by the client using the symmetric shared key. When decoding the first request of the client he will first seperate the unciphered ID from the MAC and the ciphered Message. Then he will run the unprotect message on the encoded MAC address, the encoded Message and the ID. In this specific case of the identification the $Message_d$ and $Message_e$ corresponds to the concatination of the inital request and the client's ID. The ID is also hash into the MAC to ensure it's protection.
+The server haves to decrypt only the request sent by the client using the symmetric shared key. When decoding the first request of the client he first seperates the unciphered ID from the MAC and the ciphered Message. Then he runs the unprotect message on the encoded MAC address, the encoded Message and the ID. In this specific case of the identification the $Message_d$ and $Message_e$ corresponds to the concatination of the inital request and the client's ID. The ID is also hashed into the MAC to ensure it's protection.
 Both functions(overloaded and standard) will return the decoded MAC and the decoded message. 
+For the streaming of the audio file we implemented a third method called unprotectCTR which decrypts an array of bytes (`encryptedM`) using AES in Counter (CTR) mode with no padding, utilizing a provided symmetric key (`symKey`) and a nonce. It initializes a `Cipher` instance in decryption mode with these parameters and returns the decrypted data as an array of bytes.
 
 ![](img/UnprotectMethod.jpeg)
 
