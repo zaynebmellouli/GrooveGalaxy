@@ -30,6 +30,7 @@ public class Client {
     private static JButton createUserButton = new JButton("Create a User");
     private static JButton chooseSongButton = new JButton("Choose Song");
     private static JButton playMusicButton = new JButton("Play Music");
+    private static JButton exitButton = new JButton("Exit");
 
     //Global Variables
     private static String userName; // Variable to store the user's name
@@ -85,7 +86,6 @@ public class Client {
                             throw new RuntimeException(ex);
                         } catch (IOException ex) {
                             throw new RuntimeException(ex);
-
                         }
                     });
                     playMusicButton.addActionListener(e -> {
@@ -97,6 +97,7 @@ public class Client {
                             throw new RuntimeException(ex);
                         }
                     });
+                    exitButton.addActionListener(e -> promptExit());
 
                     chooseSongButton.setVisible(false); // Initially hide the "Choose Song" button
                     playMusicButton.setVisible(false); // Initially hide the "Play Music" button
@@ -110,11 +111,12 @@ public class Client {
                     panel.add(createUserButton);
                     panel.add(chooseSongButton);
                     panel.add(playMusicButton);
+                    panel.add(exitButton);
 
                     frame.add(panel, BorderLayout.CENTER);
                     frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    //frame.setSize(width, height)
-                    // frame.pack() //to fit the contents
+                    //frame.setSize(width, height);
+                    frame.pack(); //to fit the contents
                     frame.setTitle("GrooveGalaxy");
                     frame.pack();
                     frame.setVisible(true);
@@ -143,9 +145,18 @@ public class Client {
         }
 
     }
-
+    public static void promptExit() {
+        try {
+            //scanner.close();
+            is.close();
+            os.close();
+            socket.close();
+        } catch (IOException i) {
+            System.out.println(i);
+        }
+    }
     public static void promptUserName() {
-        userName = JOptionPane.showInputDialog(frame, "Enter your name:", "Name Entry", JOptionPane.PLAIN_MESSAGE);
+        choosenSong = "Alice";
         if (userName != null && !userName.trim().isEmpty()) {
             updateMessage("Hey " + userName);
             createUserButton.setVisible(false);
@@ -154,7 +165,7 @@ public class Client {
     }
 
     public static void promptSongSelection() throws GeneralSecurityException, IOException {
-        String[] songs = {"Free Bird", "Let's Groove", "Song3"};
+        String[] songs = {"Breathe", "Free Bird", "Herzbeben", "I Lived", "I Will Survive", "Let's Groove", "Rock With You"};
         choosenSong = (String) JOptionPane.showInputDialog(frame,
                 "Which song would you like to listen to?",
                 "Select Song",
@@ -167,8 +178,8 @@ public class Client {
             updateMessage("Hey " + userName + ", you have chosen " + choosenSong);
             //First Message
             //message = "Breathe";
-            JsonObject r            = CL.protect(choosenSong.getBytes(), nonce, id, key_c);
-            byte[]     messageBytes = r.toString().getBytes();
+            JsonObject r = CL.protect(choosenSong.getBytes(), nonce, id, key_c);
+            byte[] messageBytes = r.toString().getBytes();
             os = new BufferedOutputStream(socket.getOutputStream());
             os.write(messageBytes);
             os.flush();
@@ -218,13 +229,6 @@ public class Client {
                         mediaInfo            = JsonParser.parseString(new String(Base64.getDecoder().decode(decryptedJson1.get("M").getAsString())))
                                 .getAsJsonObject();
                         media_content_length = mediaInfo.get("media_content_length").getAsInt();
-                        //System.out.printf("Client received %d bytes:", len);
-                        //System.out.println("owner_id :" + mediaInfo.get("owner_id").getAsInt());
-                        //System.out.println("format :" + mediaInfo.get("format").getAsString());
-                        //System.out.println("artist :" + mediaInfo.get("artist").getAsString());
-                        //System.out.println("title :" + mediaInfo.get("title").getAsString());
-                        //System.out.println("genre :" + mediaInfo.get("genre").getAsString());
-                        //System.out.println("lyrics :" + mediaInfo.get("lyrics").getAsString());
                         updateMusicInfo(mediaInfo);
                         chooseSongButton.setVisible(false);
                     }
