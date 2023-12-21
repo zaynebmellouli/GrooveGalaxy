@@ -23,9 +23,9 @@ public class DataBaseConnector {
     
 
     public DataBaseConnector() throws DataBaseConnectionException {
-//        this.url = "jdbc:postgresql://localhost:5432/groovedb"; // pour vous
-//        this.url = "jdbc:postgresql://localhost:5433/groovedb"; // pour rassene
-        this.url = "jdbc:postgresql://192.168.0.1:5432/groovedb";
+//        this.url = "jdbc:postgresql://localhost:5432/groovedb"; // for test others
+//        this.url = "jdbc:postgresql://localhost:5433/groovedb"; // For test rassene
+        this.url = "jdbc:postgresql://192.168.0.1:5432/groovedb"; // for submit
         this.username = "postgres";
         this.password = "postgres";
 

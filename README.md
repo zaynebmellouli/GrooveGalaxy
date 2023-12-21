@@ -355,7 +355,45 @@ $ sudo sh -c 'ip6tables-save > /etc/iptables/rules.v6'
 
 To test the four virtual machines, you could ping each machine to another.
 
+### For the FIREWALL RULES:
 
+In the VM of the server and the database install ufw:
+
+```sh
+sudo apt install ufw
+```
+
+then for each VM:
+
+**VM server:**
+```sh
+sudo ufw allow from 192.168.0.1 port 5432 to 192.168.0.100 #allow communication with the database
+sudo ufw allow from 192.168.1.1 to 192.168.0.100 port 8000 proto tcp #allow communication with the client
+```
+
+**VM database:**
+```shell
+sudo ufw allow from 192.168.0.100 to 192.168.0.1 port 5432 #allow communication with the server only
+```
+
+For the **VM of the gateway** we wil redirect the traffic comming from the client to the server. This way the client will 
+think that he communicates directly with the server but actually with the gateway. This way we give him juste the ip address
+of the gateway and he will not know the ip address of the server.
+
+**For redirecting:**
+
+```shell
+sudo iptables -F  
+sudo iptables -t nat -F  
+sudo iptables -t nat -A POSTROUTING -j MASQUERADE
+sudo iptables -t nat -A PREROUTING -i eth1 -p tcp --dport 8000 -j DNAT --to-destination 192.168.0.100:8000
+```
+
+And finally for protecting the database VM/machine we will just deny everything coming to it
+
+```shell
+sudo iptables -A FORWARD -i eth1 -o eth0 -d 192.168.0.10 -j DROP
+```
 ## Demonstration
 
 Now that all the networks and machines are up and running, we have implemented some features to our application.

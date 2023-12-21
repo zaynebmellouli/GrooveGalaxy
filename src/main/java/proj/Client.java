@@ -379,9 +379,9 @@ public class Client {
         System.setProperty("javax.net.ssl.trustStore", "https_cert/usertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
         String host =
-//                "localhost";
+//                "localhost"; // for test
 //                "192.168.0.100";
-                "192.168.1.254";
+                "192.168.1.254"; // for submit
         int port = 8000;
         startClient(host, port);
     }

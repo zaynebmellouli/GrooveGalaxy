@@ -256,6 +256,7 @@ they are in place before they are needed for encryption and decryption processes
 #### 2.3.1. Challenge Overview
 
 (_Describe the new requirements introduced in the security challenge and how they impacted your original design._)
+
 The security challenge introduced two significant new requirements that impacted our original cryptographic design. The
 first requirement was the ability for quick playback initiation in the middle of an audio stream. This necessitated the
 implementation of a flexible encryption scheme capable of supporting random access. The second requirement was the
