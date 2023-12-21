@@ -10,7 +10,7 @@
 | 108780  | Cherilyn Christen     | <https://github.com/Cherie000>     | <mailto:cherilyn.christen@epfl.ch>     |
 | 108825 | Zeineb Mellouli   | <https://github.com/zaynebmellouli> | <mailto:zeineb.mellouli@epfl.ch> |
 
-![Rassene](img/rassene.jpg) ![Zayneb](img/Zayneb.jpg) ![Charlie](img/charlie.png)
+![Rassene](img/rassene.jpg) ![Zayneb](img/Zayneb.jpg) ![Cherilyn](img/Cherilyn.jpeg)
 
 *(add face photos with 150px height; faces should have similar size and framing)*
 
