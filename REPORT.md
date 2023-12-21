@@ -335,7 +335,7 @@ evolving nature of technology solutions in the realm of digital media and entert
 
 5. **General Security Best Practices**:
     - [OWASP Top Ten Web Application Security Risks](https://owasp.org/www-project-top-ten/) 
-    - [NIST Guide to General Server Security](https://csrc.nist.gov/publications/detail/sp/800-123/final)
+    - [NIST Guide to General Server Security](https://csrc.nist.gov/publications/detail/sp/800-123/final) - Karen Scarfone (NIST), Wayne Jansen (NIST), Miles Tracy (Federal Reserve Information Technology), , , July 2008
 
 (_Present bibliographic references, with clickable links. Always include at least the authors, title, "where published",
 and year._)
