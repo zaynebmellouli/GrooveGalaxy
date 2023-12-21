@@ -123,7 +123,7 @@ For hashing, we will implement the SHA-2 algorithm. Given that SHA-2 offers a hi
    - **Technology Justification**: The connection between the database and the server is managed automatically by the JDBC Driver. It acts as a bridge between the Java application and the database, allowing them to communicate and exchange data.
 
 
-3. **Database Machine**:  HELP HELP HELP
+3. **Database Machine**:
    - **Description**: This machine is dedicated to storing and managing data. In our database schema, we created --- The media content will store the lyrics and the path_file.
    - **Technology Justification**:PostgreSQL is selected as the RDBMS for its open-source nature, reliability, and extensibility. 
 
