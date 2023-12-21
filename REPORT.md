@@ -120,7 +120,8 @@ For hashing, we will implement the SHA-2 algorithm. Given that SHA-2 offers a hi
      
 2. **Server Machine**:
    - **Description**: This server handles requests from clients. It also has access to user accounts and key accesses through the connection to the database.
-   - **Technology Justification**: 
+   - **Technology Justification**: The connection between the database and the server is managed automatically by the JDBC Driver. It acts as a bridge between the Java application and the database, allowing them to communicate and exchange data.
+
 
 3. **Database Machine**:  HELP HELP HELP
    - **Description**: This machine is dedicated to storing and managing data. In our database schema, we created --- The media content will store the lyrics and the path_file.
