@@ -19,40 +19,45 @@ import static proj.Server.NB_BYTES_PACKET_MUSIC;
 import javazoom.jl.decoder.JavaLayerException;
 import javazoom.jl.player.Player;
 import com.google.gson.JsonObject;
+
 import javax.swing.*;
 import java.awt.*;
 
 public class Client {
     //GUI Global Variables
-    private static JLabel welcomeMessage = new JLabel("Hey! Let's get started");
-    private static JLabel musicInfo = new JLabel();
-    private static JFrame frame = new JFrame();
+    private static JLabel  welcomeMessage   = new JLabel("Hey! Let's get started");
+    private static JLabel  format        = new JLabel();
+    private static JLabel  artist        = new JLabel();
+    private static JLabel  title       = new JLabel();
+    private static JLabel  genre        = new JLabel();
+    private static JLabel  lyrics        = new JLabel();
+    private static JFrame  frame            = new JFrame();
     private static JButton createUserButton = new JButton("Create a User");
     private static JButton chooseSongButton = new JButton("Choose Song");
-    private static JButton playMusicButton = new JButton("Play Music");
-    private static JButton exitButton = new JButton("Exit");
+    private static JButton playMusicButton  = new JButton("Play Music");
+
 
     //Global Variables
-    private static String userName; // Variable to store the user's name
-    private static int percentageBytes = Integer.MAX_VALUE;
-    private static String choosenSong = null;
-    private static InputStream is;
-    private static int len;
-    private static byte[] nonce;
-    private static int id;
-    private static Key key_c;
-    private static Key key_f;
-    private static SSLSocket socket;
+    private static String               userName; // Variable to store the user's name
+    private static int                  percentageBytes = Integer.MAX_VALUE;
+    private static String               choosenSong     = null;
+    private static InputStream          is;
+    private static int                  len;
+    private static byte[]               nonce;
+    private static int                  id;
+    private static Key                  key_c;
+    private static Key                  key_f;
+    private static SSLSocket            socket;
     private static BufferedOutputStream os;
-    private static byte[] data;
-    private static int media_content_length;
+    private static byte[]               data;
+    private static int                  media_content_length;
 
 
     public static void startClient(String host, int port) throws IOException {
 
         SocketFactory factory = SSLSocketFactory.getDefault();
         socket = (SSLSocket) factory.createSocket(host, port);
-        try{
+        try {
 
             socket.setEnabledCipherSuites(new String[]{"TLS_AES_128_GCM_SHA256"});
             socket.setEnabledProtocols(new String[]{"TLSv1.3"});
@@ -69,72 +74,75 @@ public class Client {
             System.out.printf("client received %d bytes: %s%n", len, new String(data, 0, len));
 
 
-                System.out.println("Type: 'Exit' to close the connection");
+            System.out.println("Type: 'Exit' to close the connection");
 
-                try {
-                    SecureRandom random = new SecureRandom();
-                    nonce  = new byte[16];
-                    random.nextBytes(nonce);
-                    id    = 6;
-                    key_c = CL.readAESKey("Keys/Key_ServClient_Amelia.key");
-                    key_f = CL.readAESKey("Keys/Key_Family_Patel.key");
-                    createUserButton.addActionListener(e -> promptUserName());
-                    chooseSongButton.addActionListener(e -> {
-                        try {
-                            promptSongSelection();
-                        } catch (GeneralSecurityException ex) {
-                            throw new RuntimeException(ex);
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    });
-                    playMusicButton.addActionListener(e -> {
-                        try {
-                            playMusic();
-                        } catch (IOException ex) {
-                            throw new RuntimeException(ex);
-                        } catch (GeneralSecurityException ex) {
-                            throw new RuntimeException(ex);
-                        }
-                    });
-                    exitButton.addActionListener(e -> promptExit());
-
-                    chooseSongButton.setVisible(false); // Initially hide the "Choose Song" button
-                    playMusicButton.setVisible(false); // Initially hide the "Play Music" button
-
-                    JPanel panel = new JPanel();
-                    panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
-                    panel.setLayout(new GridLayout(0, 1));
-                    //panel.setPreferredSize(new Dimension(width, height));
-                    panel.add(welcomeMessage);
-                    panel.add(musicInfo);
-                    panel.add(createUserButton);
-                    panel.add(chooseSongButton);
-                    panel.add(playMusicButton);
-                    panel.add(exitButton);
-
-                    frame.add(panel, BorderLayout.CENTER);
-                    frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
-                    //frame.setSize(width, height);
-                    frame.pack(); //to fit the contents
-                    frame.setTitle("GrooveGalaxy");
-                    frame.pack();
-                    frame.setVisible(true);
-
-                } catch (IOException e) {
-                    throw new RuntimeException(e);
-                } catch (JsonSyntaxException e) {
-                    throw new RuntimeException(e);
-                } catch (SecurityException e) {
+            try {
+                SecureRandom random = new SecureRandom();
+                nonce = new byte[16];
+                random.nextBytes(nonce);
+                id    = 6;
+                key_c = CL.readAESKey("Keys/Key_ServClient_Amelia.key");
+                key_f = CL.readAESKey("Keys/Key_Family_Patel.key");
+                createUserButton.addActionListener(e -> promptUserName());
+                chooseSongButton.addActionListener(e -> {
                     try {
-                        is.close();
-                        os.close();
-                        socket.close();
-                    } catch (IOException i) {
-                        System.out.println(i);
+                        promptSongSelection();
+                    } catch (GeneralSecurityException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
                     }
-                }
+                });
+                playMusicButton.addActionListener(e -> {
+                    try {
+                        playMusic();
+                    } catch (IOException ex) {
+                        throw new RuntimeException(ex);
+                    } catch (GeneralSecurityException ex) {
+                        throw new RuntimeException(ex);
+                    }
+                });
 
+                chooseSongButton.setVisible(false); // Initially hide the "Choose Song" button
+                playMusicButton.setVisible(false); // Initially hide the "Play Music" button
+
+                JPanel panel = new JPanel();
+                panel.setBorder(BorderFactory.createEmptyBorder(30, 30, 10, 30));
+                panel.setLayout(new GridLayout(0, 1));
+                int width  = 500;
+                int height = 500;
+                panel.setPreferredSize(new Dimension(width, height));
+                panel.add(welcomeMessage);
+                panel.add(format);
+                panel.add(artist);
+                panel.add(title);
+                panel.add(genre);
+                panel.add(lyrics);
+                panel.add(createUserButton);
+                panel.add(chooseSongButton);
+                panel.add(playMusicButton);
+
+                frame.add(panel, BorderLayout.CENTER);
+                frame.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
+                //frame.setSize(width, height);
+                frame.pack(); //to fit the contents
+                frame.setTitle("GrooveGalaxy");
+                frame.pack();
+                frame.setVisible(true);
+
+            } catch (IOException e) {
+                throw new RuntimeException(e);
+            } catch (JsonSyntaxException e) {
+                throw new RuntimeException(e);
+            } catch (SecurityException e) {
+                try {
+                    is.close();
+                    os.close();
+                    socket.close();
+                } catch (IOException i) {
+                    System.out.println(i);
+                }
+            }
 
 
         } catch (IOException e) {
@@ -144,15 +152,8 @@ public class Client {
         }
 
     }
-    public static void promptExit() {
-        try {
-            is.close();
-            os.close();
-            socket.close();
-        } catch (IOException i) {
-            System.out.println(i);
-        }
-    }
+
+
     public static void promptUserName() {
         userName = "Alice";
         if (userName != null && !userName.trim().isEmpty()) {
@@ -163,21 +164,22 @@ public class Client {
     }
 
     public static void promptSongSelection() throws GeneralSecurityException, IOException {
-        String[] songs = {"Breathe", "Free Bird", "Herzbeben", "I Lived", "I Will Survive", "Let's Groove", "Rock With You"};
+        String[] songs = {"Breathe", "Free Bird", "Herzbeben", "I Lived", "I Will Survive", "Let's Groove",
+                          "Rock With You"};
         choosenSong = (String) JOptionPane.showInputDialog(frame,
-                "Which song would you like to listen to?",
-                "Select Song",
-                JOptionPane.QUESTION_MESSAGE,
-                null,
-                songs,
-                songs[0]);
+                                                           "Which song would you like to listen to?",
+                                                           "Select Song",
+                                                           JOptionPane.QUESTION_MESSAGE,
+                                                           null,
+                                                           songs,
+                                                           songs[0]);
 
         if (choosenSong != null && !choosenSong.trim().isEmpty()) {
             updateMessage("Hey " + userName + ", you have chosen " + choosenSong);
             //First Message
             //message = "Breathe";
-            JsonObject r = CL.protect(choosenSong.getBytes(), nonce, id, key_c);
-            byte[] messageBytes = r.toString().getBytes();
+            JsonObject r            = CL.protect(choosenSong.getBytes(), nonce, id, key_c);
+            byte[]     messageBytes = r.toString().getBytes();
             os = new BufferedOutputStream(socket.getOutputStream());
             os.write(messageBytes);
             os.flush();
@@ -187,12 +189,13 @@ public class Client {
             // Buffer to store the total response
             is = new BufferedInputStream(socket.getInputStream());
             byte[] packet1 = new byte[10000000]; // Buffer for individual packets
-            int bytesRead1;
+            int    bytesRead1;
 
             while ((bytesRead1 = is.read(packet1)) != -1) {
-                if (Arrays.equals(packet1,0,bytesRead1 -1, "stop".getBytes(),0,3)) {
+                if (Arrays.equals(packet1, 0, bytesRead1 - 1, "stop".getBytes(), 0, 3)) {
                     break;
-                }else {
+                }
+                else {
                     buffer1.write(packet1, 0, bytesRead1);
                 }
 
@@ -201,13 +204,14 @@ public class Client {
             data = buffer1.toByteArray();
             JsonObject mediaInfo = null;
             if (len != -1) {
-                        String     firstMessage   = new String(data, StandardCharsets.UTF_8);
+                String     firstMessage   = new String(data, StandardCharsets.UTF_8);
                 JsonObject receivedJson1  = JsonParser.parseString(firstMessage).getAsJsonObject();
                 JsonObject decryptedJson1 = unprotect(receivedJson1, key_c, nonce);
-                if (!check( decryptedJson1.get("M").getAsString(), nonce, key_c, receivedJson1.get("MAC").getAsString())) {
+                if (!check(decryptedJson1.get("M").getAsString(), nonce, key_c,
+                           receivedJson1.get("MAC").getAsString())) {
                     System.out.println("Error! Restarting conversation");
-                    String message      = "Error";
-                    r            = CL.protect( message.getBytes(), nonce, key_c);
+                    String message = "Error";
+                    r            = CL.protect(message.getBytes(), nonce, key_c);
                     messageBytes = r.toString().getBytes();
                     os.write(messageBytes);
                     os.flush();
@@ -221,8 +225,9 @@ public class Client {
                         throw new SecurityException("...");
                     }
                     else {
-                        mediaInfo            = JsonParser.parseString(new String(Base64.getDecoder().decode(decryptedJson1.get("M").getAsString())))
-                                .getAsJsonObject();
+                        mediaInfo            = JsonParser.parseString(
+                                                                 new String(Base64.getDecoder().decode(decryptedJson1.get("M").getAsString())))
+                                                         .getAsJsonObject();
                         media_content_length = mediaInfo.get("media_content_length").getAsInt();
                         updateMusicInfo(mediaInfo);
                         chooseSongButton.setVisible(false);
@@ -233,7 +238,7 @@ public class Client {
             percentageBytes = getPercentageInput();
             String message = String.valueOf(percentageBytes);
             nonce        = incrementByteNonce(nonce);
-            r            = CL.protect( message.getBytes(), nonce, key_c);
+            r            = CL.protect(message.getBytes(), nonce, key_c);
             messageBytes = r.toString().getBytes();
             os.write(messageBytes);
             os.flush();
@@ -243,11 +248,11 @@ public class Client {
 
 
     public static void playMusic() throws IOException, GeneralSecurityException {
-        exitButton.addActionListener(e -> promptExit());
-        int from16bytes = (int) Math.floor((double) (percentageBytes * media_content_length/100) / NB_BYTES_PACKET_MUSIC);
-        int nb16bytes   = (int) Math.ceil((double) media_content_length / NB_BYTES_PACKET_MUSIC) ;
+        int from16bytes = (int) Math.floor(
+                (double) (percentageBytes * media_content_length / 100) / NB_BYTES_PACKET_MUSIC);
+        int nb16bytes   = (int) Math.ceil((double) media_content_length / NB_BYTES_PACKET_MUSIC);
 
-        Thread playerThreadCur = null;
+        Thread playerThreadCur  = null;
         Thread playerThreadPrev = null;
         for (int i = from16bytes; i < nb16bytes; i++) {
             //Listen for Response
@@ -259,10 +264,11 @@ public class Client {
             int    bytesRead;
 
             while ((bytesRead = is.read(packet)) != -1) {
-                if (Arrays.equals(packet,0,bytesRead -1, "MAC".getBytes(),0,2)) {
+                if (Arrays.equals(packet, 0, bytesRead - 1, "MAC".getBytes(), 0, 2)) {
                     is.read(mac);
                     break;
-                }else {
+                }
+                else {
                     buffer.write(packet, 0, bytesRead);
                 }
 //
@@ -271,16 +277,15 @@ public class Client {
             byte[] partSong = buffer.toByteArray();
 
 
-
-            byte[] nonceCTR = incrementCounterInNonce(nonce,i * NB_BYTES_PACKET_MUSIC);
+            byte[] nonceCTR = incrementCounterInNonce(nonce, i * NB_BYTES_PACKET_MUSIC);
 
             byte[] decryptPartSong = unprotectCTR(partSong, key_f, nonceCTR);
             if (!check(Base64.getEncoder().encodeToString(partSong), nonceCTR, key_f, new String(mac))) {
                 System.out.println("Error! Restarting conversation");
-                String message      = "Error";
+                String message = "Error";
                 nonce = incrementByteNonce(nonce);
-                JsonObject r = CL.protect(message.getBytes(), nonce, key_c);
-                byte[] messageBytes = r.toString().getBytes();
+                JsonObject r            = CL.protect(message.getBytes(), nonce, key_c);
+                byte[]     messageBytes = r.toString().getBytes();
                 os.write(messageBytes);
                 os.flush();
                 throw new SecurityException("...");
@@ -327,16 +332,20 @@ public class Client {
 
     private static int getPercentageInput() {
         while (true) {
-            String input = JOptionPane.showInputDialog(frame, "Enter the starting point for streaming (0-100%):", "Percentage", JOptionPane.PLAIN_MESSAGE);
+            String input = JOptionPane.showInputDialog(frame, "Enter the starting point for streaming (0-100%):",
+                                                       "Percentage", JOptionPane.PLAIN_MESSAGE);
             try {
                 int percentage = Integer.parseInt(input);
                 if (percentage >= 0 && percentage <= 100) {
                     return percentage; // Valid input, return the percentage
-                } else {
-                    JOptionPane.showMessageDialog(frame, "Please enter a valid percentage (0-100).", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                }
+                else {
+                    JOptionPane.showMessageDialog(frame, "Please enter a valid percentage (0-100).", "Invalid Input",
+                                                  JOptionPane.ERROR_MESSAGE);
                 }
             } catch (NumberFormatException e) {
-                JOptionPane.showMessageDialog(frame, "Please enter a number.", "Invalid Input", JOptionPane.ERROR_MESSAGE);
+                JOptionPane.showMessageDialog(frame, "Please enter a number.", "Invalid Input",
+                                              JOptionPane.ERROR_MESSAGE);
             }
         }
     }
@@ -348,27 +357,20 @@ public class Client {
 
     public static void updateMusicInfo(JsonObject mediaInfo) {
         // Extracting information from the JsonObject
-        int mediaContentLength = mediaInfo.get("media_content_length").getAsInt();
-        int ownerId = mediaInfo.get("owner_id").getAsInt();
-        String format = mediaInfo.get("format").getAsString();
-        String artist = mediaInfo.get("artist").getAsString();
-        String title = mediaInfo.get("title").getAsString();
-        String genre = mediaInfo.get("genre").getAsString();
-        String lyrics = mediaInfo.get("lyrics").getAsString();
+        int    mediaContentLength = mediaInfo.get("media_content_length").getAsInt();
+        int    ownerId            = mediaInfo.get("owner_id").getAsInt();
+        String f             = mediaInfo.get("format").getAsString();
+        String a            = mediaInfo.get("artist").getAsString();
+        String t           = mediaInfo.get("title").getAsString();
+        String g            = mediaInfo.get("genre").getAsString();
+        String l            = mediaInfo.get("lyrics").getAsString();
 
-        // Formatting the message
-        String message = "<html>Media Content Length: " + mediaContentLength +
-                "<br>Owner ID: " + ownerId +
-                "<br>Format: " + format +
-                "<br>Artist: " + artist +
-                "<br>Title: " + title +
-                "<br>Genre: " + genre +
-                "<br>Lyrics: " + lyrics + "</html>";
-
-        // Updating the label
-        musicInfo.setText(message);
+        format.setText("FORMAT: "+f);
+        artist.setText("ARTIST: "+a);
+        title.setText("TITLE: "+t);
+        genre.setText("GENRE: "+g);
+        lyrics.setText("LYRICS: "+l);
     }
-
 
 
     public static void main(String[] args) throws IOException {
@@ -377,8 +379,9 @@ public class Client {
         System.setProperty("javax.net.ssl.trustStore", "https_cert/usertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
         String host =
-//                "localhost";
-                "192.168.0.100";
+                "localhost";
+//                "192.168.0.100";
+//                "192.168.1.254";
         int port = 8000;
         startClient(host, port);
     }
