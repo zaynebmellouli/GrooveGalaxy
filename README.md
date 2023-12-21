@@ -355,12 +355,13 @@ Now that all the networks and machines are up and running, we have implemented s
 **Progressive Streaming:**
 - Music is streamed progressively, allowing users to start listening to the content before it's fully downloaded.
 - Users can enjoy a seamless listening experience without waiting for the entire file to be downloaded.
-
+![](img/streaming.jpg)
 
 **User-Controlled Playback:**
 - Users have control over when they start playing the music.
 - The application provides options for users to choose whether to start playback immediately or wait until a certain percentage of the file is buffered.
 stream, playback 
+![](img/playback.jpg)
 
 
 ## Additional Information
