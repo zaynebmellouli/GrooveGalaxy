@@ -137,7 +137,6 @@ mvn clean compile
 ```sh
 mvn exec:java -Dexec.mainClass="proj.database.mainforpopulate"
 ```
-
 ### Prerequisites
 
 All the virtual machines are based on: Linux 64-bit, Kali 2023.3  
