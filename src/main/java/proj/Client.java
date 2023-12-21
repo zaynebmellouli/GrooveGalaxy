@@ -71,7 +71,7 @@ public class Client {
 
                 try {
                     SecureRandom random = new SecureRandom();
-                    byte[]       nonce  = new byte[16];
+                    nonce  = new byte[16];
                     random.nextBytes(nonce);
                     id    = 1;
                     key_c = CL.readAESKey("Keys/Key_ServClient_Alice.key");
@@ -133,14 +133,7 @@ public class Client {
                 }
 
             }
-            try {
-                //scanner.close();
-                is.close();
-                os.close();
-                socket.close();
-            } catch (IOException i) {
-                System.out.println(i);
-            }
+
         } catch (IOException e) {
             throw new RuntimeException(e);
         } catch (RuntimeException e) {
@@ -216,6 +209,7 @@ public class Client {
                         //System.out.println("genre :" + mediaInfo.get("genre").getAsString());
                         //System.out.println("lyrics :" + mediaInfo.get("lyrics").getAsString());
                         updateMusicInfo(mediaInfo);
+                        chooseSongButton.setVisible(false);
                     }
                     // Continue to send the second message
                 }
@@ -316,6 +310,14 @@ public class Client {
                 }
             }
 //                        }
+        }
+        try {
+            //scanner.close();
+            is.close();
+            os.close();
+            socket.close();
+        } catch (IOException i) {
+            System.out.println(i);
         }
 
     }
