@@ -353,30 +353,25 @@ To test the four virtual machines, you could ping each machine to another.
 Now that all the networks and machines are up and running, we have implemented some features to our application.
 
 **Progressive Streaming:**
-- Music is streamed progressively, allowing users to start listening to the content before it's fully downloaded.
+- Music is streamed progressively and securely, allowing users to start listening to the content before it's fully downloaded.
 - Users can enjoy a seamless listening experience without waiting for the entire file to be downloaded.
-- 
-![](img/streaming.jpeg)
-
-**User-Controlled Playback:**
-- Users have control over when they start playing the music.
-- The application provides options for users to choose whether to start playback immediately or wait until a certain percentage of the file is buffered.
-stream, playback
 
 ![](img/playback.jpeg)
 
+**User-Controlled Playback:**
+- Users have control over when they start playing the music.
+![](img/streaming.jpeg)
+
+**Secure Mechanism**
+We're using CTR in order to stream the music directly ciphered.
 
 ## Additional Information
 
 ### Links to Used Tools and Libraries
 
-- [Java 11.0.16.1](https://openjdk.java.net/)
+- [Java 17](https://openjdk.java.net/)
 - [Maven 3.9.5](https://maven.apache.org/)
-- ...
-
-### Versioning
-
-We use [SemVer](http://semver.org/) for versioning.  
+- [PostgreSQL](https://www.postgresql.org/)
 
 ### License
 
