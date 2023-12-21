@@ -142,7 +142,7 @@ mvn exec:java -Dexec.mainClass="proj.database.mainforpopulate"
 
 All the virtual machines are based on: Linux 64-bit, Kali 2023.3  
 You can follow the guidelines for the the whole setup here: https://github.com/tecnico-sec/Setup/
-[Download]((https://cdimage.kali.org/)) and [install]((https://github.com/tecnico-sec/Setup/blob/master/KaliSetup.md)) a virtual machine of Kali Linux 2023.3.  
+[Download](https://cdimage.kali.org/) and [install](https://github.com/tecnico-sec/Setup/blob/master/KaliSetup.md) a virtual machine of Kali Linux 2023.3.  
 
 ### Machine configurations
 
@@ -151,7 +151,7 @@ For each machine, there is an initialization script with the machine name, with 
 Inside each machine, use Git to obtain a copy of all the scripts and code.
 
 ```sh
-$(https://github.com/tecnico-sec/a51-cherilyn-zeineb-rassene.git)
+$https://github.com/tecnico-sec/a51-cherilyn-zeineb-rassene.git
 ```
 
 Next we have custom instructions for each machine.
