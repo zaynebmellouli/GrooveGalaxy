@@ -33,7 +33,7 @@ On the client side, the following information is maintained:
 There are two sets of messages from the client to the server.
 
 The first:
-From client to server: ${K_c(hash(Message, ID, nonce)), K_c(Message), K_c(Nonce), ID}$
+From client to server: ${K_c(hash(Message, ID, nonce)), K_c(Message), Nonce, ID}$
 The client sends a Message that contains which song he wants with an ID and MAC of the request ${K_c(hash(Message, ID, nonce))}$
 The protect method run by the client returns a JSON file with four seperate properties for each element of the message.
 By adding the ID to the hash we protect the ID from being tampered with. The ID is not ciphered as the server needs it to look up the key of the client sending the request. 
@@ -95,7 +95,7 @@ If this test passes the method returns true, in any other case it returns false 
 
 For our project, we have selected Java as the programming language due to its robust security features and extensive libraries for cryptographic functions. The encryption scheme between the server and the client will utilize AES in CBC (Cipher Block Chaining) mode. This mode ensures that each block of plaintext is XORed with the previous ciphertext block before being encrypted, providing strong data encryption.
 
-On the other hand, for encryption within family members, we will employ AES in CTR (Counter) mode. This choice is particularly well-suited for streaming data, as it allows for the encryption of data bytes individually, facilitating efficient processing of streaming content.
+On the other hand, for encryption within family members, we will employ AES in CTR (Counter) mode. This choice is particularly well-suited for streaming data, as it allows for the encryption of data bytes individually, facilitating efficient processing of streaming content. We faced a challenge in generating the MAC address for the streamed package rather than the data as a whole. We decided to compute the MAC on the encrypted package to ensure the integrity, authenticity and the freshness of each of the streamed pack of bytes.
 
 The nonce, a number used once, will be randomly generated at the start of the communication session. It will then be incremented by one for each subsequent message to ensure that each message is unique, mitigating the risk of replay attacks.
 
@@ -111,15 +111,18 @@ For hashing, we will implement the SHA-2 algorithm. Given that SHA-2 offers a hi
 (_Justify the choice of technologies for each server._)
 
 1. **Client Machine**: 
-   - **Description**: This is the user's interface for interacting with GrooveGalaxy. It includes the application or web interface through which users browse, preview, purchase, and play songs.
-   - **Technology Justification**:
+   - **Description**: The Client Machine serves as the user's interface for interacting with GrooveGalaxy. It provides a user-friendly GUI through which users can receive song information and stream music.
+   - **Technology Justification**: HTTPS Connection: The use of HTTPS (Hypertext Transfer Protocol Secure) for client-server communication is crucial for ensuring the confidentiality and integrity of the data transmitted. HTTPS encrypts the data sent between the client and the server, protecting information from eavesdropping and man-in-the-middle attacks. 
+AES in CBC and CTR Modes:
+CBC (Cipher Block Chaining) Mode: AES in CBC mode is employed for scenarios where data integrity is as crucial as confidentiality. CBC mode ensures that each block of ciphertext depends on all preceding plaintext blocks, providing strong data protection.
+CTR (Counter) Mode: AES in CTR mode is used for streaming audio content because it allows for random access to encrypted data. This means users can start playback from any part of the stream without needing to decrypt the entire file first, enhancing the user experience with quick and efficient access to music.
      
 2. **Server Machine**:
-   - **Description**: This server handles requests from clients, including song browsing, purchase transactions, and delivery of encrypted audio files. It also manages user accounts and personalization algorithms.
+   - **Description**: This server handles requests from clients. It also has access to user accounts and key accesses through the connection to the database.
    - **Technology Justification**: 
 
-3. **Database Machine**:
-   - **Description**: This machine is dedicated to storing and managing data. In our database schema, we created one table for users that collect different informations about the user. Two tables will be designed for the songs: media and media_content. First will contain the title, format, artists and the genre. The media content will store the lyrics and the path_file.
+3. **Database Machine**:  HELP HELP HELP
+   - **Description**: This machine is dedicated to storing and managing data. In our database schema, we created --- The media content will store the lyrics and the path_file.
    - **Technology Justification**:PostgreSQL is selected as the RDBMS for its open-source nature, reliability, and extensibility. 
 
 4. **Gateway/Router Machine (e.g., VM2)**:
