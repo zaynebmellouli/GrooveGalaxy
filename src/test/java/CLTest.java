@@ -16,8 +16,8 @@ class CLTest extends CL {
 
     @org.junit.jupiter.api.Test
     void testGenerateAndReadAESKey() throws GeneralSecurityException, IOException {
-        Key r = CL.generateAESKey("Keys/Key_Family_Musterman.key");
-        Key t = CL.readAESKey("Keys/Key_Family_Musterman.key");
+        Key r = CL.generateAESKey("Keys/Key_ServClient_Emily.key");
+        Key t = CL.readAESKey("Keys/Key_Family_Johnson.key");
         Assertions.assertEquals(r, t);
     }
 

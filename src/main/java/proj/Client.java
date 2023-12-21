@@ -84,6 +84,7 @@ public class Client {
                             throw new RuntimeException(ex);
                         } catch (IOException ex) {
                             throw new RuntimeException(ex);
+
                         }
                     });
                     playMusicButton.addActionListener(e -> {
@@ -171,13 +172,29 @@ public class Client {
             os.write(messageBytes);
             os.flush();
             //Listen for Response
-            is   = new BufferedInputStream(socket.getInputStream());
-            data = new byte[2048];
-            len  = is.read(data);
-            JsonObject mediaInfo            = null;
-            if (len != -1) {
+                    ByteArrayOutputStream buffer1     = new ByteArrayOutputStream();
+
+                    // Buffer to store the total response
+                    is = new BufferedInputStream(socket.getInputStream());
+                    byte[] packet1 = new byte[10000000]; // Buffer for individual packets
+                    int    bytesRead1;
+
+                    while ((bytesRead1 = is.read(packet1)) != -1) {
+                        if (Arrays.equals(packet1,0,bytesRead1 -1, "stop".getBytes(),0,3)) {
+                            break;
+                        }else {
+                            buffer1.write(packet1, 0, bytesRead1);
+                        }
+//
+                    }
+                    // Convert the total response into a string
+                    data = buffer1.toByteArray();
+                    JsonObject mediaInfo            = null;
+                    int        media_content_length = 0;
+                    if (len != -1) {
 //                            nonce        = incrementByteNonce(nonce);
-                String     firstMessage   = new String(data, 0, len);
+//                        String     firstMessage   = new String(data, 0, len);
+                        String     firstMessage   = new String(data, StandardCharsets.UTF_8);
                 JsonObject receivedJson1  = JsonParser.parseString(firstMessage).getAsJsonObject();
                 JsonObject decryptedJson1 = unprotect(receivedJson1, key_c, nonce);
                 if (!check( decryptedJson1.get("M").getAsString(), nonce, key_c, receivedJson1.get("MAC").getAsString())) {
