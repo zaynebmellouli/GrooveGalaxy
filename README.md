@@ -151,7 +151,7 @@ For each machine, there is an initialization script with the machine name, with 
 Inside each machine, use Git to obtain a copy of all the scripts and code.
 
 ```sh
-$https://github.com/tecnico-sec/a51-cherilyn-zeineb-rassene.git
+$git clone https://github.com/tecnico-sec/a51-cherilyn-zeineb-rassene.git
 ```
 
 Next we have custom instructions for each machine.
