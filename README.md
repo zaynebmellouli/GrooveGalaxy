@@ -15,7 +15,6 @@
 
 
 
-*(add face photos with 150px height; faces should have similar size and framing)*
 
 ## Introduction
 
