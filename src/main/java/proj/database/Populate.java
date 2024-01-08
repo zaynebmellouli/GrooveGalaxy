@@ -50,17 +50,17 @@ public class Populate {
                 , Base64.getEncoder().encodeToString((CL.readAESKey("Keys/Key_Family_Johnson.key")).getEncoded()));
 
         Media media1 = new Media(1,1, "MP3", "Lynyrd Skynyrd","Free Bird",  "Rock");
-        Media media2 = new Media(2,2, "MP3", "Pink Floyd", "Breathe", "Alternative Rock");
-        Media media3 = new Media(3,3, "MP3", "Helene Fischer","Herzbeben",  "Pop");
+        Media media2 = new Media(2,1, "MP3", "Pink Floyd", "Breathe", "Alternative Rock");
+        Media media3 = new Media(3,1, "MP3", "Helene Fischer","Herzbeben",  "Pop");
 
-        Media media4 = new Media(4,4, "MP3", "OneRepublic", "I Lived", "Pop");
-        Media media5 = new Media(5,5, "MP3", "OneRepublic", "I Lived", "Pop");
-        Media media6 = new Media(6,7, "MP3", "OneRepublic", "I Lived", "Pop");
+        Media media4 = new Media(4,1, "MP3", "OneRepublic", "I Lived", "Pop");
+        Media media5 = new Media(5,1, "MP3", "OneRepublic", "I Lived", "Pop");
+        Media media6 = new Media(6,1, "MP3", "OneRepublic", "I Lived", "Pop");
 
-        Media media7 = new Media(7,6, "MP3", "Earth, Wind and Fire","Let's Groove",  "Disco");
-        Media media8 = new Media(8,8, "MP3", "Gloria Gaynor","I will survive",  "Funk");
-        Media media9 = new Media(9,9, "MP3", "Michael Jackson", "Rock With You", "Disco Funk");
-        Media media10 = new Media(10,10, "MP3", "Michael Jackson", "Rock With You", "Disco Funk");
+        Media media7 = new Media(7,1, "MP3", "Earth, Wind and Fire","Let's Groove",  "Disco");
+        Media media8 = new Media(8,1, "MP3", "Gloria Gaynor","I will survive",  "Funk");
+        Media media9 = new Media(9,1, "MP3", "Michael Jackson", "Rock With You", "Disco Funk");
+        Media media10 = new Media(10,2, "MP3", "Michael Jackson", "Rock With You", "Disco Funk");
 
         MediaContent mediaContent1 = new MediaContent(1,1, "Free Bird",
                 "If I leave here tomorrow\n" +
@@ -91,7 +91,7 @@ public class Populate {
                         "Lord, I can't change\n" +
                         "Won't you fly high, free bird, yeah",
                 "src/main/resources/songs/Free Bird.mp3");
-        MediaContent mediaContent2 = new MediaContent(2,2,"Breathe",
+        MediaContent mediaContent2 = new MediaContent(2,1,"Breathe",
                 "Breathe, breathe in the air\n" +
                         "Don't be afraid to care\n" +
                         "Leave, but don't leave me\n" +
@@ -110,7 +110,7 @@ public class Populate {
                         "You race towards an early grave",
                 "src/main/resources/songs/Breathe.mp3"
                 );
-        MediaContent mediaContent3 = new MediaContent(3,3, "Herzbeben",
+        MediaContent mediaContent3 = new MediaContent(3,1, "Herzbeben",
                 "Durch meine Venen fließt der Bass, hämmert gegen meine Sehnen\n" +
                 "Auf das Leben ist Verlass, es hat noch viel zu geben\n" +
                 "Und ich nehm deine Hand, muss tanzen, immer weiter\n" +
@@ -161,7 +161,7 @@ public class Populate {
                 "Herzbeben\"",
                 "src/main/resources/songs/Herzbeben.mp3");
 
-        MediaContent mediaContent4 = new MediaContent(4,4, "I Lived",
+        MediaContent mediaContent4 = new MediaContent(4,1, "I Lived",
                 "Hope when you take that jump\n" +
                         "You don't fear the fall\n" +
                         "Hope when the water rises\n" +
@@ -223,7 +223,7 @@ public class Populate {
                 "src/main/resources/songs/I Lived.mp3"
                 );
 
-        MediaContent mediaContent5 = new MediaContent(5,5, "I Lived",
+        MediaContent mediaContent5 = new MediaContent(5,1, "I Lived",
                 "Hope when you take that jump\n" +
                         "You don't fear the fall\n" +
                         "Hope when the water rises\n" +
@@ -285,7 +285,7 @@ public class Populate {
                 "src/main/resources/songs/I Lived.mp3"
         );
 
-        MediaContent mediaContent6 = new MediaContent(6,7, "I Lived",
+        MediaContent mediaContent6 = new MediaContent(6,1, "I Lived",
                 "Hope when you take that jump\n" +
                         "You don't fear the fall\n" +
                         "Hope when the water rises\n" +
@@ -348,7 +348,7 @@ public class Populate {
         );
 
 
-        MediaContent mediaContent7 = new MediaContent(7,6,"Let's Groove",
+        MediaContent mediaContent7 = new MediaContent(7,1,"Let's Groove",
         "Let this groove, get you to move,\n" +
                 "It's alright, alright\n" +
                 "Let this groove, set in your shoes,\n" +
@@ -383,7 +383,7 @@ public class Populate {
                 "We're gonna groove tonight",
                 "src/main/resources/songs/Let's Groove.mp3");
 
-        MediaContent mediaContent8 = new MediaContent(8,8,"I will survive",
+        MediaContent mediaContent8 = new MediaContent(8,1,"I will survive",
                 "At first I was afraid, I was petrified\n" +
                         "Kept thinking I could never live without you by my side\n" +
                         "But then I spent so many nights thinking how you did me wrong\n" +
@@ -440,7 +440,7 @@ public class Populate {
                         "I will survive",
                 "src/main/resources/songs/I Will Survive.mp3");
 
-    MediaContent mediaContent9 = new MediaContent(9,9,"Rock With You",
+    MediaContent mediaContent9 = new MediaContent(9,1,"Rock With You",
             "Girl, close your eyes\n" +
                     "Let that rhythm get into you\n" +
                     "Don't try to fight it\n" +
@@ -487,7 +487,7 @@ public class Populate {
                     "Rock the night away (rock, right)",
             "src/main/resources/songs/Rock With You.mp3");
 
-        MediaContent mediaContent10 = new MediaContent(10,9,"Rock With You",
+        MediaContent mediaContent10 = new MediaContent(10,2,"Rock With You",
                 "Girl, close your eyes\n" +
                         "Let that rhythm get into you\n" +
                         "Don't try to fight it\n" +

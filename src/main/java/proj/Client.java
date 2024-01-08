@@ -80,9 +80,9 @@ public class Client {
                 SecureRandom random = new SecureRandom();
                 nonce = new byte[16];
                 random.nextBytes(nonce);
-                id    = 6;
-                key_c = CL.readAESKey("Keys/Key_ServClient_Amelia.key");
-                key_f = CL.readAESKey("Keys/Key_Family_Patel.key");
+                id    = 1;
+                key_c = CL.readAESKey("Keys/Key_ServClient_Alice.key");
+                key_f = CL.readAESKey("Keys/Key_Family_Lu.key");
                 createUserButton.addActionListener(e -> promptUserName());
                 chooseSongButton.addActionListener(e -> {
                     try {
@@ -164,7 +164,7 @@ public class Client {
     }
 
     public static void promptSongSelection() throws GeneralSecurityException, IOException {
-        String[] songs = {"Breathe", "Free Bird", "Herzbeben", "I Lived", "I Will Survive", "Let's Groove",
+        String[] songs = {"Breathe", "Free Bird", "Herzbeben", "I Lived", "I will survive", "Let's Groove",
                           "Rock With You"};
         choosenSong = (String) JOptionPane.showInputDialog(frame,
                                                            "Which song would you like to listen to?",
@@ -178,7 +178,9 @@ public class Client {
             updateMessage("Hey " + userName + ", you have chosen " + choosenSong);
             //First Message
             //message = "Breathe";
+            System.out.println("Encrypting message: " + choosenSong);
             JsonObject r            = CL.protect(choosenSong.getBytes(), nonce, id, key_c);
+            System.out.println("Encrypted message: " + r.toString());
             byte[]     messageBytes = r.toString().getBytes();
             os = new BufferedOutputStream(socket.getOutputStream());
             os.write(messageBytes);
@@ -206,7 +208,9 @@ public class Client {
             if (len != -1) {
                 String     firstMessage   = new String(data, StandardCharsets.UTF_8);
                 JsonObject receivedJson1  = JsonParser.parseString(firstMessage).getAsJsonObject();
+                System.out.println("Received encrypted song info: " + receivedJson1.toString());
                 JsonObject decryptedJson1 = unprotect(receivedJson1, key_c, nonce);
+                System.out.println("Decrypted song info: " + decryptedJson1.toString());
                 if (!check(decryptedJson1.get("M").getAsString(), nonce, key_c,
                            receivedJson1.get("MAC").getAsString())) {
                     System.out.println("Error! Restarting conversation");
@@ -238,7 +242,9 @@ public class Client {
             percentageBytes = getPercentageInput();
             String message = String.valueOf(percentageBytes);
             nonce        = incrementByteNonce(nonce);
+            System.out.println("Encrypting message: " + message);
             r            = CL.protect(message.getBytes(), nonce, key_c);
+            System.out.println("Crypted message: " + r.toString());
             messageBytes = r.toString().getBytes();
             os.write(messageBytes);
             os.flush();
@@ -273,13 +279,18 @@ public class Client {
                 }
 //
             }
+
             // Convert the total response into a string
             byte[] partSong = buffer.toByteArray();
+
+            System.out.println("Received encrypted song part: " + partSong);
+            System.out.println("Received mac: " + mac.toString());
 
 
             byte[] nonceCTR = incrementCounterInNonce(nonce, i * NB_BYTES_PACKET_MUSIC);
 
             byte[] decryptPartSong = unprotectCTR(partSong, key_f, nonceCTR);
+            System.out.println("Decrypted song part: " + decryptPartSong);
             if (!check(Base64.getEncoder().encodeToString(partSong), nonceCTR, key_f, new String(mac))) {
                 System.out.println("Error! Restarting conversation");
                 String message = "Error";
@@ -379,9 +390,9 @@ public class Client {
         System.setProperty("javax.net.ssl.trustStore", "https_cert/usertruststore.jks");
         System.setProperty("javax.net.ssl.trustStorePassword", "changeme");
         String host =
-//                "localhost"; // for test
+                "localhost"; // for test
 //                "192.168.0.100";
-                "192.168.1.254"; // for submit
+//                "192.168.1.254"; // for submit
         int port = 8000;
         startClient(host, port);
     }

@@ -20,6 +20,7 @@ import java.security.GeneralSecurityException;
 import java.security.Key;
 import java.sql.Connection;
 import java.sql.SQLException;
+import java.sql.SQLOutput;
 import java.util.Base64;
 
 import javax.crypto.spec.SecretKeySpec;
@@ -72,6 +73,7 @@ public class Server {
                         if (len != -1) {
                             message = new String(data, 0, len);
                             JsonObject receivedJson1 = JsonParser.parseString(message).getAsJsonObject();
+                            System.out.println("Received encrypted message: " + receivedJson1.toString());
                             //get the key of the client from the id form the json
                             id            = receivedJson1.get("ID").getAsInt();
                             keyServClient = new SecretKeySpec(
@@ -85,6 +87,7 @@ public class Server {
                             //to change the key to the key in the database
                             //decrypt the message
                             JsonObject decryptedJson1 = CL.unprotect(receivedJson1, keyServClient);
+                            System.out.println("Decrypted message: " + decryptedJson1.toString());
                             song = new String(
                                     Base64.getDecoder().decode(decryptedJson1.get("M").getAsString()));
                             if (!check(decryptedJson1.get("M").getAsString(), id, nonce, keyServClient,
@@ -129,10 +132,11 @@ public class Server {
                         media.addProperty("media_content_length", audioBytes.length);
                         media.addProperty("lyrics", media_content.get("lyrics").getAsString());
                         message = media.toString();
-
+                        System.out.println("Unprotect song info: " + message);
                         //Sending of Song info
                         JsonObject r = CL.protect(message.getBytes(), nonce, keyServClient,
                                                   keyFamily);
+                        System.out.println("Sending encrypted song info: " + r.toString());
                         byte[] messageBytes = r.toString().getBytes();
                         os = new BufferedOutputStream(socket.getOutputStream());
                         BufferedOutputStream bufferedOutput = new BufferedOutputStream(os, 1000);
@@ -158,7 +162,9 @@ public class Server {
                         nonce = incrementByteNonce(nonce);
                         //decrypt the message
                         int        byteReqInt     = 0;
+                        System.out.println("Received encrypted message: " + receivedJson2.toString());
                         JsonObject decryptedJson2 = CL.unprotect(receivedJson2, keyServClient, nonce);
+                        System.out.println("Decrypted message: " + decryptedJson2.toString());
                         String byteReq = new String(
                                 Base64.getDecoder().decode(decryptedJson2.get("M").getAsString()));
                         if (!check(decryptedJson2.get("M").getAsString(), nonce, keyServClient,
@@ -202,7 +208,10 @@ public class Server {
                         byte[] originalSong = Base64.getDecoder()
                                                     .decode(media_content.get("file_Bytes")
                                                                          .getAsString());
+                        System.out.println("Protecting song" + originalSong.toString());
                         byte[] encryptedOriginalSong = CL.protectCTR(originalSong, nonce, keyFamily);
+                        System.out.println("Protected song" + encryptedOriginalSong.toString());
+
                         int from16bytes = (int) Math.floor(
                                 (byteReqInt / 100.0) * encryptedOriginalSong.length / NB_BYTES_PACKET_MUSIC);
                         int nb16bytes = (int) Math.ceil(
@@ -214,13 +223,16 @@ public class Server {
                             byte[] nonceCTR = incrementCounterInNonce(nonce,
                                                                       i * NB_BYTES_PACKET_MUSIC);
                             bufferedOutput = new BufferedOutputStream(os, 1000);
+                            System.out.println("Sending part encrypted song"+partEncryptedSong);
                             bufferedOutput.write(partEncryptedSong);
                             bufferedOutput.flush();
+                            System.out.println("Mac");
                             bufferedOutput.write("MAC".getBytes());
                             bufferedOutput.flush();
-                            bufferedOutput.write(
-                                    calculateMAC(Base64.getEncoder().encodeToString(partEncryptedSong),
-                                                 nonceCTR, keyFamily).getBytes());
+                            byte[] mac = calculateMAC(Base64.getEncoder().encodeToString(partEncryptedSong),
+                                                      nonceCTR, keyFamily).getBytes();
+                            System.out.println("Sending mac"+mac);
+                            bufferedOutput.write(mac);
                             bufferedOutput.flush();
 
 
